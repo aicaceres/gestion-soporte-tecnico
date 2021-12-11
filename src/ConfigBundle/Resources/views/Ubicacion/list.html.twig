@@ -1,0 +1,97 @@
+{% if table == 'Departamento' %}
+    {% set filtro = app.session.get('filtro_ubicacion') %}
+<div class="col-md-12">    
+<form id="searchform" class="form-horizontal" action="{{ path('configuracion_ubicacion',{ 'table': 'Departamento' }) }}" method="get" >    
+    <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/>        
+    <div class="form-group">
+        <label class="col-sm-1 control-label">Ubicación:</label>
+        <div class="col-sm-3">
+            <select class="select2 form-control" name="idUbicacion" id="selectUbicacion">
+                <option value="0">Todos</option>
+                {%for ubic in ubicaciones %}
+                    <option {%if ubic.id==filtro['idUbicacion']%} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                {% endfor %} 
+            </select>
+        </div>                          
+        <label class="col-sm-1 control-label">Edificio:</label>
+        <div class="col-sm-4">
+            <select class="select2 form-control" name="idEdificio" id="selectEdificio">
+                <option value="0">Todos</option>
+                {%for ed in edificios %}
+                    <option {%if ed.id==filtro['idEdificio']%} selected="selected" {%endif%} value="{{ed.id}}">{{ed.nombre}}</option>
+                {% endfor %}  
+            </select>
+        </div>                          
+    </div>   
+</form>       
+</div>                
+{% endif %}   
+<table id="tablelist" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th class="no-sort">#</th>            
+            {% if table == 'Ubicacion' %}  
+                <th>Nombre</th>
+                <th>Abreviatura</th> 
+            {% endif %}
+            {% if table == 'Edificio' %}  
+                <th>Ubicación</th> 
+                <th>Edificio</th> 
+            {% endif %}
+            {% if table =='Departamento' %} 
+            <th>Ubicación</th> 
+            <th>Edificio</th>
+            <th>Departamento</th>
+            <th>Dirección</th> 
+            <th>Localidad</th>             
+            <th>Equipos Asignados</th>             
+            {% endif %}
+            <th class="no-sort thactions">
+                {% if app.user.access('configuracion_ubicacion') %}
+                    &nbsp;<a href="javascript:void(0);" data-url="{{ path('configuracion_ubicacion_new', { 'table': table }) }}" class="new" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                    {% endif %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entity in entities %}
+            <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }} ">
+                <td>{{ entity.id }}</td>
+                {% if table == 'Ubicacion' %}  
+                    <td>{{ entity.nombre }}</td>
+                    <td> {{ entity.abreviatura }}</td>
+                {% endif %}
+                {% if table == 'Edificio' %}  
+                    <td> {{ entity.ubicacion }}</td> 
+                    <td>{{ entity.nombre }}</td> 
+                {% endif %}
+                {% if table =='Departamento' %} 
+                    <td> {{ entity.edificio.ubicacion }}</td> 
+                    <td> {{ entity.edificio}}</td>
+                    <td>{{ entity.nombre }}</td> 
+                    <td> {{ entity.direccion}}</td> 
+                    <td> {{ entity.localidad}}</td> 
+                    <td> {{ entity.cantidadEquipos}}</td>             
+                {% endif %}
+                <td class="link-actions" {% if table=='Departamento' %} style="width:62px;text-align:center;"{% endif %}>
+                    {% if app.user.access('configuracion_ubicacion') %}
+                        <a href="javascript:void(0);" data-url="{{ path('configuracion_ubicacion_edit', { 'table': table, 'id': entity.id }) }}" class="edit" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
+                    {% endif %}
+                    {% if app.user.access('configuracion_ubicacion') %}
+                        <form action="{{ path('configuracion_ubicacion_delete', { 'table': table, 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                            <input type="hidden" name="_method" value="DELETE" />
+                            {{ form_widget(deleteForms[entity.id]) }}
+                            <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click();"><i class="fa fa-trash-o"></i></a>&nbsp;
+                            <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                        </form>
+                    {% endif %}
+                    {% if table=='Departamento' %}
+                        {% if entity.ipPrincipal or entity.ipRespaldo %}
+                        <a href="javascript:void(0);" data-url="{{ path('monitoreo_ip_departamento', { 'id': entity.id }) }}" class="monitorear-ip" title="Monitorear IPs"><i class="fa fa-sitemap"></i><i class="fa fa-spinner fa-spin hidden"></i></a>&nbsp;
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>    

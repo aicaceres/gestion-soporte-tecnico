@@ -1,0 +1,55 @@
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <i class="fa fa-table"></i>
+
+        <h3 class="box-title">Equipos por tipo de Incidencia y Sector</h3>
+
+        <div class="box-tools pull-right">
+            <form id="printform_eqxIncidenciaySector" name="printform" target="_blank" style="display:inline-block;" 
+                          action="{{path('print_reporte')}}" method="POST">                         
+                        <input type="hidden" class="tiposalida" name="tiposalida"/>
+                        <input type="hidden" name="reporte" value="eqxincidenciaysector"/>
+                        <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i> </button> 
+                        <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i> </button> 
+                    </form>
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="box-body">
+      
+       <div class="col-md-12">  
+            <div class="tabla-tipoincidencia">
+                <table class="table-resumen table table-bordered table-hover">
+                    <tr>
+                        <th> Tipo de Incidencia &nbsp; <i class="fa fa-caret-right"></i>&nbsp; Area Solicitante <br><i class="fa fa-caret-right"></i>&nbsp; Tipo de equipo 
+                        <i class="fa fa-plus-square expAll pull-right"></i></th>
+                        <th> Finalizado </th>
+                        <th> Asignado </th>
+                        <th> Sin Asignar </th>
+                        <th> Total </th>
+                        <th> Porcentaje </th>
+                    </tr>  
+                    {% set sumtotal=0 %}
+                    {% for item in tablaTipoIncidenciaSector %}
+                        {% set totalitem = item['FINALIZADO']+item['ASIGNADO']+item['SIN ASIGNAR'] %}
+                        <tr id="{{item.id}}" data-padre="{{ item.padre }}" class="tipo{{item.tipo}} id{{item.padre}} {% if item.tipo in ['I','M'] %}hidden {% endif %}" data-id="{{ item.id }}">
+                            <td>{{ item.nombre }} {% if item.tipo in ['S','M'] %} <i class="fa fa-plus verDetalle pull-right" data-tipo="{{ item.tipo }}"></i> {% endif %}</td>
+                            <td>{{ item['FINALIZADO'] }}</td>
+                            <td>{{ item['ASIGNADO'] }}</td>
+                            <td>{{ item['SIN ASIGNAR'] }}</td>
+                            <td>{{ totalitem }}</td>
+                            <td>{% if item.tipo=='S' %} {{ ((totalitem*100)/totalTipoIncidenciaSector)|number_format(2,'.',',') }}% 
+                                {% set sumtotal = sumtotal + ((totalitem*100)/totalTipoIncidenciaSector) %}
+                                {% endif %}
+                            {% if item.tipo=='T' %}{{ sumtotal }}%{% endif %}
+                            </td>                            
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+        
+    </div>
+    <!-- /.box-body-->
+</div>

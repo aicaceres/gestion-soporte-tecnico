@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=UTF-8" />
+   </head>
+   <body  >  
+<style>
+.align-center{text-align: center}
+table{ font-family:'Arial';font-size: 12px; }
+table tr th{
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+    background: #CCCCCC;
+    font-size: 13px;
+    }
+table tr th:last-of-type, table tr.master td:last-of-type { 
+    border-right: 1px solid gray;  
+    
+}
+table tr.master:last-of-type td{    border-bottom: 1px solid gray;  }
+table tr.master:first-of-type td{    border-top: 1px solid gray;  }
+table tr.master td{
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+}
+table tr td, table tfoot th{ text-align: right;}
+</style>       
+       
+      <h2 text-align="center"> Listado de Equipos</h2>              
+        <h4><strong>Tipos:</strong> {{ filtro[0] }} - <strong>Marca:</strong> {{ filtro[1] }} - <strong>Modelo:</strong> {{ filtro[2] }} - <strong>Estado:</strong> {{ filtro[3] }} </h4>        
+        <h4><strong>Ubicación:</strong> {{ filtro[4] }} - <strong>Edificio:</strong> {{ filtro[5] }} - <strong>Departamento:</strong> {{ filtro[6] }} - <strong>Verificado:</strong> {{ filtro[7] }} </h4>
+        {% if filtro[9]!='' %} 
+            <h4><strong>{{ filtro[8] }}:</strong>  {{filtro[9]}} </h4>
+        {% endif %}         
+        {% if filtro[8]=='FECHA DE COMPRA' and (filtro[10]!='' or filtro[11]!='') %} 
+            <h4><strong>{{ filtro[8] }}:</strong>  {{filtro[10]}} a {{filtro[11]}}</h4>
+        {% endif %}         
+        {% if search %}
+            <h4> Término de Búsqueda: "{{search}}" </h4>
+            <div height="10px"></div>
+        {%endif%}
+    <table cellspacing="0">
+        <thead>
+        <tr>
+                <th>#</th>
+                <th>Tipo</th>                
+                <th>N° Serie</th>                
+                <th>Descripción</th>                
+                <th>Marca</th>                
+                <th>Modelo</th>
+                <th>Estado</th>                
+                <th>Ubicación</th>                
+                <th>Verificado</th>            
+        </tr>        
+        </thead>
+        <tbody>
+        
+    {% for item in items %}
+        <tr>
+            <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.tipo.nombre}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.nroSerie}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.nombre}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.marca.nombre}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.modelo.nombre}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.estado.nombre}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.ubicacionActual.texto}}</td>            
+            <td height="20px" vertical-align="middle" padding-left="5px">{% if item.verificado %}Si {%else%}No {%endif%}</td>            
+        </tr>        
+    {% endfor %}
+        </tbody>              
+    </table>    
+
+   </body>
+</html>

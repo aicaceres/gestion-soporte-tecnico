@@ -1,0 +1,79 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#f39c12" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+                <h2 text-align="center">Reporte de Requerimientos por Tipo de Incidencia</h2>
+                <h3 margin-bottom="5px" vertical-align="middle">Criterios de Filtro:</h3>
+                <table>
+                    <tr> 
+                        <td border.type="none" vertical-align="middle" font-style="bold">Ubicaciones</td>
+                        <td border.type="none" vertical-align="middle" font-style="bold">Edificios</td>
+                        <td border.type="none" vertical-align="middle" font-style="bold">Departamentos</td>
+                    </tr>
+                    <tr> 
+                        <td border.type="none" vertical-align="middle">{{ filtro.ubicaciones|trim }}</td>
+                        <td border.type="none" vertical-align="middle">{{ filtro.edificios|trim }}</td>
+                        <td border.type="none" vertical-align="middle">{{ filtro.departamentos|trim }}</td>
+                    </tr>
+                </table>                                
+                <div margin-bottom="5px" margin-top="5px" vertical-align="middle"><span font-style="bold">Tipos de Incidencias:</span> {{ filtro.tiposSoporte|trim }} </div>
+                <div margin-bottom="5px" vertical-align="middle"><span font-style="bold">Período: </span>{{ filtro.desde|date('d/m/Y') }} - {{ filtro.hasta|date('d/m/Y') }}</div>
+                
+                <div height="20px"></div>
+                <div text-align="center">
+                    <img ignore-error="true" src="{{grafico}}" width="80%" margin="0 auto" text-align="left" />
+                
+                <div height="20px"></div>                
+                <table font-size="8" width="80%" margin="0 auto" text-align="left">
+                    <tr>
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"><strong>Tipo de Incidencia</strong></td>
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Finalizado</strong></td>
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Asignado</strong></td>
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Sin Asignar</strong></td>
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Total</strong></td>
+                    </tr>  
+                    {% set totitem=0 %}                    
+                    {% for item in datos.table  %}                         
+                        {% set totitem = item.finalizado + item.asignado + item.sinasignar %}
+                        {% if item.tipo=='S' %}
+                            <tr>                          
+                                <td font-style="bold" height="20px" vertical-align="middle" padding-left="5px" > {{ (item.nombre )?item.nombre|upper : 'SIN TIPO' }} </td>
+                                <td height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.finalizado }}</td>
+                                <td height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.asignado }}</td>
+                                <td height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.sinasignar }}</td>
+                                <td font-style="bold" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ totitem }}</td>
+                            </tr>
+                        {% endif %}
+                        {% if item.tipo=='T' %}
+                            <tr>                          
+                                <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" padding-left="5px"> {{ item.nombre }} </td>
+                                <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.finalizado }}</td>
+                                <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.asignado }}</td>
+                                <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.sinasignar }}</td>
+                                <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ totitem }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>                                
+        </div>
+    </dynamic-page>
+</pdf>

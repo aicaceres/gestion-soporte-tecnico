@@ -1,0 +1,50 @@
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <i class="fa fa-bar-chart"></i>
+
+        <h3 class="box-title">Requerimientos Por Incidencia</h3>
+
+        <div class="box-tools pull-right">
+            <form id="printform_reqxincidencia" name="printform" target="_blank" style="display:inline-block;" 
+                          action="{{path('print_reporte')}}" method="POST">                        
+                        <input type="hidden" id="grafico_reqxincidencia" name="grafico"/>  
+                        <input type="hidden" class="tiposalida" name="tiposalida"/>
+                        <input type="hidden" name="reporte" value="reqxincidencia"/>
+                        <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i> </button> 
+                        <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i> </button> 
+                    </form>
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="col-md-6 no-padding"> 
+            <canvas id="grafico-tipo-incidencia" height="200px" ></canvas>            
+        </div>
+        <div class="col-md-6 no-padding">  
+            <div id="tabla1">
+                <table class="table-resumen table table-bordered table-hover">
+                    <tr>
+                        <th> Tipo de Incidencia </th>
+                        <th> Finalizado </th>
+                        <th> Asignado </th>
+                        <th> Sin Asignar </th>
+                        <th> Total </th>
+                    </tr>  
+                    {% set totitem=0 %}                    
+                    {% for item in dataResumen_reqxIncidencia.table %}                         
+                        {% set totitem = item.finalizado + item.asignado + item.sinasignar %}
+                        <tr class="tipo{{item.tipo}}" >                          
+                            <td> {% if item.tipo!='T' %} <i class="fa fa-square" style="color:{{item.color}};"></i>{% endif %} {{ (item.nombre) ? item.nombre : 'SIN TIPO DE SOPORTE' }}</td>
+                            <td> {{ item.finalizado }}</td>
+                            <td> {{ item.asignado }}</td>
+                            <td> {{ item.sinasignar }}</td>
+                            <td>{{ totitem }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>        
+    </div>
+    <!-- /.box-body-->
+</div>

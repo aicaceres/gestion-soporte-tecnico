@@ -1,0 +1,59 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-users"></i> &nbsp; Usuarios de Sistema</h3>
+                    
+            </div><!-- /.box-header -->
+            <div class='box-body'>
+                <div class="box-body table-responsive" style="padding: 15px" >
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre de Usuario</th>
+                                <th class="hidden-xs">Nombre y Apellido</th>
+                                <th>Rol</th>
+                                <th class="hidden-xs">Activo</th>
+                                <th class="no-sort thactions">
+                                    {% if app.user.access('seguridad_usuario') %}
+                                    &nbsp;<a href="{{ path('seguridad_usuario_new') }}" data-toggle="tooltip"  title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                                    {% endif %}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+               {% for entity in entities %}
+                            <tr>
+                                <td>{{ entity.username }}</td>
+                                <td class="hidden-xs">{{ entity.nombre }}</td>
+                                <td>{{ entity.rol }}</td>                                
+                                <td class="hidden-xs"><input type="checkbox" class="list-active" disabled="disabled" {% if entity.activo %}checked="checked"{% endif %} /><span class="hidden"> {{entity.activo}}</span></td>
+                                <td class="link-actions">
+                                    {% if app.user.access('seguridad_usuario') %}
+                                    <a href="{{ path('seguridad_usuario_edit', { 'id': entity.id }) }}" data-toggle="tooltip"  title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
+                                    {% endif %}
+                                    {% if app.user.access('seguridad_usuario_delete') and not entity.rol.admin %}
+                                    <form action="{{ path('seguridad_usuario_delete', { 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                                        <input type="hidden" name="_method" value="DELETE" />
+                                        {{ form_widget(deleteForms[entity.id]) }}
+                                        <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click(); "><i class="fa fa-trash-o"></i></a>&nbsp;
+                                        <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                                    </form> 
+                                     {% endif %}
+                                </td>
+                            </tr>
+               {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}

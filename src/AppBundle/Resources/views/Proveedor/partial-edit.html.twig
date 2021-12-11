@@ -1,0 +1,22 @@
+{{ form_start(form) }}
+    {% if entity.id  %}
+        <input name="_method" value="PUT" type="hidden">
+    {%endif%}
+    <div class='box-body'>
+        {% include "form-notification.html.twig" %}
+            <input type="hidden" value="{{path('create_proveedor')}}" id="create_url"/>            
+            <div class="col-sm-12">
+                <fieldset>
+                    {{ form_row(form.nombre, { 'attr': {'autofocus':'autofocus' } }) }}
+                </fieldset>
+            </div>    
+    </div>
+    <div style='display:none;'>
+        {{ form_end(form) }}
+    </div>
+</form>   
+<script type="text/javascript">
+$(document).ready(function() {    
+    $('#proveedor_nombre').focus();
+});
+</script>

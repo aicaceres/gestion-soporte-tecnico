@@ -1,0 +1,275 @@
+{% extends "dataTableList.html.twig" %}
+{% block page_content %}
+{% include "notification.html.twig" %}    
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-briefcase"></i> &nbsp; Órdenes de Trabajo</h3>
+                
+                <div class="pull-right box-tools">
+                    {% if app.user.access('view_logs') and entities|length>0 and false%}
+                        <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                                data-id="" data-url="{{path('get_insumo_logs')}}"  >   <i class="fa fa-history"></i></button>  
+                        {% endif %}        
+                    <form id="printform" name="printform" target="_blank" style="display:inline-block;" 
+                          action="{{path('print_listado_ordentrabajo')}}" method="POST">                        
+                        <input type="hidden" id="searchterm" name="searchterm"/>
+                        <input type="hidden" id="datalist" name="datalist"/>
+                        <input type="hidden" id="option" name="option"/>
+                        <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir"> <i class="fa fa-print"></i> Listado</button> 
+                    </form>  
+                </div>
+
+            </div><!-- /.box-header -->
+            <div class='box-body' >
+                <form id="searchform" action="{{ path('soporte_ordentrabajo') }}" method="get" >                    
+                    <div class="col-md-12">                        
+                        <fieldset>                          
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    <label>Ubicación:</label>
+                                    <select id="selUbicacion" name="idUbicacion" urledificio="{{ path('select_edificios') }}" class="ubicacion_selector form-control select2">
+                                        <option {%if app.session.get('filtro_ordentrabajo')['idUbicacion']==0 %} selected="selected" {%endif%} value="0">Todos</option>
+                                        {%for ubic in ubicaciones %}
+                                            <option {%if ubic.id == app.session.get('filtro_ordentrabajo')['idUbicacion'] %} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                                        {% endfor %} 
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group ">
+                                    <label>Edificio:</label>                                    
+                                    <select id="selEdificio" name="idEdificio" urldepartamento="{{ path('select_departamentos') }}" class="edificio_selector form-control select2">
+                                        <option value="{{ app.session.get('filtro_ordentrabajo')['idEdificio'] }}" >Todos</option>
+                                        {%for edif in edificios %}
+                                            <option {%if edif.id == app.session.get('filtro_ordentrabajo')['idEdificio'] %} selected="selected" {%endif%} value="{{edif.id}}">{{edif.nombre}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group ">
+                                    <label>Área Solicitante:</label>
+                                    <select id="selDepartamento" name="idDepartamento" urldatosdepartamento="{{ path('datos_departamento') }}" class="departamento_selector form-control select2">
+                                        <option value="{{ app.session.get('filtro_ordentrabajo')['idDepartamento'] }}" >Todos</option>
+                                        {%for dep in departamentos %}
+                                            <option {%if dep.id == app.session.get('filtro_ordentrabajo')['idDepartamento'] %} selected="selected" {%endif%} value="{{dep.id}}">{{dep.nombre}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label>Tipo Incidencia:</label>
+                                    <select id="selTipoIncidencia" name="idTipoIncidencia" class="form-control select2">
+                                        <option value="{{ app.session.get('filtro_ordentrabajo')['idTipoIncidencia'] }}" >Todos</option>
+                                        {%for tipo in tiposIncidencia %}
+                                            <option {%if tipo.id == app.session.get('filtro_ordentrabajo')['idTipoIncidencia'] %} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>                        
+                    </div> 
+                    <div class="col-md-12">                
+                       <fieldset>  
+                           <div class="col-md-3">
+                                <div class="form-group ">
+                                    <label>Técnico:</label>                                    
+                                    <select id="selTecnico" name="idTecnico" class="form-control select2">
+                                        {% if not app.user.rol.permiso('ordentrabajo_own') %} <option value="0">Todos</option> {% endif %}
+                                        {%for tec in tecnicos %}
+                                            <option {%if tec.id == app.session.get('filtro_ordentrabajo')['idTecnico'] %} selected="selected" {%endif%} value="{{tec.id}}">{{tec.nombre}}</option>
+                                        {% endfor %} 
+                                    </select>
+                                </div>
+                            </div>
+                           <div class="col-md-2">
+                                <div class="form-group ">
+                                    {% set estado = app.session.get('filtro_ordentrabajo')['estado'] %}
+                                    <label>Estado:</label>
+                                    <select id="selEstado" name="estado" class="form-control select2">
+                                        <option value="0">Todos</option>
+                                        <option value="ABIERTO" {%if estado=='ABIERTO' %} selected="selected" {%endif%}>Abierto</option>
+                                        <option value="CERRADO" {%if estado=='CERRADO' %} selected="selected" {%endif%}>Cerrado</option>
+                                        <option value="CANCELADO" {%if estado=='CANCELADO' %} selected="selected" {%endif%}>Cancelado</option>
+                                    </select>
+                                </div>
+                            </div>                           
+                            <div class="col-md-2">
+                                <label class="required">Período:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{filtro.desde}}">
+                                </div>   
+                            </div>    
+                            <div class="col-md-2"> 
+                                <label>&nbsp;</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{filtro.hasta}}">                                            
+                                </div>                                           
+                            </div> 
+                            <div class="col-md-3"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label style="width:100%;">&nbsp;</label>
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                            </div>      
+                        </fieldset>
+                    </div> 
+                </form>                      
+
+                <div class="table-responsive" style="padding: 15px">
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style='width:8%'>Fecha/Hora</th>
+                                <th style='width:10%'>N° OT</th>
+                                <th style='width:10%'>N° JIRA</th>
+                                <th>Técnico</th>
+                                <th>Descripción</th>
+                                <th style='width:10%'>Equipos</th>
+                                <th style='width:10%'>Estado</th>
+                                <th style='width:10%' class="no-sort">Tiempo</th>
+                                <th style='width:10%' class="no-sort thactions">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in entities %}
+                                <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }} 
+                                    {{ (entity.estado in ['ABIERTO','ASIGNADO'] and entity.altaPrioridad) ? "altaPrioridad" : ""  }}">
+                                    <td><span class="hidden">{{ entity.fechaOrden|date('YmdH:i') }}</span>{{ entity.fechaOrden|date('d-m-Y H:i') }}</td>                                
+                                    <td style='text-align:center'>{{ entity.nroOT }}</td>
+                                    <td style='text-align:center'>{{ entity.jira}}</td>
+                                    <td>{{ entity.tecnico.nombre}}</td>
+                                    <td>{{ entity.descripcionCorta}}</td>                                   
+                                    <td style='text-align:center'>{{ entity.detalles|length}}</td>                                   
+                                    <td>{{ entity.estado}}</td>                                   
+                                    <td>{{ entity.tiempo}}</td>                                   
+                                    <td class="link-actions">                                         
+                                        <a href="javascript:void(0)" class="view-ot" data-nro="{{ entity.nroOT }}" data-url="{{ path('soporte_ordentrabajo_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver OT"><i class="fa fa-folder-open"></i></a>&nbsp;
+                                        {% if entity.tecnico.id == app.user.id and entity.estado=='ABIERTO' %}
+                                        <a href="{{ path('soporte_ordentrabajo_tareas', { 'id': entity.id }) }}" data-toggle="tooltip" title="Tareas de Soporte"><i class="fa fa-briefcase"></i></a>&nbsp;
+                                        {% endif %}
+                                        {% if app.user.access('ordentrabajo_edit') %}
+                                            {% if  entity.estado=='ABIERTO'%}
+                                                <a href="{{ path('soporte_ordentrabajo_edit', { 'id': entity.id }) }}" data-toggle="tooltip" title="Editar" ><i class="fa fa-edit"></i></a>&nbsp; 
+                                            {% elseif entity.estado=='CERRADO'  %}                                                
+                                                <a href="javascript:void(0)" class="add-documento" data-url="{{ path('render-add-tarea-documentacion',{'ot':entity.id}) }}" data-toggle="tooltip" title="Subir Documentación Anexa" ><i class="fa fa-upload"></i></a>&nbsp;
+                                            {% endif %}                                                                                
+                                        {% endif %}
+                                        {% if app.user.access('ordentrabajo_delete') and entity.estado=='ABIERTO'%}
+                                        <form action="{{ path('soporte_ordentrabajo_delete', { 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                                            <input type="hidden" name="_method" value="DELETE" />
+                                            {{ form_widget(deleteForms[entity.id]) }}
+                                            <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click(); "><i class="fa fa-trash-o"></i></a>
+                                            <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                                        </form> 
+                                    {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {    
+  $('.select2').select2();
+    var oTable = $('#tablelist').dataTable();
+        oTable.fnSort( [ [0,'desc'] ] );    
+    $('#limpiar-filtros').on('click',function(){
+        $('#searchform').find('.select2').val(0);
+        $('#searchform').find('.datepicker').val('');
+        $('#searchform').submit();
+    }); 
+    
+    $('#pdf').on('click',function(){   
+        if( ( parseInt('{{entities|length}}')>500 )  ){
+           if (!confirm('Muchos registros podrían hacer demasiado lenta la generación del PDF. Desea Continuar?')){
+               return false;
+           }
+        }
+        $('#searchterm').val( $('#tablelist_filter input').val() );
+        var datos = [];        
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) { 
+            var i = value[0].indexOf('</span>');
+            if( i >-1 ){
+                var fecha = value[0].substr(i+7);
+                value[0]=fecha;
+            }
+            value.splice(7);
+            datos[index] = value;
+        });                 
+        $('#datalist').val(JSON.stringify(datos)); 
+        $('#printform').submit();
+    });  
+     
+    $('body').on('click','.view-ot',function(){
+        var options = {
+           url: $(this).data('url'),
+           title:'Orden de Trabajo N° '+$(this).data('nro'),
+           size: eModal.size.xl,
+           buttons: [               
+               {text: 'Cerrar', style: 'success', close: true }
+           ]
+       };
+       eModal.ajax(options);
+    });   
+    
+    $('.add-documento').on('click',function(e){
+        var obj = $(this);
+        var url = obj.data('url');
+        var options = {
+           url: url,           
+           title:'Nueva Documentación Anexa',
+           size: eModal.size.sm,
+           buttons: [
+               {text: 'Agregar', style: 'success', close: true, 
+                   click: function(){  
+                       e.preventDefault();
+                        var url = $('[name="appbundle_documentacion"]').attr('action');
+                        var form = document.getElementById("appbundle_documentacion");
+                        var formdata = new FormData(form);
+                        formdata.append('file', document.getElementById('appbundle_documentacion_file').files[0]);                             
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            dataType: 'JSON',
+                            data: formdata ,
+                            processData: false,
+                            contentType: false,
+                            success: function(data, textStatus, jqXHR)
+                            {
+                               if( data.msg == 'OK'){                                   
+                                   //obj.closest('table').find('.collectionHolder').append( data.html )
+                                   alert('Documentación anexada!');
+                               }else{
+                                   alert(data)
+                               }
+                            }                                
+                        });                       
+                   } },
+               {text: 'Cancelar', style: 'danger', close: true }
+           ]
+       };
+        
+        eModal.ajax(options);
+    });
+    
+});
+</script>    
+{% endblock %}

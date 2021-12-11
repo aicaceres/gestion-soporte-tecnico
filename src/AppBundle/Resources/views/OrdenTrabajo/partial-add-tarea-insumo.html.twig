@@ -1,0 +1,177 @@
+{{ form_start(form) }}    
+<div class='box-body no-padding'>
+    <div class="col-md-12">
+        <div class="col-md-2">
+            {{ form_row(form.fecha) }}
+        </div>
+        <div class="col-md-2">
+            {{ form_row(form.hora) }}
+        </div>    
+    </div> 
+    <div class="col-md-12">    
+        {% if entity.ordentrabajo.detalles|length>0 %}
+            <div class="col-md-12">
+                {{ form_row(form.ordenTrabajoDetalles) }}
+            </div>  
+    {% endif %}         
+    </div> 
+        
+    <div class="col-md-12 insumos">        
+        <div class="form-group ">
+            <label>Insumos:&nbsp;</label>
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover tablaInsumos">
+                <thead>
+                    <tr>
+                        <th style="width:3%;">#</th>                          
+                        <th>Detalle [Cod. De Barra - Tipo – Marca – Modelo]</th>
+                        <th style="width:10%;">Cantidad</th>
+                        <th style="width:5%;text-align:center;" class="no-sort thactions">
+                            &nbsp;<a href="javascript:void(0);" data-toggle="tooltip" id="addInsumo" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody data-index="{{form.insumos | length }}" data-prototype="{% filter escape %}
+                       {% include 'AppBundle:OrdenTrabajo:prototype-insumo-tarea.html.twig' with {'item':form.insumos.vars.prototype} %}{% endfilter %}">                              
+                </tbody>                
+            </table>             
+            <div  class="col-md-12" style="padding: 0">                                                        
+                <div class='box box-default box-solid insumosDatatable'>
+                    <div class='box-header'>                                    
+                        <h6 class="text-primary" style="margin:0;font-weight:bold;">Buscar Insumos</h6> 
+                        <div class="pull-right box-tools">
+                            <button type="button" class="btn btn-box-tool closesearch" ><i class="fa fa-close"></i></button>
+                        </div>
+                    </div><!-- /.box-header -->
+                    <div id="datatableslist" class='box-body'></div>       
+                </div>                             
+            </div>                
+        </div> 
+    </div>      
+    
+</div>
+<div style='display:none;'>
+    {{ form_end(form) }}
+</div> 
+<script type="text/javascript">
+    var $insumosHolder;
+$(document).ready(function() {    
+    $('.insumosDatatable').hide();
+    date = $('#appbundle_tarea_fecha').datepicker();
+    date.css('z-index', 'auto');    
+    $('#appbundle_tarea_hora').timepicker({ 'timeFormat': 'G:i' });    
+    $('#appbundle_tarea_ordenTrabajoDetalles').select2();    
+  
+    $('.insumosDatatable').find('.closesearch').on('click',function(){
+        $('.insumosDatatable').hide();
+    });
+    $insumosHolder = $('.tablaInsumos tbody');  
+    $insumosHolder.find('.delTd').each(function() {                    
+        addInsumoDeleteLink($(this));
+    });
+    $insumosHolder.find('.ordTd').each(function(i) {
+        $(this).html(i + 1);
+    });  
+    $('#addInsumo').on('click', function(e) {
+        e.preventDefault();
+        addNewInsumo();
+        e.stopPropagation();
+    });  
+    
+    addNewInsumo();
+    
+     $('body').on('click','.searchAddInsumo',function(){
+         btntd = $(this).closest('td.descTd');
+        sel = btntd.find('[name$="[insumo]"]');
+       // barcode = btntd.find('[name$="[codigo]"]');
+        texto = btntd.find('[name$="[descripcion]"]');
+        cantidad = btntd.parent().find('[name$="[cantidad]"]');
+        var xmlRequest = $.ajax({
+            url: $(this).data('url'),
+            type: 'GET',
+            success: function(data){
+               $('.insumosDatatable').show();
+               $('#datatableslist').html(data);  
+               $('#datatableslist').find('#ckTodos').hide();
+               $('#selectInsumo').hide();
+               $('#datatableslist').on('click','.ckItem',function(){ 
+                   ck = $(this);
+                   item = $(this).data('id');  
+                   //sel = $('#appbundle_requerimientodetalle_equipo');
+                    sel.val(item).trigger('change');
+                        //buscar datos y agregar item al select
+                        $.getJSON("{{path('find_insumo_data_by_id')}}",{id:item}, function(data){
+                            if(data.msj=='OK'){
+                               //barcode.val( data.barcode );
+                               texto.val( data.nombre );
+                               cantidad.focus();
+                            }else{
+                                alert(data.msj);
+                                return false;
+                            }
+                        }); 
+                   ck.attr('checked',false);
+                   $('.insumosDatatable').hide();
+                });               
+            }            
+        });                    
+    });                   
+    
+});
+function agregarInsumo(list,idx){
+    $btn =  $("#"+idx); 
+    $.getJSON("{{path('find_data_insumo')}}",{list:list}, function(data){ 
+        first=true;
+        $.each(data, function(i,item){
+            if(first){
+                // cargar el primero en el tr ya agregado.    
+                first=false;
+                insumo = $btn.closest('td.descTd').find('[name$="[insumo]"]');
+                //codigo = $btn.closest('td.bcTd').find('[name$="[codigo]"]');
+                texto = $btn.closest('.item').find('[name$="[descripcion]"]');
+            }else{
+                addNewInsumo();
+                insumo = $insumosHolder.find('[name$="[insumo]"]').last();
+                //codigo = $insumosHolder.find('[name$="[codigo]"]').last();
+                texto = $insumosHolder.find('[name$="[descripcion]"]').last();
+            }            
+            insumo.val( item.id ); 
+            //codigo.val( item.codigo );
+            texto.val( item.nombre );
+        });
+    });  
+}
+
+function addNewInsumo() {
+    var prototype = $insumosHolder.data('prototype');
+    var index = $insumosHolder.data('index');    
+    var newForm = prototype.replace(/insitems/g, index);
+    $insumosHolder.append(newForm);
+    $insumosHolder.data('index', index + 1);
+    addInsumoDeleteLink($insumosHolder.find('.delTd').last());
+    $insumosHolder.find('.ordTd').last().html($insumosHolder.data('index'));
+    var btnsearch = $insumosHolder.find('.searchAddInsumo').last();
+    btnsearch.attr('id', $insumosHolder.data('index'));
+    if( !$('.insumosDatatable').is(':visible') ){
+       btnsearch.click(); 
+    }    
+    $insumosHolder.find('.descTd input').last().focus();
+}
+function addInsumoDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            var index = $insumosHolder.data('index');
+            $insumosHolder.data('index', index - 1);
+            $insumosHolder.find('.ordTd').each(function(i) {
+               jQuery(this).html(i + 1);
+            });
+        }
+    });
+}
+</script>

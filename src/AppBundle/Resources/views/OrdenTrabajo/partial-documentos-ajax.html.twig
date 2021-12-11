@@ -1,0 +1,33 @@
+<table  class="table table-bordered documentos"> 
+    <thead>
+       <tr>                              
+           <th style="width:8%">Fecha</th>
+           <th style="width:15%">Usuario</th>
+           <th>Descripción</th>
+           <th>Archivo</th>
+           <th style="width:5%">               
+                <a href="javascript:void(0)" class="btn btn-primary btn-xs add-documento-ajax" 
+                   data-url="{{ path('render-add-tarea-documentacion',{'ot':entity.id}) }}" title="Cargar archivo">
+                    <i class="fa fa-plus"></i></a>                
+           </th>
+       </tr>
+   </thead>   
+   <tbody data-index="{{entity.documentos | length }}" class="collectionHolder formDocumentos" >               
+       {% for doc in entity.documentos  %}
+           <tr>
+               <td class="dateTd">{{ doc.created|date('d/m/Y') }} </td>
+               <td class="tecTd">{{ doc.createdBy.username }} </td>
+               <td class="descTd">{{ doc.descripcion }} </td>
+               <td class="pathTd">
+                    {% if doc.webPath %}
+                        <a href="{{ asset(doc.webPath) }}" target="_blank">{{ doc.path }}</a>
+                    {% endif %} 
+               </td>
+               <td class="delTd-ajax">
+                   <a href="javascript:void(0)" title="Quitar" class="btn btn-primary btn-xs deldoc" 
+                      data-url='{{ path('del-tarea-documentacion',{'id':doc.id}) }}'><i class="fa fa-trash"></i></a>
+               </td>
+           </tr> 
+       {% endfor %}         
+   </tbody>    
+</table> 

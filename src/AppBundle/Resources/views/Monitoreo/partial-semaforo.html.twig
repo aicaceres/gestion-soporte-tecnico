@@ -1,0 +1,11 @@
+<span class="semaforo ">
+    {% if data.estado %}
+    <span class="badge {{(data.estado.success==0)?'cero':''}} bg-green">{{ data.estado.success }}</span>
+    <span class="badge {{(data.estado.warning==0)?'cero':''}} bg-yellow2">{{ data.estado.warning }}</span>
+    <span class="badge {{(data.estado.danger==0)?'cero':''}} bg-red">{{ data.estado.danger }}</span>
+    {% else %}
+    <span class="badge cero bg-green">&nbsp;</span>
+    <span class="badge cero bg-yellow2">&nbsp;</span>
+    <span class="badge cero bg-red">&nbsp;</span>
+    {% endif %}
+</span>

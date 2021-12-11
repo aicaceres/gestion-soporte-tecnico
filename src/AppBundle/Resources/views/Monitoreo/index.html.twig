@@ -1,0 +1,231 @@
+{% extends "dataTableList.html.twig" %}
+{% block page_content %}
+{% include "notification.html.twig" %} 
+<style>
+    .nivel1{
+        font-size: 20px;
+        height: 40px;
+    } 
+    .nivel1 span.semaforo span{
+        font-size: 16px;       
+    }
+    .nivel1:not(:first-child){
+        border-top: 20px solid #FFFFFF;
+    }
+    .nivel2{
+        font-size: 14px;        
+        background-color: lightgray;
+    } 
+    .nivel2 span.semaforo span{
+        font-size: 12px;       
+    }
+    .nivel4{
+        font-size: 12px;        
+    } 
+    /*.table tr.nivel3 td{
+        font-size: 14px !important;
+    }*/
+    .masdatos,i.fa.fa-refresh{
+        cursor: pointer;
+    }   
+    i.fa.fa-refresh{        
+        margin-top: 4px;
+    }
+    .badge.cero {
+        opacity: 0.3;
+    }
+    .semaforo {
+ 	background-color: black;
+	padding: 4px 7px 7px 7px;
+	border-radius: 10px;
+    }
+    .departamentos span.badge{
+        font-weight: 400;
+        cursor: pointer;
+    }
+    .departamentos span.badge i.fa-times{
+        font-size: 10px;
+        vertical-align: top;        
+    }
+</style>
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-sitemap"></i> &nbsp; Monitoreo de red</h3>
+                <div class="pull-right box-tools">                                        
+
+                </div>                
+            </div><!-- /.box-header -->
+            <div class='box-body'>
+                <form action="{{ path('monitoreo_estadored') }}" method="get" class="form-horizontal">
+                    <div class="col-md-12">                        
+                        <fieldset>  
+                            <div class="form-group">
+                                <label class="col-md-2 control-label" style="padding-left:0">Ubicaciones:</label>                        
+                                <div class="col-md-5">
+                                    <select id="selUbicaciones" name="selUbicaciones[]" urledificio="{{ path('selEdificios') }}" class="selector_edificios form-control select2" multiple="multiple" >
+                                        {%for ubic in ubiclist %}
+                                            {% if ubic.id in app.user.ubicacionesPermitidas or app.user.rol.admin %}
+                                            <option {%if ubic.id in app.session.get('filtro_monitoreo')['selUbicaciones'] %} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select> 
+                                </div>                                                    
+                                <div class="col-md-2">
+                                    <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:60%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>   
+                                </div>                               
+                            </div> 
+                        </fieldset>                        
+                    </div> 
+                    <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                </form>    
+                
+                <div class="box-body table-responsive no-padding" >
+                    <table  class="table table-bordered">
+                        <thead>
+                            <tr class="bg-navy">
+                                <th class="no-sort" style="width:5px"> </th>
+                                <th class="no-sort"> Nombre </th>
+                                <th class="no-sort" style="width:130px"> Estado <i class="fa fa-refresh pull-right hidden"></i> </th>
+                                <th class="no-sort" style="width:100px"> Reclamos {% if reclamos>0 %} <i class="fa fa-exclamation-triangle pull-right hidden"></i> {% endif %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ubicacion in ubicaciones%}
+                                <tr class="nivel1 bg-gray-active" data-nivel="1" data-id="U{{ ubicacion.id }}">
+                                    <td><i class="fa fa-plus masdatos" title="Ver Edificios" data-url="{{ path('get_monitoreo_edificios',{'ubicid':ubicacion.id}) }}"></i></td>                                
+                                    <td colspan="3">{{ ubicacion.nombre}}</td>                                                                       
+                                </tr>
+                            {% endfor %}
+                        </tbody>                        
+                    </table>
+
+                </div>
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">                        
+$(document).ready(function() { 
+    $('.fa.fa-refresh').click(function() {
+            // Recargo la página
+            location.reload()
+     });
+     $('body').on('click','.verDatosProveedor',function(){
+        var on = $(this).hasClass('on')
+        var div = $(this).closest('table').find('.datosproveedor')        
+        if( on ){
+            div.addClass('hidden')
+            $(this).removeClass('on')
+        }else{
+            div.removeClass('hidden')
+            $(this).addClass('on')
+        }        
+     });
+     $('body').on('click','.reclamos',function(){
+         var provid = $(this).data('provid');         
+         var optionsReclamos = {
+           url: "{{ path('reclamo') }}",
+           title:'Reclamos',
+           data:{provid:provid},
+           size: eModal.size.lg,
+           buttons:[]
+        };
+        eModal.ajax(optionsReclamos);         
+     });
+     
+    $('body').on('click','.masdatos',function(){
+        var icon = $(this);        
+        var nivelsup = icon.parent().parent();
+        let nivelsupdata = parseInt(nivelsup.data('nivel'))        
+        var classinf = '.nivel' + ( nivelsupdata+1 );   
+        if( icon.hasClass('fa-plus') ){
+            icon.removeClass('fa-plus').addClass('fa-spinner fa-spin');              
+            var url = $(this).data('url');            
+            $.ajax({
+                type: 'get',
+                url: url,
+                success: function(data) { 
+                    $(data).insertAfter(nivelsup);
+                    icon.removeClass('fa-plus').addClass('fa-minus');
+                    icon.removeClass('fa-spinner fa-spin');
+                    if( nivelsupdata==2){
+                        nivelsup.find('.testipdptos').toggleClass('hidden')
+                        nivelsup.find('.semaforo').toggleClass('hidden')
+                    }
+                }
+            });                 
+        }
+        if(icon.hasClass('fa-minus')){
+            var id = nivelsup.data('id');              
+            icon.removeClass('fa-minus').addClass('fa-plus');
+            $('tr[class*="'+id+'"]').remove();
+            if( nivelsupdata==2){
+                nivelsup.find('.testipdptos').toggleClass('hidden')
+                divsemaforo = nivelsup.find('.semaforo')
+                divsemaforo.find('span').addClass('cero')
+                divsemaforo.find('span').html(0)
+                divsemaforo.toggleClass('hidden')                
+            }
+        }        
+    });
+    
+    $('body').on('click','.testipdptos.btn-info',function(){        
+        let btn = $(this)
+        // agregar spinner y cambiar color mientras se testea
+        btn.removeClass('btn-info').addClass('bg-orange')
+        btn.find('.fa-spin').removeClass('hidden') 
+        
+        // armar semafono
+        let tr = $(this).closest('tr')
+        let semaforo = tr.find('.semaforo')     
+        semaforo.find('span').addClass('cero')
+        semaforo.find('span').html(0)
+        let items = $('.'+tr.data('id'))        
+        // buscar equipos expandidos y cerrarlos
+        let cantitems = items.length
+        items.each( function(){
+            // oculto equipos
+            trexpand = $(this).find('.fa.fa-minus.masdatos')
+           if( trexpand.length ){
+               trexpand.click()
+           }
+           // testeo de ip por departamento
+           let span = $(this).find('.testip')
+           span.html( '<i class="fa fa-spinner fa-spin"></i>')
+           let ip = $(this).find('.testip').data('ip')
+           $.get('testIP',{'ip':ip,'intentos':1} , function(data){       
+               salida = $(data)
+               time = $(salida[4]).val()
+               state = $(salida[6]).val()
+               title = $(salida[8]).val()
+               bg = $(salida[10]).val()
+            }).done(function() {
+                span.attr('title',title)
+                span.html( (time)? time : '<i class="fa fa-times"></i>' )   
+                span.removeClass('btn-success btn-default btn-danger btn-yellow2').addClass( 'btn-'+state)
+                // fila del dpto o equipo
+                let cels = span.closest('tr.nivel3').find('td[class^="bg-"]')                   
+                cels.removeClass('bg-success bg-default bg-danger bg-yellow2').addClass( 'bg-'+state) 
+                semitem = semaforo.find('span.'+bg)
+                semval = parseInt(semitem.html()) + 1
+                if(semval>0){ 
+                    semitem.removeClass('cero')
+                }
+                semitem.html( semval  ) 
+                                
+                if( --cantitems==0 ) {
+                    btn.addClass('btn-info').removeClass('bg-orange')
+                    btn.find('.fa-spin').addClass('hidden')
+                }
+            });                         
+        })        
+    });
+});
+
+</script>    
+{% endblock %}

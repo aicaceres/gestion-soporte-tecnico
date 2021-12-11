@@ -1,0 +1,77 @@
+<tr class="item" divdata="item_items">
+    <td class="ordTd" style="vertical-align:middle;padding-left:10px;font-weight:bold"></td>
+    <td class="insumoTd" >
+        <div class="col-md-12">
+            <div class="input-group"> 
+                <span class="input-group-addon"><i class="fa fa-puzzle-piece"></i></span>  
+                    {{ form_widget(item.insumo) }}
+                <span class="input-group-addon buscarInsumo"><i class="fa fa-search"></i></span>
+                <span class="input-group-btn" style="padding-left: 10px;">
+                    <button data-toggle="tooltip" title="Nuevo Insumo" type="button" 
+                            class="btn btn-default btn-flat btn-xs addItem"><i class="fa fa-plus"></i></button>
+                </span>
+            </div>             
+        </div>             
+    </td>    
+    <td class="newItemTd" data-tipo="">
+        <div class="col-md-12" style="padding:0">
+            <div class="col-md-6">                    
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-desktop"></i></span>                        
+                    {{ form_widget(item.tipo) }}                                
+                    {% if app.user.access('configuracion_parametro') %}
+                        <span class="input-group-btn" style="padding-left: 5px;">
+                            <button data-toggle="tooltip" title="Agregar Tipo Insumo/Equipo" type="button" data-tabla="Tipo" data-tipo="E" data-url="{{path('render_add_parametro')}}"
+                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                        </span>
+                    {% endif %}
+                </div>
+                {{ form_errors(item.tipo) }}                                                                        
+            </div>
+            <div class="col-md-6">                
+                <div class="input-group"> 
+                    {{ form_widget(item.nombre) }}
+                    <span class="input-group-btn" style="padding-left: 10px;">
+                        <button data-toggle="tooltip" title="Seleccionar insumo existente" type="button" 
+                                class="btn btn-default btn-flat btn-xs backInsumoTd"><i class="fa fa-times"></i></button>
+                    </span>
+                </div>
+            </div>                                       
+        </div> 
+        <div class="col-md-12" style="padding  : 6px 0;">
+            <div class="col-md-6">
+                <div class="input-group">
+                {{ form_widget(item.itemMarca, { 'attr': {'urlModelos' : path('select_modelos') } }) }}
+                {% if app.user.access('configuracion_parametro') %}
+                    <span class="input-group-btn" style="padding-left: 5px;">
+                        <button data-toggle="tooltip" title="Agregar Marca" type="button" data-tabla="Marca" data-url="{{path('render_add_parametro')}}"
+                                class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                    </span>
+                {% endif %}
+                </div>                                       
+            </div>                                       
+            <div class="col-md-6">
+                <div class="input-group">
+                {{ form_widget(item.itemModelo) }}
+                {% if app.user.access('configuracion_parametro') %}
+                    <span class="input-group-btn" style="padding-left: 5px;">
+                        <button data-toggle="tooltip" title="Agregar Modelo" type="button" data-tabla="Modelo" data-url="{{path('render_add_parametro')}}"
+                                class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                    </span>
+                {% endif %}
+                </div>  
+            </div>                                       
+        </div>          
+
+    </td>    
+    <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number','min':'0'} }) }} </td>                                
+    <td class="precioTd right">
+        <div class="input-group">
+            {{ form_widget(item.precio, { 'attr': {'class' : 'number','min':'0'} }) }}                    
+            <span class="input-group-btn" style='width:46px'>
+                {{ form_widget(item.moneda, { 'attr': {'style' : 'padding:0'} }) }}   
+            </span>              
+        </div>
+    </td> 
+    <td class="delTd" style="text-align:center;"></td>
+</tr>

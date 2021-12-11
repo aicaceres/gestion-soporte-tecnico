@@ -1,0 +1,105 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" margin-bottom="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#dd4b39" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+
+        {% for tarea in tareas %}
+
+            <h2 margin='20px 0' text-align="center"> Acta de Reemplazo de Equipos</h2>
+            
+            <div><strong>Concepto Entrega: {{ tarea.conceptoEntrega }}</strong></div>
+
+            <p margin-top="10px" padding-bottom="0px" font-size="12px" line-height="30px" text-align="justify" >En fecha {{ tarea.fechaLarga }} se detallan las tareas realizadas en {{ tarea.equipoUbicacionFinal.nombreCompleto }} 
+                según Requerimiento de Soporte N° {{ "%06d" | format(tarea.ordenTrabajo.requerimiento.id) }}.
+            </p>
+            {% set txt = tarea.descripcion|split('|')  %}            
+            <p margin-top="0px" padding-top="0px" font-size="12px" text-align="justify">
+              Descripción/Mensaje:  {% if txt[0]|trim=='' %} -- {% else %} {{ txt[0] }}  {% endif %}
+            </p>            
+
+            {% if tarea.ordenTrabajoDetalles|length>0 %}
+
+                <h3 >Equipos que quedan operativos:</h3>       
+                <table font-size="9px">
+                    <tr>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm">Cant.</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Equipo</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="4 cm">Descripción</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="4.5 cm">Marca/Modelo</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">N° Serie</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Estado</td>
+                    </tr>
+                    {% for item in tarea.ordenTrabajoDetalles if item.tipoRecambio=='IN'  %}        
+                        <tr>
+                            <td height="20px" vertical-align="middle" text-align="right" padding-right="8px">1</td>
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.tipo.nombre }}</td>
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.nombre }}</td>
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.marca~' / '~item.equipo.modelo }}</td>    
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.nroSerie }}</td> 
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.estado }}</td> 
+                        </tr>
+                    {% endfor %}                
+                </table>       
+                <br></br>
+                <h3 >Equipos retirados:</h3>       
+                <table font-size="9px">
+                    <tr>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm">Cant.</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Equipo</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="4 cm">Descripción</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="4.5 cm">Marca/Modelo</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">N° Serie</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Estado</td>
+                    </tr>
+                    {% for item in tarea.ordenTrabajoDetalles if item.tipoRecambio=='OUT'  %}        
+                        <tr>
+                            <td height="20px" vertical-align="middle" text-align="right" padding-right="8px">1</td>
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.tipo.nombre }}</td>
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.nombre }}</td>
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.marca~' / '~item.equipo.modelo }}</td>    
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.nroSerie }}</td> 
+                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.estado }}</td> 
+                        </tr>
+                    {% endfor %}                
+                </table> 
+                
+                <p margin-top="30px" font-size="12px" line-height="30px" text-align="justify" >{{ tarea.textoAdicional }}</p>
+            {% endif %}
+            
+            <p font-size="12px" line-height="30px" text-align="justify">Ambas partes en señal de conformidad, firmando la presente acta.</p>
+
+            <p margin-top='30px' font-size="12px">Recibe: .................................................................................... DNI:........................... Firma:</p>
+            
+            
+            <p font-size="12px" margin-top='40px' padding-bottom="10px">Responsable Área: ................................................................................................... Firma:</p>
+            <p font-size="10px" padding="0">{{ tarea.equipoUbicacionFinal.nombreCompleto }}</p>           
+            
+            <p font-size="12px" margin-top='40px' padding-bottom="10px">Responsable Servicio técnico: .................................................................................. Firma:</p>
+            <p font-size="10px" padding="0">{% if tarea.createdBy %}  {{ tarea.createdBy.nombre }} {% endif %} </p>            
+
+            {% if not loop.last %}
+            <page-break />   
+            {% endif %}
+        {% endfor %}
+
+    </dynamic-page>
+</pdf>

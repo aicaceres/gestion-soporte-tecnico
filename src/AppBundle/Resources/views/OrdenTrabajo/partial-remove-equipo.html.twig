@@ -1,0 +1,38 @@
+{{ form_start(form) }}    
+<div class='box-body no-padding'>
+    <h4 style="margin-top:0;text-align:center;">Corroborar los datos para el estado y ubicación de este equipo:</h4>
+    <div class="col-md-12">
+        <div class="col-md-6">
+            {{ form_row(form.estado) }}
+        </div>    
+        <div class="col-md-6">
+            {{ form_row(form.ubicacion.conceptoEntrega) }}
+        </div>    
+    </div> 
+    <div class="col-md-12">
+        <div class="col-md-5">
+            {{ form_row(form.ubicacion.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'), 'class' : 'ubicacion_selector' } }) }}   
+        </div>    
+        <div class="col-md-7">
+            {{ form_row(form.ubicacion.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+        </div>    
+    </div> 
+    <div class="col-md-12">
+        <div class="col-md-8">
+             {{ form_row(form.ubicacion.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+        </div>    
+        <div class="col-md-4">
+            {{ form_row(form.ubicacion.piso, { 'attr': {'class' : 'piso_selector' } }) }}              
+        </div>    
+    </div> 
+</div>        
+<div style='display:none;'>
+    {{ form_end(form) }}
+</div>
+  
+<script type="text/javascript">    
+$(document).ready(function() {        
+    $('select').select2();
+    $('#appbundle_estadoubicacion_ubicacion_ubicacion').change();
+});
+</script>

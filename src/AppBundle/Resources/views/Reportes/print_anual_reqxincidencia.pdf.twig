@@ -1,0 +1,140 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#f39c12" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="20px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+                <h2 margin-bottom="5px" text-align="center">Reporte Anual de Requerimientos por Incidencias</h2>
+                <h2 margin-top="2px" text-align="center">Período {{ filtro.anio }}</h2>
+                <h3 margin="5px 0" vertical-align="middle">Criterios de Filtro:</h3>
+                <table>
+                    <tr> 
+                        <td border.type="none" vertical-align="middle" font-style="bold">Ubicaciones</td>
+                        <td border.type="none" vertical-align="middle" font-style="bold">Edificios</td>
+                        <td border.type="none" vertical-align="middle" font-style="bold">Departamentos</td>
+                    </tr>
+                    <tr> 
+                        <td border.type="none" vertical-align="middle">{{ filtro.ubicaciones|trim }}</td>
+                        <td border.type="none" vertical-align="middle">{{ filtro.edificios|trim }}</td>
+                        <td border.type="none" vertical-align="middle">{{ filtro.departamentos|trim }}</td>
+                    </tr>
+                </table>                                
+                <div margin-bottom="5px" margin-top="5px" vertical-align="middle"><span font-style="bold">Tipos de Incidencias:</span> {{ filtro.tiposSoporte|trim }} </div>                
+                <div height="10px"></div>
+                <img breakable="true" ignore-error="true" width="98%" src="{{grafico}}"/>
+                <div height="20px"></div>
+                
+             {% set anio = app.session.get('filtro_reportes_soporte_anual')['anio']  %}   
+        
+                
+             {% set cantidad=datos.tipos|length %}
+             {% if cantidad > 0 %}
+                 {% set j=0 %}
+                 {% if cantidad is odd %} {% set cantidad = cantidad + 1 %} {% endif %}
+                 <table font-size="10px">
+                     {% for i in 1..(cantidad/2) %}
+                         <tr>
+                             <td border.type="none">
+                                                                    
+                                     <table margin-bottom="10px" margin-right="5px">
+                                         <tr><td colspan="5" border.color="black" background.color="aliceblue" height="20px" vertical-align="middle" text-align="center" font-style="bold">{{ datos.tipos[j].nombre|upper }}</td></tr>
+                                         <tr>
+                                             <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="center" width="3 cm"> Período {{ anio }}</td>
+                                             <td font-size="6" border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"> Finalizado </td>
+                                             <td font-size="6" border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"> Asignado </td>
+                                             <td font-size="6" border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"> Sin Asignar </td>
+                                             <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"> Total </td>                        
+                                         </tr>  
+                                         {% set fin,asig,sinasig,total = 0,0,0,0 %}                    
+                                         {% for item in datos.table %}
+                                             {% set tpid = (item.tipoSoporte) ? item.tipoSoporte : 0 %}                        
+                                             {% if tpid==datos.tipos[j].id %}
+                                                 {% set suma = item.finalizado + item.asignado + item.sinasignar %}
+                                                 {% set fin,asig,sinasig,total = fin+item.finalizado, asig+item.asignado, sinasig+item.sinasignar, total+suma %}
+                                                 <tr class="detalle">
+                                                     <td height="15px" vertical-align="middle" padding-left="10px">{{ meses[(item.mes|number_format)-1 ] }}-{{ item.anio }}</td>
+                                                     <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.finalizado }}</td>
+                                                     <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.asignado }}</td>
+                                                     <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.sinasignar }}</td>
+                                                     <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ suma }}</td>                                                                         
+                                                 </tr>
+                                             {% endif %}
+                                         {% endfor %}
+                                         <tr class="tipoT">
+                                             <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="center" font-style="bold">TOTALES</td>
+                                             <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="right" padding-right="5px">{{ fin }}</td>
+                                             <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="right" padding-right="5px">{{ asig }}</td>
+                                             <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="right" padding-right="5px">{{ sinasig }}</td>
+                                             <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="right" padding-right="5px" font-style="bold">{{ total }}</td>                        
+                                         </tr>
+                                     </table>
+                                     
+                             </td>
+                             {% set j=j+1 %}
+                             <td border.type="none">
+                                 
+                                     {% if j< datos.tipos|length %}
+                                         
+                                         <table margin-bottom="10px" margin-left="5px">
+                                             <tr><td colspan="5" border.color="black" background.color="aliceblue" height="20px" vertical-align="middle" text-align="center" font-style="bold">{{ datos.tipos[j].nombre|upper }}</td></tr>
+                                             <tr>
+                                                 <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="center" width="3 cm"> Período {{ anio }}</td>
+                                                 <td font-size="6" border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"> Finalizado </td>
+                                                 <td font-size="6" border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"> Asignado </td>
+                                                 <td font-size="6" border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"> Sin Asignar </td>
+                                                 <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"> Total </td>                        
+                                             </tr>  
+                                             {% set fin,asig,sinasig,total = 0,0,0,0 %}                    
+                                             {% for item in datos.table %}
+                                                 {% set tpid = (item.tipoSoporte) ? item.tipoSoporte : 0 %}                        
+                                                 {% if tpid==datos.tipos[j].id %}
+                                                     {% set suma = item.finalizado + item.asignado + item.sinasignar %}
+                                                     {% set fin,asig,sinasig,total = fin+item.finalizado, asig+item.asignado, sinasig+item.sinasignar, total+suma %}
+                                                     <tr class="detalle">
+                                                         <td height="15px" vertical-align="middle" padding-left="10px">{{ meses[(item.mes|number_format)-1 ] }}-{{ item.anio }}</td>
+                                                         <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.finalizado }}</td>
+                                                         <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.asignado }}</td>
+                                                         <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.sinasignar }}</td>
+                                                         <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ suma }}</td>                                                                         
+                                                     </tr>
+                                                 {% endif %}
+                                             {% endfor %}
+                                             <tr class="tipoT">
+                                                 <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="center" font-style="bold">TOTALES</td>
+                                                 <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="right" padding-right="5px">{{ fin }}</td>
+                                                 <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="right" padding-right="5px">{{ asig }}</td>
+                                                 <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="right" padding-right="5px">{{ sinasig }}</td>
+                                                 <td border.color="black" height="20px" background.color="lightgray" vertical-align="middle" text-align="right" padding-right="5px" font-style="bold">{{ total }}</td>                        
+                                             </tr>
+                                         </table>
+                                         
+                                         
+                                         {% set j=j+1 %}
+                                     {% endif %}
+                                 
+                             </td>
+                         </tr>
+                     {% endfor %}
+                 </table>
+             {% endif %}        
+                      
+                
+    </dynamic-page>
+</pdf>       

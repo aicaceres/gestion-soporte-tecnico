@@ -1,0 +1,335 @@
+{% extends "base.html.twig" %}
+{% block avanzu_admin_menumode %}sidebar-collapse sidebar-open {% endblock %}
+{% block page_content %}    
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Recepción de Compras  </h3>
+                </div><!-- /.box-header -->
+                <div class='box-body'>                    
+                    <div class="box box-solid">            
+                        <div class="box-body border-radius-none">                
+                            <fieldset style="padding-bottom:10px;">
+                                <div class="col-md-3">
+                                    <span><strong>Fecha Compra:</strong>&nbsp;{{entity.fechaCompra|date('d-m-Y')}}</span>                        
+                                </div>
+                                <div class="col-md-3">
+                                    <span><strong>Razón Social:</strong>&nbsp;{{entity.razonSocial}}</span>                        
+                                </div>
+                                <div class="col-md-2">
+                                    <span><strong>N° Orden:</strong>&nbsp;{{entity.ordenCompra}}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span><strong>Área Req.:</strong>&nbsp;{{entity.solicitante}}</span>
+                                </div>
+                            </fieldset>    
+                            <fieldset style="padding-bottom:10px;">    
+                                <div class="col-md-6">
+                                    <span><strong>Proveedor:</strong>&nbsp;{{entity.proveedor}}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span><strong>N° Factura:</strong>&nbsp;{{entity.nroFactura}}</span>                        
+                                </div>
+                                <div class="col-md-3">
+                                    <span><strong>Pedido el:</strong>&nbsp;{{entity.fechaEnvioProveedor|date('d-m-Y')}}</span>                        
+                                </div>
+                            </fieldset>
+                            {% if entity.descripcion %}
+                                <fieldset style="padding-bottom:10px;">
+                                    <div class="col-md-12">
+                                        <span><strong>Observaciones:</strong>&nbsp;{{entity.descripcion}}</span>                        
+                                    </div>                                       
+                                </fieldset>
+                            {% endif %}
+                        </div>  
+                        {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="nav-tabs-custom" style="box-shadow:none;">
+                            <ul class="nav nav-tabs">
+                                <li><a href="#detalle" data-toggle="tab"><strong>Detalle de la Compra</strong></a></li>
+                                    {% if entity.recepciones|length>0 %}
+                                        {% for entrega in entity.recepciones %}
+                                        <li {% if entrega.id is null %}class="active" {% endif %}><a href="#entrega{{ loop.index }}" data-toggle="tab"> Entrega N° {{ loop.index }}</a></li>   
+                                        {% endfor %}
+                                    {% endif %}
+                                <li class="pull-right hidden">
+                                    <button type="button" id="recibir" data-compra="{{ entity.id }}" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Nueva Recepción"><i class="fa fa-truck"></i> Recepción</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane" id="detalle">
+
+                                    <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:30px;text-align:center">#</th>                          
+                                                <th>Detalle</th>
+                                                <th style="width:8%;">Cantidad</th>
+                                                <th style="width:10%;">Precio Unit.</th>
+                                                <th style="width:10%;">Total</th>
+                                                <th style="width:10%;">Recibido</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in entity.detalles %}
+                                                <tr>
+                                                    <td style="vertical-align:middle;padding-left:10px;font-weight:bold">{{loop.index}}</td>
+                                                    <td> <i class="fa {% if item.claseDetalle=='I' %} fa-puzzle-piece {%else%}  fa-desktop {%endif%}"></i> &nbsp; {{ item.descripcion }}</td>
+                                                    <td style="text-align:right" >{{ item.cantidad|number_format(0,'.',',') }} </td>                                
+                                                    <td style="text-align:right"><small style='float:left'>{{ item.moneda }}</small> {{ item.precio|number_format(2,'.',',') }} </td>
+                                                    <td style="text-align:right">{{ (item.cantidad*item.precio)|number_format(2,'.',',') }} </td>
+                                                    <td style="text-align:right" >{{ item.recibido|number_format(2,'.',',') }} </td> 
+                                                </tr>
+                                            {% endfor %}           
+                                        </tbody>
+                                        <!--<tfoot>
+                                            <th colspan="4" style="text-align:right" >TOTAL</th>
+                                            <th style="text-align:right" >{{ entity.total|number_format(2,'.',',') }}</th>
+                                            <th></th>
+                                        </tfoot>-->
+                                    </table>    
+                                            {% include "AppBundle:Compra:partial-info.html.twig" %}
+                                    <div class="btn-group pull-right">                                         
+                                        <a type="button" class="btn btn-app" href="{{ path('compra_admin')}}"><i class="fa fa-reply"></i> Volver</a>
+                                    </div>
+                                </div>
+                                <!-- /.tab-pane -->
+                                {% if entity.recepciones|length>0 %}
+                                    {% for entrega in entity.recepciones %}
+                                        
+                                        {% if entrega.id %}
+                                            <div class="tab-pane" id="entrega{{ loop.index }}">
+                                            {% include "AppBundle:Compra:partial-recibido.html.twig" %}
+                                            </div>
+                                        {% else %}
+                                            <div class="tab-pane active" id="entrega{{ loop.index }}">
+                                            {% include "AppBundle:Compra:partial-recibir.html.twig" %}
+                                            </div>
+                                        {% endif %}
+       
+                                    {% endfor %}
+                                {% endif %}                                
+
+                            </div>
+                            <!-- /.tab-content -->
+                        </div>
+                    </div>
+
+                </div>                   
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{ parent() }}
+<script src="{{ asset('bundles/app/bootstrap.file-input.js') }}" type="text/javascript"></script>
+<script type="text/javascript">            
+    $(document).ready(function () {
+        $('.datepicker').datepicker();
+        $('input[type=file]').bootstrapFileInput();
+        $('.file-input-wrapper').removeClass('form-control');
+        $('.file-input-wrapper').addClass('btn-sm');
+        $('input[type=file]').removeClass('form-control');
+        $('#appbundle_recepcioncompra_deposito').attr('required',true);
+        $('#appbundle_recepcioncompra_deposito').css('font-size','90%');
+        
+    $(document).keypress(function(e) {
+       var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ e.preventDefault(); }       
+    });           
+        
+        $('[name="appbundle_recepcioncompra"]').on('submit',function(e){  
+            valid = true;
+            recibir = false;
+            $('[id$="_cantidad"]').each(function(){
+                if(isNaN( $(this).val() )) $(this).val(0);                          
+                if( $(this).val()>0 ){
+                    recibir = true;
+                }
+                tr = $(this).parent().parent();
+                max = parseInt(tr.find('.cant-pendiente').html());                  
+                if( ($(this).val() < 0) || ($(this).val() > max) ){
+                    alert('Cantidad fuera del rango!');
+                    $(this).val(0);
+                    $(this).focus();
+                    valid = false;
+                    return false;
+                }                
+            });
+          /*  $('[id$="_nombre"]').each(function(){ 
+                var nombre = $(this);
+                setTimeout(function(){
+                    res = checkUniqueNombre(nombre );        
+                },2000);
+                console.log(res);
+            }); */
+            if(!valid) {return false;}   
+            if(!recibir) {
+                alert('No se ingresaron insumos ni equipos para realizar la recepción!');
+                return false;
+            }   
+        });
+        
+    // controla que el nombre sea unico 
+    $('body').on('blur','[id$="_nombre"]',function(){
+        obj = $(this);
+        checkUniqueNombre(obj);             
+    });
+    $('body').on('blur','[id$="_nroSerie"]',function(){
+        obj = $(this);
+        if( obj.val() ){
+            var url = "{{path('check_unique_nroserie')}}";
+            var datos = {txt:obj.val()};
+            $.get(url,datos, function(data){            
+                if(data){
+                    alert('Ya existe un equipo con este número de serie');
+                    obj.focus();
+                    return false;
+                }   
+            });        
+        }
+    });
+    $('body').on('blur','[id$="_cantidad"]',function(){
+        if(isNaN( $(this).val() )){
+            alert('Número no válido!');
+            $(this).val(0);  
+        }
+        cant =  parseInt($(this).val());
+        tr = $(this).parent().parent();
+        pend = parseInt(tr.find('.cant-pendiente').html());
+        if(cant>pend){
+            $(this).css('background-color','lightpink');     
+        }else{
+            $(this).css('background-color','white'); 
+        }
+        if(cant==0){
+            tr.addClass('deleted');
+            tr.find('[id$="_nroSerie"]').attr('required',false);
+        }else{
+            tr.removeClass('deleted');
+            nroserie = tr.find('[id$="_nroSerie"]');
+            if( nroserie.is(':visible')){
+                nroserie.attr('required',true);
+            }
+            
+        }
+    });
+    $('body').on('click','.addItem',function(){
+        var hldr = $(this).closest('.insumoTd').parent();
+        var hldrInsumo = hldr.find('.insumoTd');
+        hldrInsumo.find('select').html('');
+        hldrInsumo.hide();
+        hldrNew = hldr.find('.newItemTd');
+        hldrNew.find('.addParametro').data('tipo','I');
+        hldrNew.find('.input-group-addon i').removeClass('fa-desktop').addClass('fa-puzzle-piece');
+        hldrNew.show();
+    });
+    $('body').on('click','.backInsumoTd',function(){
+        var hldr = $(this).closest('.newItemTd').parent();
+        var hldrNewTd = hldr.find('.newItemTd');            
+        hldrNewTd.find('select').val('').trigger('change');
+        hldrNewTd.find('input').val('');
+        hldrNewTd.hide();
+        hldrInsumo = hldr.find('.insumoTd');
+        hldrInsumo.show();
+    });
+    $('body').on('change','[id$="_itemMarca"]',function(){
+        var selectModelos = $(this).closest('.newItemTd').find('[id$="_itemModelo"]');
+        var data = { marca_id: $(this).val()  };
+        $.ajax({
+            type: 'post',
+            url: $(this).attr('urlModelos'),
+            data: data,
+            success: function(data) {
+                changeDataSelect( selectModelos, data, false );
+                selectModelos.focus();
+            }
+        });
+    });
+    
+    $dataHolder = $('.table-recibir tbody'); 
+    var detId = null;
+    var cnt = 1;
+    $dataHolder.find('tr').each(function(){        
+        var tr = $(this);        
+        var insumoTd = tr.find('.insumoTd');
+        var newItemTd = tr.find('.newItemTd'); 
+        selInsumo = insumoTd.find('select');  
+        selInsumo.select2({
+            ajax: {
+              url: "{{path('get-compra-insumos')}}",
+              dataType: 'json',
+              delay: 250,
+              processResults: function (data) {
+                return {
+                  results: data
+                };
+              },
+              minimumInputLength: 3
+            }
+          }); 
+        newItemTd.find('[id$="_tipo"]').select2({
+            ajax: {
+              url: "{{path('get-autocomplete-tipo')}}?clase="+newItemTd.data('tipo'),
+              dataType: 'json',
+              delay: 250,
+              processResults: function (data) {
+                return {
+                  results: data
+                };
+              },
+              minimumInputLength: 3
+            }
+          });
+        
+        if( !detId ){ 
+            detId = tr.find('[id$="_compraDetalle"]').val();             
+        }else{ 
+            if(detId===tr.find('[id$="_compraDetalle"]').val()){
+                // cambiar nombre
+                txt = newItemTd.find('[id$="_nombre"]').val()+' ('+cnt+')';
+                newItemTd.find('[id$="_nombre"]').val(txt);
+                cnt = cnt+1;
+            }else{
+                detId = tr.find('[id$="_compraDetalle"]').val();
+                cnt = 1;
+            }
+        }        
+        newItemTd.find('[id$="_itemMarca"]').select2();  
+        newItemTd.find('[id$="_itemModelo"]').select2();  
+        newItemTd.find('[id$="_itemMarca"]').change();                        
+    });
+    $('[id$="_nombre"]').each(function(){ 
+        var nombre = $(this);
+        setTimeout(function(){
+            checkUniqueNombre(nombre );        
+        },2000);
+    });    
+    $('body').on('change','.precioTd input',function(){ 
+        val = parseFloat( $(this).val() );
+       if(isNaN( val )){
+           $(this).val(0); 
+       }else $(this).val( val.toFixed(2) );
+    });
+    $('.select2-container').css('width','100%');             
+    
+    
+});        
+function checkUniqueNombre(obj){
+    var url = "{{path('check_unique_nombre')}}";
+    var tipo = obj.closest('.newItemTd').data('tipo');
+    var datos = {txt:obj.val(),tipo:tipo};
+    $.get(url,datos, function(data){            
+        if(data){
+            alert('Ya existe un elemento con esta descripción');
+            obj.val( obj.val()+' (**)' );
+            obj.focus();
+            return false;
+        }   
+    });  
+}
+</script>    
+{% endblock %}

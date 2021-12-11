@@ -1,0 +1,10 @@
+{% if app.user.rol.admin and entity.deletedAt is not empty %}
+    <fieldset>
+        <div class="callout callout-danger admindata">            
+            <small>Eliminado el {{entity.deletedAt|date('d-m-Y H:i')}} por {{entity.updatedBy}}&nbsp;&nbsp;</small>            
+            <small>( Para borrar definitivamente presione "Eliminar" )</small>
+            {{ form_widget(form.deletedAt, { 'attr': {'class':'hidden' } }) }}
+            <button class="pull-right btn btn-xs bg-gray restore-deleted" data-formname="{{ form.vars.name }}" type="button" title="Restaurar registro"><i class="fa fa-undo"></i>&nbsp; Restaurar</button>            
+        </div>
+    </fieldset>
+{% endif %}  

@@ -1,0 +1,73 @@
+<pdf>
+    <dynamic-page page-size="A4-landscape" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#dd4b39" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 text-align="center"> Histórico de Insumos</h2>              
+        <h4><strong>Insumo:</strong> {{ filtro[0] }}</h4>
+        <h4><strong>Periodo:</strong> {{ filtro[1] }} al {{ filtro[2] }}</h4>
+        <div height="10px"></div>        
+        <table font-size="9px">
+            <tr>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.8 cm"><strong>I/E</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.2 cm"><strong>Fecha hora</strong></td>                
+                {% if filtro[0] != 'Todos' %}
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="4 cm"><strong>Insumo</strong></td>
+                {% endif %}
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm" ><strong>Depósito</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Tipo Movimiento</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>N° Comprob.</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.2 cm"><strong>Cantidad</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.5 cm"><strong>Stock Total</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Usuario</strong></td>
+            </tr>        
+            {% if items|length>0   %}
+                {% for entity in items %}
+                    <tr>
+                        <td height="20px" vertical-align="middle" text-align="center" font-size="16px">{{entity.signo}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{entity.created|date('d-m-Y H:i')}}</td>
+                        {% if filtro[0] != 'Todos' %}
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{entity.insumo}}</td>
+                        {% endif %}                        
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{entity.deposito}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{entity.tipo|capitalize}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">
+                            {% if entity.tipo=='SOPORTE' and entity.equipo %}
+                              {{ entity.nroComprobante }} [ {{ entity.equipo.textoCompleto }} ]
+                            {% else %}
+                                {{ entity.nroComprobante }}
+                            {% endif %}
+                             
+                        </td>
+                        <td height="20px" vertical-align="middle" padding-right="10px" text-align="right">{{entity.cantidad|number_format(0)}}</td>
+                        <td height="20px" vertical-align="middle" padding-right="10px" text-align="right">{% if entity.stock %} {{entity.stock|number_format(0)}}{% endif %}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px" font-size="7px">{{entity.createdBy.username}}</td>
+                    </tr>                
+                {% endfor %}  
+            {% else %}  
+                <tr>
+                    <td colspan="{% if filtro[0] != 'Todos' %} 8 {% else %} 9 {% endif %}" height="30px" vertical-align="middle" padding-left="10px">
+                        <strong>No hay registros históricos coincidentes con el criterio de búsqueda</strong></td>
+                </tr>
+            {% endif %}            
+        </table>         
+    </dynamic-page>
+</pdf>

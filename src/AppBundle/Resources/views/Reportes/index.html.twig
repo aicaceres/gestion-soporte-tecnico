@@ -1,0 +1,271 @@
+{% extends "base.html.twig" %}
+{% block stylesheets %}
+    {{parent()}}    
+<style>
+    .table-resumen{
+        font-size:13px;
+    }
+    .table-resumen td:not(:first-child),.table-resumen th:not(:first-child){
+        text-align: right;
+        padding:2px 10px 2px 2px;
+        vertical-align: middle;
+    }
+    .tipoS td,.tipoM td{
+        font-weight: bold;
+    }
+    .tipoS{
+        background-color: antiquewhite;
+        font-size: 15px;
+        text-transform: uppercase;
+    }
+    .tipoM td:first-child{
+        padding-left: 15px;
+    }
+    .tipoM{
+        background-color: aliceblue;
+        font-size: 14px;
+    }
+    .tipoI td:first-child{
+        padding-left: 25px;
+    }
+    .tipoT,.table-resumen th{
+        font-size: 14px;
+        font-weight: bold;
+        background-color: lightgray;
+    }
+    .verDetalle{
+       cursor: pointer;
+    }
+    .tabla-tipoequipo tr.tipoM td{
+        font-weight: normal !important;
+        background-color: white;
+    }
+</style>    
+    
+{% endblock %}
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-bar-chart-o"></i> &nbsp; Reporte Detallado de Soporte Técnico</h3>                
+                <div class="pull-right box-tools">                                
+                    <!-- FORMULARIO PARA IMPRESION -->       
+                </div>
+
+            </div><!-- /.box-header -->
+            <div class='box-body' >
+                <form id="searchform" action="{{ path('soporte_reportes_detallado') }}" method="get" >
+                    <div class="col-md-12">                        
+                        <fieldset>                          
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label class="required">Ubicaciones:</label>
+                                    <select id="selUbicaciones" name="selUbicaciones[]" urledificio="{{ path('selEdificios') }}" class="selector_edificios form-control select2" multiple="multiple" >
+                                            {%for ubic in ubicaciones %}
+                                                <option {%if ubic.id in app.session.get('filtro_reportes_soporte')['selUbicaciones'] %} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                                            {% endfor %}
+                                        </select>
+                                </div>                            
+                            </div>                            
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label class="required">Edificios:</label>
+                                    <select id="selEdificios" name="selEdificios[]" urldepartamento="{{ path('selDepartamentos') }}" class="selector_departamentos form-control select2" multiple="multiple" >
+                                            {%for edif in edificios %}                                                
+                                                <option {%if edif.id in app.session.get('filtro_reportes_soporte')['selEdificios'] %} selected="selected" {%endif%} value="{{edif.id}}">{{edif.abreviatura~' - '~edif.nombre}}</option>
+                                            {% endfor %}
+                                        </select>
+                                </div>                            
+                            </div>                            
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label class="required">Sectores:</label>
+                                    <select id="selDepartamento" name="selDepartamento[]"  class="selDepartamentos form-control select2" multiple="multiple" >
+                                            {%for dep in departamentos %}
+                                                {% set nombreCompleto = dep.abreviatura~' - '~dep.edifnombre~' - '~dep.nombre %}
+                                                <option {%if dep.id in app.session.get('filtro_reportes_soporte')['selDepartamento'] %} selected="selected" {%endif%} value="{{dep.id}}">{{nombreCompleto}}</option>
+                                            {% endfor %}
+                                        </select>
+                                </div>                            
+                            </div>                            
+                        </fieldset>                        
+                    </div>
+                    <div class="col-md-12">                                   
+                        <fieldset>    
+                            <div class="col-md-5">
+                                <label class="required">Tipos de Incidencia:</label>
+                                <select id="selTipos" name="selTipos[]" class="form-control select2" multiple="multiple" >
+                                        {%for tipo in tiposSoporte %}
+                                            <option {%if tipo.id in app.session.get('filtro_reportes_soporte')['selTipos'] %} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                        {% endfor %}
+                                    </select>
+                             </div>     
+                             <div class="col-md-2">
+                                <label class="required">Período:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{filtro.desde}}">
+                                </div>   
+                            </div>    
+                            <div class="col-md-2"> 
+                                <label>&nbsp;</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{filtro.hasta}}">                                            
+                                </div>                                           
+                            </div>       
+                            <div class="col-md-3"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label style="width:100%;">&nbsp;</label>
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                            </div>         
+                             
+                        </fieldset>                    
+                    </div>                                         
+                    
+                </form>                 
+            </div>
+            <div class='box-body' >
+                                 
+                <div class="col-md-12">          
+                    <!-- Tipo de Incidencia por sector  -->
+                    {% include "AppBundle:Reportes:partial-tipo-incidencia.html.twig" %}
+                </div>   
+                <div class="col-md-12">          
+                    <!-- Tipo de Incidencia por sector  -->
+                    {% include "AppBundle:Reportes:partial-detallado-eqxincidencia.html.twig" %}
+                </div>   
+
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script src="{{ asset('bundles/app/chart-js/dist/Chart.min.js') }}" type="text/javascript"></script>         
+<script src="{{ asset('bundles/app/chart-js/dist/chartjs-plugin-labels.js') }}" type="text/javascript"></script>         
+         
+<script type="text/javascript">
+    
+    
+$(document).ready(function() {      
+    $('body').on('click','.fa-plus-square.expAll',function(){ 
+        var table = $(this).parent().parent().parent();
+        table.find('.fa-plus.verDetalle').click();            
+        $(this).removeClass('fa-plus-square').addClass('fa-minus-square');       
+    });
+    $('body').on('click','.fa-minus-square.expAll',function(){ 
+        var table = $(this).parent().parent().parent();
+        table.find('.tipoM').each(function(){
+            $(this).find('.fa-minus.verDetalle').click();
+        });                             
+        table.find('.tipoS').each(function(){
+            $(this).find('.fa-minus.verDetalle').click();
+        });           
+        $(this).removeClass('fa-minus-square').addClass('fa-plus-square');       
+    });
+        
+    $('body').on('click','.fa-plus.verDetalle',function(){  
+        var table = $(this).parent().parent().parent();
+        var tipo = ( $(this).data('tipo') =='S')?'tipoM':'tipoI';    
+        var id =  $(this).parent().parent().data('id');                  
+        table.find('.'+tipo+'.id'+id).removeClass('hidden');            
+        $(this).removeClass('fa-plus').addClass('fa-minus');       
+    });
+    $('body').on('click','.fa-minus.verDetalle',function(){
+        var table = $(this).parent().parent().parent();
+        var tipo = ( $(this).data('tipo') =='S')?'tipoM':'tipoI';       
+        var id =  $(this).parent().parent().data('id');
+        if(tipo=='tipoM'){
+            //recorrer detalle de cada edificio para ocultar
+            table.find('.tipoM.id'+id).each(function(){
+                var eid = $(this).data('id');
+                $(this).find('i').removeClass('fa-minus').addClass('fa-plus');
+                table.find('.tipoI.id'+eid).addClass('hidden');
+            });            
+        }
+        table.find('.'+tipo+'.id'+id).addClass('hidden');                
+        $(this).removeClass('fa-minus').addClass('fa-plus');
+    });        
+    // colocar porcentajes a tipo de soporte
+    $('.tabla-tipoincidencia tr.tipoM').each(function(){
+        var value = parseInt( $(this).find('td:nth-child(5)').html() );
+        var padre = $('#'+$(this).data('padre'));
+        var padreValue = parseInt( padre.find('td:nth-child(5)').html() );
+        var porcentaje = (value*100)/padreValue;
+        $(this).find('td:nth-child(6)').html( ( (Number.isInteger(porcentaje)) ? porcentaje : porcentaje.toFixed(2) )+'%' );
+    });        
+    
+    $("#selTipos").select2({
+        placeholder: "TODOS",
+        allowClear: true
+    });
+        
+    $('#limpiar-filtros').on('click',function(){       
+        $('.select2').val(0);
+        $('#searchform').find('.datepicker').val('');
+        $('#searchform').submit();
+    });    
+    $('#pdf,#xls').on('click',function(){  
+        $(this).siblings('.tiposalida').val( $(this).attr('id') );        
+        $(this).closest('form').submit();        
+    }); 
+    
+    //grafico
+    var bareqxincidencia = new Chart($('#grafico-detallado-eqxincidencia'), {
+        type: 'bar',
+        data: {
+        labels:{{ eqxincidencia.label|json_encode|raw}},
+        datasets: {{eqxincidencia.data|json_encode|raw}}
+    },options: {
+        layout: {
+            padding: { top: 20, bottom:20 }
+        },       
+        legend:{
+            display:true,
+            position:'bottom',
+            fontSize:10,
+            labels:{
+                usePointStyle:true
+            } 
+        },        
+        animation : {
+            onComplete : function(){    
+                $('#grafico_eqxIncidencia').val(bareqxincidencia.toBase64Image());
+            }
+        },
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true                    
+                }
+            }],
+            xAxes: [{
+                gridLines: { display:false}
+            }]
+        },
+        plugins: {
+          labels: [{
+                precision:2,
+                fontSize:9,         
+                fontColor:'#333',         
+                showActualPercentages: true                
+            }]
+        }
+    }
+        
+    });        
+    
+});
+</script>    
+{% endblock %}

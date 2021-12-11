@@ -1,0 +1,37 @@
+<div class="box box-default">    
+    <div class="box-header with-border">
+        <h3 class="box-title"><i class="fa fa-bell"></i> &nbsp;Vencimientos</h3>
+        <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+        </div>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>                        
+                    <th> Detalle </th>
+                    <th style="width:75px"> Fecha</th>                            
+                </tr>
+            </thead>
+            <tbody>
+                {% for vto in vencimientos %}
+                    <tr class="bg-{{vto.estado}}">
+                        <td>{{ vto.detalle }} </td> 
+                        <td>{{ vto.fechaFin|date('d-m-Y') }} </td>                                                                                                                            
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><td colspan="2" style="text-align:center"> 
+                        <a href="{{ path('monitoreo_vencimiento') }}" class="btn btn-xs btn-default">Ver Todos</a>
+                    </td></tr>
+            </tfoot>
+        </table>            
+    </div>
+    <!-- /.box-body -->
+</div>
+<!-- /.box -->

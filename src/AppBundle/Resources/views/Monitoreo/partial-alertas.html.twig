@@ -1,0 +1,22 @@
+<li>
+    <!-- inner menu: contains the actual data -->
+    <ul class="menu">         
+        {% for venc in vencimientos %}
+            {% if app.user.access('monitoreo_vencimiento_edit') %}
+                {% set link = path('monitoreo_vencimiento_edit', { 'id': venc.id }) %}
+            {% else %}
+                {% set link = path('monitoreo_vencimiento') %}
+            {% endif %}
+        <li>
+            <a href="{{ link }}">
+                <i class="fa fa-warning 
+                   {% if venc.estado=='warning' %}text-yellow {% else %} text-danger {%endif%}"></i> {{ venc.detalle }}
+                   <p style="margin:0;font-size:11px;color:#888888;white-space:normal;float:right">
+                        <small><i class="fa fa-clock-o"></i> {{ venc.fechaFin|date('d/m/Y') }}</small>
+                    </p>
+            </a>            
+        </li>
+        {% endfor %}    
+    </ul>
+</li>
+<li class="footer"><a href="{{ path('monitoreo_vencimiento') }}">Ver todos</a></li>

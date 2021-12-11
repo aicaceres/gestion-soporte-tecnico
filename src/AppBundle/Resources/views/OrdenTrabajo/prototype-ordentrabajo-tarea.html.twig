@@ -1,0 +1,41 @@
+<table  class="table table-bordered tareas"> 
+     <thead>
+        <tr>
+            <th style="width:12%">Fecha</th>
+            <th style="width:8%">Usuario</th>
+            <th style="width:15%">Tipo</th>
+            <th>Descripción</th>
+            <th style="width:5%"></th>
+        </tr>
+    </thead>   
+    <tbody>               
+        {% for item in tareas if not gr or item.ordenTrabajoDetalles|length==0  %}        
+            <tr>
+                <td class="dateTd">{{ item.fecha|date('d/m/Y H:i') }} </td>
+                <td class="tecTd">{% if item.createdBy %} {{ item.createdBy.username }} {% endif %} </td>
+                <td class="tipoTd">{{ item.tipoTarea }} </td>
+                <td class="detTd">
+                    {% if item.tipoTarea.abreviatura == 'SI' %}
+                        {% for insxtarea in item.insumos  %}
+                            <span> {{ insxtarea.cantidad }} - {{ insxtarea.descripcion }} </span>
+                            {{ insxtarea.estado(1)|raw }}
+                            {% if not loop.last %}<br>{% endif %}
+                        {% endfor %}
+                    {% elseif item.tipoTarea.abreviatura == 'CE' %} 
+                        {% set txt = item.descripcion|split('|')  %}
+                        {{ ( (txt[0]) ? txt[0]~'<br>' :'' )|raw }}
+                        {{ (tipo=='OUT') ? txt[1]|raw : txt[2]|raw }}     
+                    {% else %}
+                        {{ item.descripcion|raw }} 
+                    {% endif %}
+                </td>
+                <td>{% if item.tipoTarea.abreviatura=='EE' %}<a href="{{ path('print_entrega_equipo',{'id':item.id}) }}" data-toggle="tooltip" title="Imprimir" target="_blank" ><i class="fa fa-print"></i></a>{% endif %} </td>
+            </tr> 
+        {% endfor %}         
+    </tbody>    
+</table>    
+
+
+
+
+

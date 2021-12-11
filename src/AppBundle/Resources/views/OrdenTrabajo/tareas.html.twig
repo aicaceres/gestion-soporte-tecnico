@@ -1,0 +1,432 @@
+{% extends "base.html.twig" %}   
+{% block page_content %}    
+    <style> 
+        .itemtarea .box{margin-bottom: 0}              
+    </style>    
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{box_color}}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-briefcase"></i> &nbsp; Registro de Actividad - OT N° <strong>{{ entity.nroOT }}</strong> </h3>
+            </div><!-- /.box-header -->             
+            <div class='box-body'>
+                <div class='row'>
+                    <div class="col-md-12">
+                        {% include "notification.html.twig" %} 
+                    </div>
+                    {% if entity.requerimiento %}
+                    <div class="col-md-12" id="infoRequerimiento">
+                          {% include "AppBundle:Requerimiento:partial-info.html.twig" with {'entity':entity.requerimiento} %}                                  
+                    </div>                            
+                    {% endif %}
+                    <div class='col-md-12' style="margin-bottom:6px">   
+                        <div class="col-md-2">
+                            <span><strong>N° OT:</strong>&nbsp;{{ entity.nroOT }}</span>
+                        </div>    
+                        <div class="col-md-3">
+                            <span><strong>Fecha:</strong>&nbsp;{{entity.fechaOrden|date('d-m-Y H:i')}}</span>                        
+                        </div>
+                        <div class="col-md-2">
+                            <span><strong>N° JIRA:</strong>&nbsp;{{entity.jira}}</span>
+                        </div>    
+                        <div class="col-md-2">
+                            <span><strong>Estado:</strong>&nbsp;{{entity.estado}}</span>
+                        </div>    
+                        <div class="col-md-3">
+                            <span><strong>Técnico:</strong>&nbsp;{{entity.tecnico.nombre}}</span>                                
+                        </div>
+                    </div>    
+                    <div class="col-md-12" style="padding-bottom:10px;">
+                        <div class="col-md-10" style="margin-bottom:6px">
+                            <span><strong>Descripción de la OT:</strong>&nbsp;{{entity.descripcion}}</span>                        
+                        </div>          
+                        <div class="col-md-2" style="margin-bottom:6px">
+                            {% if entity.altaPrioridad %}
+                            <span class="label label-danger pull-right" style="font-size:90%;font-weight:400;"><i class="fa fa-exclamation-circle"></i>&nbsp;Prioridad Alta</span>             
+                            {% endif %}
+                        </div>          
+                    </div> 
+                        
+                    <div class="col-md-12"> 
+                        <div class="col-md-12"> 
+                            <div class='box  box-default box-solid '>
+                                <div class='box-header' style="background-color:white;">                                    
+                                    <h6 id="otdocs" class="text-blue colapsable" style="margin:0;font-weight:bold;">DOCUMENTACIÓN ANEXA &nbsp;&nbsp; </h6>
+                                    <div class="pull-right box-tools">                                                
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                    </div>
+                                </div><!-- /.box-header -->
+                                <div class='box-body no-padding'> 
+                                    {% include "AppBundle:OrdenTrabajo:partial-tareas-documentos.html.twig" with {'entity':entity } %} 
+                                    <br>
+                                </div>      
+                            </div> 
+                        </div>
+                    </div>                           
+                        
+                    <div class="col-md-12">                        
+                        <div class="col-md-12">                                                        
+                            <div class='box  box-default box-solid {% if not entity.getTareasGenerales %}hidden{%endif%}'>
+                                <div class='box-header' style="background-color:white;">                                    
+                                    <h6 id="hgrales" class="text-red colapsable" style="margin:0;font-weight:bold;">TAREAS GENERALES &nbsp;&nbsp; 
+                                        <span class="badge bg-gray">{{ entity.getCountTareasGenerales }}</span> </h6>
+                                    <div class="pull-right box-tools">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div><!-- /.box-header -->
+                                <div class='box-body no-padding'>                                    
+{% if entity.getTareasGenerales %}                          
+{% include "AppBundle:OrdenTrabajo:prototype-tarea.html.twig" with {'tareas':entity.tareas,'gr': 1 } %}                             
+{% endif %}
+                                </div>      
+                            </div>                             
+                        </div>  
+                    </div>  
+                    <div class="col-md-12">
+                        <div class="col-md-12" style="margin-bottom: 10px;">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary addTarea" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'NT'}) }}">Agregar Nota</button>
+                                <button type="button" class="btn btn-primary addTarea" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'SI'}) }}">Solicitud de Insumo</button>
+                                <button type="button" class="btn btn-primary addTarea" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'DS'}) }}">Derivar Soporte</button>
+                                <button type="button" class="btn btn-primary addTarea need-equipo" disabled="disabled" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'RE'}) }}">Reubicar Equipo</button>
+                                <button type="button" class="btn btn-primary addTarea need-equipo one" disabled="disabled" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'CE'}) }}" data-size="xl">Reemplazo de Equipo</button>                                
+                            </div>
+                            <div class="btn-group pull-right">
+                                <button type="button" class="btn btn-success addTarea" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'TS'}) }}">Terminar Soporte</button>
+                            </div>
+                        </div>
+                    </div>
+                                
+                                
+                    <div class="col-md-12">
+                        <div class="col-md-12">  
+                            <h6 class="text-yellow" style="padding:12px 10px;background:#eee;font-weight:bold;margin:2px 0 0 0;">EQUIPOS ASOCIADOS
+                                {% if entity.estado=='ABIERTO' %}
+                                    <a href="javascript:void(0)" style="margin:-5px;" class="btn btn-warning btn-xs addEquipoDetalle pull-right" data-url="{{ path('render_add_equipo_detalle',{'id':entity.id,'op':'tar'}) }}"><i class="fa fa-plus"></i> Agregar Equipo</a>
+                                {% endif %}
+                            </h6>  
+                            <table id="equipos" class="table table-hover table-bordered" {% if entity.detalles|length==0 %} style="display:none;"{% endif %}>
+                                <thead>
+                                    <tr>
+                                        <th style="width:3%">#</th>
+                                        <th style="width:15%">Código de Barra</th>
+                                        <th style="width:42%">Tipo - Descripción - N° de Serie - Marca - Modelo</th>
+                                        <th style="width:35%">Obs. Adicionales</th>
+                                        <th style="width:5%">                                                               
+                                            Tareas
+                                        </th>
+                                        <th style="width:5%">                                                               
+                                            <input type="checkbox" id="ckAll" />
+                                        </th>
+                                        <th style="width:5%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in entity.detalles  %}                                             
+                                        <tr class="item" style='background-color:gainsboro'>
+                                            <td class="ordTd">{{ loop.index }}</td>
+                                            <td>{{ item.equipo.barcode }}</td>
+                                            <td class="textoOT" >{{ item.equipo.textoOT }}</td>    
+                                            <td>{{ item.descripcion }}</td> 
+                                            <td style='background-color:white'>
+                                                <button class=" btn btn-xs {% if not item.entregado %}btn-danger{%else%}btn-default{%endif%} viewTareas" style="width:100%"  title="Ver/Ocultar tareas asociadas">{{ item.tareas|length }} </button>                                                
+                                            </td> 
+                                            <td class="link-actions "  style='background-color:white'>{% if not item.entregado %}<input type="checkbox" class="ckEq" value="{{ item.id }}"  id="ck{{item.id}}" />{% endif %} </td> 
+                                            <td style='background-color:white'>
+                                                {% if not item.entregado and item.tareas|length==0  %}                                            
+                                                    {% if item.estadoOriginal and item.equipoUbicacionOriginal %}
+                                                        <a class="delete-link" onclick="if(!confirm('Confirma quitar este equipo de la OT?')){return false;}"  href="{{ path('remove-equipo-asociado',{'id':item.id,'src':'TAR'}) }}"><i title="Quitar el equipo" class="fa fa-trash"></i> </a>
+                                                    {% else %}
+                                                        <a class="modal-delete-link"  href="javascript:void(0)" data-url="{{ path('render-remove-equipo-asociado',{'id':item.id,'src':'TAR'}) }}"><i title="Quitar el equipo" class="fa fa-trash"></i> </a>
+                                                    {% endif %}                                                                        
+                                                {%endif%}
+                                            </td> 
+                                        </tr>
+                                        {% if item.tareas|length>0 %}
+                                            <tr>
+                                                <td class="no-padding" colspan="6">
+                                                    {% include "AppBundle:OrdenTrabajo:prototype-tarea.html.twig" with {'tareas':item.tareas,'gr':0, 'tipo':item.tipoRecambio} %}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>                              
+                            <div style="text-align:center;margin-bottom: 20px;">
+                            {% if entity.reubicacionEquipo >0 %}
+                                <a href="{{ path('print_entrega_equipo',{'id':entity.id})}}" class="btn btn-default" target="_blank" ><i class="fa fa-print"></i>&nbsp; Acta Reubicación de Equipos</a>                                                    
+                            {% endif %}
+                            {% if entity.reemplazoEquipo >0 %}
+                                <a href="{{ path('print_reemplazo_equipo',{'id':entity.id})}}" class="btn btn-default" target="_blank" ><i class="fa fa-print"></i>&nbsp; Acta Reemplazo de Equipos</a>                                                    
+                            {% endif %}
+                                <a href="{{ path('print_ordentrabajo_resumen', { 'id': entity.id }) }}" target="_blank" class="btn btn-default printOTResumen"> <i class="fa fa-print"></i>&nbsp; Imprimir OT</a>
+                                <a href="{{ path('print_ordentrabajo', { 'id': entity.id }) }}" target="_blank" class="btn btn-default printOrdentrabajo"> <i class="fa fa-print"></i>&nbsp; OT Detallada</a>
+                            </div>                                   
+
+                        </div>                                                             
+                    </div>                                       
+                                
+                </div>                                               
+            </div>                                       
+        </div><!-- /.box -->
+    </div><!-- /.col-->        
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+var $tareaHolder;
+$(document).ready(function() {
+    $(document).keypress(function(e) {        
+       var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13' && !$(e.target).is("textarea") ){ e.preventDefault(); }
+    });      
+    $('.addEquipoDetalle').on('click',function(){
+        var sol = '{{entity.requerimiento.solicitante.id}}';
+        var options = {
+           url: $(this).data('url'),
+           data: {sol: sol },
+           title:'Agregar Equipo',
+           size: eModal.size.xl,
+           buttons: [
+               {text: 'Agregar', style: 'success', close: true, 
+                   click: function(){  
+                       if( confirm('Confirma agregar este equipo a la OT?') ){                           
+                            form = $('#addEquipoCreate form');
+                            form.submit();
+                        }else{
+                            return false;
+                        }
+                   } },
+               {text: 'Cancelar', style: 'danger', close: true }
+           ]
+       };
+       eModal.ajax(options);   
+    });
+    $('.viewTareas').on('click',function(){
+        if( parseInt( $(this).html())>0 ){
+            $(this).closest('tr').next('tr').toggleClass('hidden');            
+        }
+    });    
+       
+       
+    $('#ckAll').on('ifChecked', function(){
+       $('.ckEq').iCheck('check'); 
+    });
+    $('#ckAll').on('ifUnchecked', function(){    
+        $('.ckEq').iCheck('uncheck');  
+    });
+    $('.ckEq').on('ifChecked', function(){        
+       // HABILITAR OPCIONES CORRESPONDIENTES DEL MENU 
+       $('.need-equipo').attr('disabled',false);
+    });
+    $('.ckEq').on('ifUnchecked', function(){    
+        // DESHABILITAR OPCIONES CORRESPONDIENTES DEL MENU 
+        $('.need-equipo').attr('disabled',true);
+    });
+
+    $('.addTarea').on('click',function(e){
+        var selected = [];
+        $. each($(".ckEq:checked"), function(){
+            selected.push($(this).val());
+            $(this).iCheck('uncheck');
+        }); 
+        $('#ckAll').iCheck('uncheck');
+        if( $(this).data('size') ){
+            size = $(this).data('size');
+        }else{
+            size = eModal.size.lg;
+        }                
+       /* if( $(this).hasClass('one') && selected.length>1 ){
+            alert('Debe seleccionar un solo equipo para hacer el reemplazo.');
+            return false;
+        }*/
+        var options = {
+           url: $(this).data('url'),
+           data: {'eq': selected  },
+           title:'Registrar tarea:',
+           subtitle:$(this).text(),
+           size: size,
+           buttons: [
+               {text: 'Guardar', style: 'success', close: false, 
+                   click: function(){      
+                       var formTarea = $('[name="appbundle_tarea"]');
+                       if( !formTarea.find('#appbundle_tarea_fecha').val() ){
+                           alert('Debe ingresar la fecha!');
+                           formTarea.find('#appbundle_tarea_fecha').focus();
+                           return false;
+                       }
+                       if( !formTarea.find('#appbundle_tarea_hora').val() ){
+                           alert('Debe ingresar la hora!');
+                           formTarea.find('#appbundle_tarea_hora').focus();
+                           return false;
+                       }
+                       var tipoTarea = parseInt( formTarea.find('#appbundle_tarea_tipoTarea').val() ) ;                          
+                       switch(tipoTarea) {
+                            case 1: 
+                                // NT - NoTa que no falte descripcion
+                                if( !formTarea.find('#appbundle_tarea_descripcion').val() ){
+                                    alert('Debe ingresar una descripción o mensaje!');                                    
+                                    return false;
+                                }
+                                break;
+                            case 2:                                  
+                                // SI - Solicitud de Insumos - que no haya items en blanco
+                                var ir = true;
+                                $('.tablaInsumos').find('tr.item').each(function(){
+                                    var tr = $(this);
+                                    if( tr.find('[name$="[codigo]"]').val()=='' &&
+                                        tr.find('[name$="[descripcion]"]').val()=='' &&
+                                        tr.find('[name$="[cantidad]"]').val()=='' ){
+                                        tr.remove();
+                                    }else if(tr.find('[name$="[cantidad]"]').val()=='' || tr.find('[name$="[cantidad]"]').val()==0){
+                                        alert('Debe ingresar una cantidad');
+                                        ir = false;
+                                        return false;
+                                    }
+                                }); 
+                                if( !ir ) return false;
+                                break; 
+                            case 3:
+                                // DS - Derivar Soporte
+                                var tecnico = $('#tecnicoId option:selected').text();
+                                if( !confirm('Confirma derivar la orden de trabajo a '+tecnico+'?') ){
+                                    return false;
+                                }
+                                break; 
+                            case 4:
+                                // CE - reCambio o reemplazo de Equipo
+                                /*if( !$('#appbundle_tarea_ordenTrabajoDetalles').val() ){
+                                    alert('Debe ingresar al menos un equipo a reemplazar!');
+                                    return false;
+                                }*/
+                                if( !$('#appbundle_tarea_ubicacion_piso').val() ){
+                                    alert('Debe ingresar la ubicación donde se reubicarán los equipos a reemplazar!');
+                                    return false;
+                                }
+                                if( $('[name$="eqid_in[]"]').length == 0 ){
+                                    alert('Debe ingresar al menos un equipo de reemplazo!');
+                                    return false;
+                                }
+                                if( !$('#appbundle_tarea_ubicacionNueva_piso').val() ){
+                                    alert('Debe ingresar la ubicación donde se reubicarán los equipos nuevos!');
+                                    return false;
+                                }
+                                if( !confirm('Confirma realizar el reemplazo de los equipos?') ){
+                                    return false;
+                                }
+                                break; 
+                            case 5:
+                                // RE - Reubicar Equipos                                
+                                if( !$('#appbundle_tarea_estadoId').val() ){
+                                    alert('Debe ingresar el estado que se le asignará al equipo!');                                 
+                                    $('#estado').select2('open');
+                                    return false;
+                                }                                 
+                                $. each($(".desc_equipo"), function(){
+                                    if( !$(this).val() ){
+                                        alert('Debe completar la descripción de los equipos');                                        
+                                        return false;
+                                    }
+                                }); 
+                                if( !$('#appbundle_tarea_ordenTrabajoDetalles').val() ){
+                                    alert('Debe ingresar al menos un equipo!');
+                                    return false;
+                                }                                                                                                              
+                                if( !$('#appbundle_tarea_ubicacion_fechaEntrega').val() ){
+                                    alert('Debe indicar la fecha de entrega.');
+                                    return false;
+                                }                                                                                                              
+                                if( !$('#appbundle_tarea_ubicacion_piso').val() ){
+                                    alert('Debe ingresar la ubicación donde se reubicarán los equipos!');
+                                    return false;
+                                }                                       
+                                
+                                break; 
+                            case 6:
+                                // TS - Terminar Soporte
+                                if( !confirm('Confirma dar por terminado el soporte?') ){
+                                    return false;
+                                }
+                                break; 
+                                
+                        }                                              
+                       formTarea.submit();
+                   } },
+               {text: 'Cancelar', style: 'danger', close: true }
+           ]
+       };
+       eModal.ajax(options);
+    });
+    
+    // Documentos
+    $('.add-documento').on('click',function(e){
+        var obj = $(this);
+        var url = obj.data('url');
+        var options = {
+           url: url,           
+           title:'Agregar Documento',
+           size: eModal.size.sm,
+           buttons: [
+               {text: 'Agregar', style: 'success', close: true, 
+                   click: function(){  
+                       e.preventDefault();
+                        var url = $('[name="appbundle_documentacion"]').attr('action');
+                        var form = document.getElementById("appbundle_documentacion");
+                        var formdata = new FormData(form);
+                        formdata.append('file', document.getElementById('appbundle_documentacion_file').files[0]);                             
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            dataType: 'JSON',
+                            data: formdata ,
+                            processData: false,
+                            contentType: false,
+                            success: function(data, textStatus, jqXHR)
+                            {
+                                console.log(data)
+                               if( data.msg == 'OK'){
+                                   console.log( obj.closest('table').find('.collectionHolder'))
+                                   obj.closest('table').find('.collectionHolder').append( data.html )
+                               }else{
+                                   alert(data)
+                               }
+                            }                                
+                        });                       
+                   } },
+               {text: 'Cancelar', style: 'danger', close: true }
+           ]
+       };
+        
+        eModal.ajax(options);
+    });
+    
+    
+    $('.deldoc').on('click', function(e) {
+        var url = $(this).data('url');
+        var tr = $(this).closest('tr');
+        if (confirm('Desea eliminar este item?')) {
+            e.preventDefault();
+            // ajax
+            $.ajax({
+                url: url,                
+                type: 'DELETE',
+                success: function(data){
+                   if(data == 'OK'){
+                       tr.remove();
+                        $holder = $(this).closest('tbody');
+                        var index = $holder.data('index');
+                        $holder.data('index', index - 1);
+                   }else{                                                                                                      
+                      alert(data);                          
+                   }     
+                }
+            });
+                        
+        }
+    });
+    
+});
+</script>    
+{% endblock %}

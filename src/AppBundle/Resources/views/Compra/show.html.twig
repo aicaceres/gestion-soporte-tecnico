@@ -1,0 +1,325 @@
+{% extends "base.html.twig" %}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Registro de Compras  </h3>
+                </div><!-- /.box-header -->                
+                <div class='box-body'> 
+                    {% include "notification.html.twig" %}    
+                    <div class="box box-solid">            
+                        <div class="box-body border-radius-none">                
+                            <fieldset style="padding-bottom:10px;">
+                                <div class="col-md-3">
+                                    <span><strong>Fecha Compra:</strong>&nbsp;{{entity.fechaCompra|date('d-m-Y')}}</span>                        
+                                </div>
+                                <div class="col-md-3">
+                                    <span><strong>Razón Social:</strong>&nbsp;{{entity.razonSocial}}</span>                        
+                                </div>
+                                <div class="col-md-2">
+                                    <span><strong>N° Orden:</strong>&nbsp;{{entity.ordenCompra}}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span><strong>Área Req.:</strong>&nbsp;{{entity.solicitante}}</span>
+                                </div>
+                            </fieldset>    
+                            <fieldset style="padding-bottom:10px;">    
+                                <div class="col-md-4">
+                                    <span><strong>Proveedor:</strong>&nbsp;{{entity.proveedor}}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span><strong>N° Factura:</strong>&nbsp;{{entity.nroFactura}}</span>                        
+                                </div>
+                                <div class="col-md-2">
+                                    {% if entity.fechaEnvioProveedor %}
+                                    <span><strong>Pedido el:</strong>&nbsp;{{entity.fechaEnvioProveedor|date('d-m-Y')}}</span>
+                                    {% endif %}    
+                                </div>
+                                <div class="col-md-3">
+                                    <span><strong>Estado:</strong>&nbsp;{{entity.estado}}</span>
+                                </div>    
+                            </fieldset>
+                            {% if entity.descripcion %}
+                                <fieldset style="padding-bottom:10px;">
+                                    <div class="col-md-12">
+                                        <span><strong>Observaciones:</strong>&nbsp;{{entity.descripcion}}</span>                        
+                                    </div>                                       
+                                </fieldset>
+                            {% endif %}
+                        </div>  
+                        {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                    </div>
+                    <div class="col-md-12">
+                        <div class="nav-tabs-custom" style="box-shadow:none;margin-bottom:0;">
+                            <ul class="nav nav-tabs">
+                                <li class="active"><a href="#detalle" data-toggle="tab"><strong>Detalle de la Compra</strong></a></li>
+                                {% if entity.recepciones|length>0 %}
+                                    {% for entrega in entity.recepciones %}
+                                    <li><a href="#entrega{{ loop.index }}" data-toggle="tab"> Entrega N° {{ loop.index }}</a></li>   
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="detalle">                                    
+                                    <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:30px;text-align:center">#</th>                          
+                                                <th>Detalle </th>
+                                                <th style="width:8%;">Cantidad</th>
+                                                <th style="width:10%;">Precio Unit.</th>
+                                                <th style="width:10%;">Total</th>
+                                                {% if entity.estado != 'NUEVO' %}
+                                                <th style="width:10%;">Recibido</th>
+                                                {% endif %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in entity.detalles %}
+                                                <tr>
+                                                    <td style="vertical-align:middle;padding-left:10px;font-weight:bold">{{loop.index}}</td>
+                                                    <td> <i class="fa {% if item.claseDetalle=='I' %} fa-puzzle-piece {%else%}  fa-desktop {%endif%}"></i> &nbsp; {{ item.descripcion }}</td>
+                                                    <td style="text-align:right" >{{ item.cantidad|number_format(0,'.',',') }} </td>                                
+                                                    <td style="text-align:right"><small style='float:left' >{{ item.moneda }}</small> {{ item.precio|number_format(2,'.',',') }} </td>
+                                                    <td style="text-align:right">{{ (item.cantidad*item.precio)|number_format(2,'.',',') }} </td>
+                                                    {% if entity.estado != 'NUEVO' %}
+                                                        <td style="text-align:right" >{{ item.recibido|number_format(0,'.',',') }} </td> 
+                                                    {% endif %}
+                                                </tr>
+                                            {% endfor %}           
+                                        </tbody>
+                                       <!-- <tfoot>
+                                            <th colspan="4" style="text-align:right" >TOTAL</th>
+                                            <th style="text-align:right" >{{ entity.total|number_format(2,'.',',') }}</th>
+                                            {% if entity.estado != 'NUEVO' %}<th></th>{% endif %}
+                                        </tfoot>-->
+                                    </table>    
+
+                                </div>
+                                <!-- /.tab-pane -->
+                                {% if entity.recepciones|length>0 %}
+                                    {% for entrega in entity.recepciones %}
+                                            <div class="tab-pane" id="entrega{{ loop.index }}">
+                                            {% include "AppBundle:Compra:partial-recibido.html.twig" with {'nro':loop.index} %}
+                                            {% include "admin-form-data.html.twig" with {'table':entrega} %}  
+                                            </div>                                               
+                                    {% endfor %}
+                                {% endif %}                                
+
+                            </div>
+                            <!-- /.tab-content -->
+                        </div>                                
+                    </div>                                  
+                </div>                                  
+                <div class="box-footer">
+                    {% include "AppBundle:Compra:partial-info.html.twig" %}
+                    <div class="btn-group pull-right">                        
+                        <a type="button" class="btn btn-app" target="_blank" href="{{ path('print_compra',{'id':entity.id})}}"><i class="fa fa-print"></i> Imprimir</a>
+                        <a type="button" class="btn btn-app" href="{{ path('compra_admin')}}"><i class="fa fa-reply"></i> Volver</a>
+                    </div>
+                </div>                         
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+    <script src="{{ asset('bundles/app/bootstrap.file-input.js') }}" type="text/javascript"></script>
+<script type="text/javascript">    
+var url = '';    
+$(document).ready(function() {  
+    $('body').on('click','.del-recepcion-compra',function(e){
+        
+        url = $(this).data('url');
+        var options = {
+            message:  '<div class="alert alert-danger"><h4><i class="icon fa fa-warning"></i> Confirma eliminar esta entrega?</h4> Los equipos ingresados también serán eliminados!</div>',
+            title: 'Entrega N° '+$(this).data('nro'),
+            size: eModal.size.sm,
+            label: "Aceptar"
+        };
+
+        eModal.confirm(options)
+              .then(borrarEntrega);        
+    });
+    
+    
+   $('body').on('click','.edit-recepcion-compra',function(){
+        var options = {
+           url: $(this).data('url'),
+           title:'Edición Entrega N° '+$(this).data('nro'),
+           size: eModal.size.lg,           
+           buttons: [                      
+
+               {text: 'Modificar', style: 'success', close: true, 
+                   click: function(e){                                                
+                        valid = true;                            
+                        $('[id$="_cantidad"]').each(function(){
+                            if( !$(this).closest('tr').data('eqid') ){
+                                if(isNaN( $(this).val() )) $(this).val(0);                          
+                                if( $(this).val()>0 ){
+                                    recibir = true;
+                                }
+                                cantrec = parseInt( $(this).parent().data('cantidad') );                                 
+                                pend = parseInt($(this).parent().parent().find('.cant-pendiente').html()); 
+                                if( ($(this).val() < 0) || ($(this).val() > (cantrec+pend)) ){
+                                    alert('Cantidad fuera del rango!');
+                                    $(this).val(0);
+                                    $(this).focus();
+                                    valid = false;
+                                    return false;
+                                } 
+                            }                                                                       
+                        });
+                        if(!valid) {return false;}   
+                            
+                        if( confirm('Confirma las modificaciones?') ){    
+                            e.preventDefault();
+                            var url = $('[name="appbundle_recepcioncompra"]').attr('action');
+                            var form = document.getElementById("appbundle_recepcioncompra");
+                            var formdata = new FormData(form);
+                            formdata.append('file', document.getElementById('appbundle_recepcioncompra_file').files[0]);                             
+                            $.ajax({
+                                url: url,
+                                type: 'POST',
+                                data: formdata ,
+                                processData: false,
+                                contentType: false,
+                                success: function(data, textStatus, jqXHR)
+                                {
+                                   if( data == 'OK'){
+                                       location.reload();
+                                   }else{
+                                       alert(data)
+                                   }
+                                }                                
+                            });
+                                                                                                                                           
+                        }else{
+                            return false;
+                        }
+                        
+                   } },
+               {text: 'Cancelar', style: 'default', close: true }
+           ]
+       };
+       eModal.ajax(options)
+               .then(aftermodal);              
+                                    
+    });
+
+});
+
+function aftermodal(){
+    date = $('.datepicker').datepicker();
+    date.css('z-index', 'auto');
+    $('.datepicker').datepicker();
+    $('input[type=file]').bootstrapFileInput();
+    $('.file-input-wrapper').removeClass('form-control');
+    $('.file-input-wrapper').addClass('btn-sm');
+    $('input[type=file]').removeClass('form-control');
+    $('#appbundle_recepcioncompra_deposito').attr('required',true);
+    $('#appbundle_recepcioncompra_deposito').css('font-size','90%');
+    $('#appbundle_recepcioncompra_deposito').select2();
+    /*$('[id$="_insumo"]').select2();  
+    $('[id$="_tipo"]').select2();  
+    $('[id$="_itemMarca"]').select2();  
+    $('[id$="_itemModelo"]').select2();          */     
+
+    $('body').on('blur','[id$="_cantidad"]',function(){
+           if(isNaN( $(this).val() )){
+               alert('Número no válido!');
+               $(this).val(0);  
+           }
+           cant =  parseInt($(this).val());
+           tr = $(this).parent().parent();
+           cantrec = parseInt( $(this).parent().data('cantidad') )                    
+           pend = parseInt(tr.find('.cant-pendiente').html());                       
+           if(cant> (cantrec+pend) ){
+               $(this).css('background-color','lightpink');     
+           }else{
+               $(this).css('background-color','white'); 
+           }
+           if(cant==0){
+               tr.addClass('deleted');
+               /*tr.find('[id$="_nroSerie"]').attr('required',false);*/
+           }else{
+               tr.removeClass('deleted');
+               /*nroserie = tr.find('[id$="_nroSerie"]');
+               if( nroserie.is(':visible')){
+                   nroserie.attr('required',true);
+               }*/
+
+           }
+       });   
+
+       /*$('body').on('change','[id$="_nroSerie"]',function(){
+           obj = $(this);
+           id = obj.closest('tr').data('eqid');                     
+           if( obj.val() ){
+               var url = "{{path('check_unique_nroserie')}}";
+               var datos = {txt:obj.val(), id:id};
+               $.get( url,datos, function(data) {  
+                   if(data){
+                       alert('Ya existe un equipo con este número de serie'); 
+                       obj.val( obj.val()+' (**)' );
+                       obj.focus();
+                       return false;                                
+                   }
+                 });            
+           }
+       });*/
+
+       /*$('body').on('change','[id$="_itemMarca"]',function(){
+           var selectModelos = $(this).closest('.newItemTd').find('[id$="_itemModelo"]');
+           var data = { marca_id: $(this).val()  };
+           $.ajax({
+               type: 'post',
+               url: $(this).attr('urlModelos'),
+               data: data,
+               success: function(data) {
+                   changeDataSelect( selectModelos, data, false );
+                   selectModelos.focus();
+               }
+           });
+       });*/
+       /*$('body').on('change','[id$="_nombre"]',function(){
+           obj = $(this);
+           var url = "{{path('check_unique_nombre')}}";
+           var id = obj.closest('tr').data('eqid');                    
+           var datos = {txt:obj.val(),id:id};
+           $.get(url,datos, function(data){            
+               if(data){                            
+                   alert('Ya existe un elemento con esta descripción');
+                   obj.val( obj.val()+' (**)' );
+                   obj.focus();
+                   return false;
+               }   
+           });            
+       });*/
+       $('.precioTd input').on('change',function(){ 
+           val = parseFloat( $(this).val() );
+          if(isNaN( val )){
+              $(this).val(0); 
+          }else $(this).val( val.toFixed(2) );
+       });      
+      $('.select2-container').css('width','100%');  
+      /*$('[id$="_itemMarca"]').change();  */ 
+}
+function borrarEntrega(){
+    $.ajax({
+        url: url,
+        type: 'POST',                                
+        success: function(data)
+        {
+           if( data == 'OK'){
+               location.reload();
+           }else{
+               alert(data)
+           }           
+        }                                
+    }); 
+    url = '';
+}
+</script>   
+{% endblock %}

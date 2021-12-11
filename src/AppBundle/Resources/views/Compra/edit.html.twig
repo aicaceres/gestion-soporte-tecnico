@@ -1,0 +1,546 @@
+{% extends "base.html.twig" %}
+{% block page_content %}
+    <style>
+        .input-group-addon.buscarInsumo{
+            cursor:pointer;
+        }
+    </style>
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Registro de Compras  </h3>
+                </div><!-- /.box-header -->
+                {{ form_start(form) }}
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-2">
+                                {{ form_row(form.fechaCompra) }}
+                            </div>  
+                            <div class="col-md-2">
+                                {{ form_row(form.razonSocial) }}
+                            </div>                                        
+                            <div class="col-md-2">
+                                {{ form_row(form.ordenCompra) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_row(form.solicitante) }}
+                            </div>
+
+                        </div>  
+                        <div class="col-md-12">
+                            <div class="col-md-4 form-group">
+                                {{ form_label(form.proveedor,null, { 'label_attr': {'class' : 'required' } }) }} 
+                                <span class="required" title="Dato requerido">*</span>
+                                <div class="input-group">
+                                    {{ form_widget(form.proveedor, { 'attr': {'class' : 'select2' } }) }}                                
+                                    {% if app.user.access('proveedor') %}
+                                        <span class="input-group-btn" style="padding-left: 5px;">
+                                            <button data-toggle="tooltip" title="Agregar Proveedor" type="button" data-tabla="Proveedor" data-url="{{path('render_add_proveedor')}}"
+                                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {{ form_errors(form.proveedor) }}
+                            </div> 
+
+                            <div class="col-md-3">
+                                {{ form_row(form.nroFactura) }}
+                            </div> 
+                            <div class="col-md-4 {% if entity.estado!='NUEVO' %}hidden{% endif %}">
+                                {{ form_row(form.enviado,{'label': 'Enviado al Proveedor ','label_attr':{'class':'infoicon' ,'title':'Marcar para indicar que ya fue enviado al Proveedor'},'attr': {'title':'Marcar para indicar que ya fue enviado al Proveedor'}  }) }}
+                            </div>                             
+                            <div class="col-md-2 {% if entity.estado=='NUEVO' %}hidden{% endif %}">
+                                <div class="form-group ">
+                                    <label>Estado:</label>
+                                    <input type="text" disabled="disabled" value="{{ entity.estado }}"  class="form-control">
+                                </div>
+                            </div>                             
+                        </div>                          
+                        <div class="col-md-12">
+                            <div class="col-md-12">
+                                {{ form_row(form.descripcion) }}    
+                            </div>
+                        </div>                          
+                    </div>
+                    {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                    {% include "admin-form-deleted-data.html.twig" with {'table':entity} %}
+                    <div class="col-md-12">
+                        <h4>Detalle de la orden de compra</h4>
+                        <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover tablacompras">
+                            <thead>
+                                <tr>
+                                    <th style="width:30px;text-align:center">#</th>                          
+                                    <th>Detalle</th>
+                                    <th style="width:8%;">Cantidad</th>
+                                    <th style="width:15%;">Precio Unit.</th>
+                                    <th style="width:3%;text-align:center;" class="no-sort thactions"></th>
+                                </tr>
+                            </thead>
+                            <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Compra:itemPrototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                                {% for item in form.detalles %}
+                                    {% set clase = item.vars.data.claseDetalle  %}
+                                    <tr class="item" divdata="item_items" >
+                                        <td class="ordTd" style="vertical-align:middle;padding-left:10px;font-weight:bold"></td>
+                                        <td class="insumoTd" {% if not item.vars.data.insumo %} style="display:none"{% endif %} >
+                                            <div class="col-md-12">
+                                                <div class="input-group"> 
+                                                    <span class="input-group-addon"><i class="fa fa-puzzle-piece"></i></span>  
+                                                        {{ form_widget(item.insumo) }}
+                                                    <span class="input-group-btn" style="padding-left: 10px;">
+                                                        <button data-toggle="tooltip" title="Nuevo Insumo" type="button" 
+                                                                class="btn btn-default btn-flat btn-xs addItem"><i class="fa fa-plus"></i></button>
+                                                    </span>
+                                                </div>             
+                                            </div>             
+                                        </td>    
+                                        <td class="newItemTd" data-tipo="{{ clase }}" {% if item.vars.data.insumo %} style="display:none"{% endif %} >
+                                            <div class="col-md-12" style="padding:0">
+                                                <div class="col-md-6">                    
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon"><i class="fa {% if clase=='I' %} fa-puzzle-piece {%else%}  fa-desktop {%endif%}"></i></span>                        
+                                                            {{ form_widget(item.tipo) }}                                
+                                                            {% if app.user.access('configuracion_parametro') %}
+                                                            <span class="input-group-btn" style="padding-left: 5px;">
+                                                                <button data-toggle="tooltip" title="Agregar Tipo Insumo/Equipo" type="button" data-tabla="Tipo" data-tipo="E" data-url="{{path('render_add_parametro')}}"
+                                                                        class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                                            </span>
+                                                        {% endif %}
+                                                    </div>
+                                                    {{ form_errors(item.tipo) }}                                                                        
+                                                </div>
+                                                <div class="col-md-6">
+                                                    {%if clase=='E' %}
+                                                    {{ form_widget(item.nombre) }}
+                                                    {%else%}    
+                                                    <div class="input-group"> 
+                                                        {{ form_widget(item.nombre) }}
+                                                        <span class="input-group-btn" style="padding-left: 10px;">
+                                                            <button data-toggle="tooltip" title="Seleccionar insumo existente" type="button" 
+                                                                    class="btn btn-default btn-flat btn-xs backInsumoTd"><i class="fa fa-times"></i></button>
+                                                        </span>
+                                                    </div> 
+                                                    {%endif%}    
+                                                </div>                                       
+                                            </div> 
+                                            <div class="col-md-12" style="padding  : 6px 0;">
+                                                <div class="col-md-6">
+                                                    {{ form_widget(item.itemMarca, { 'attr': {'urlModelos' : path('select_modelos') } }) }}
+                                                </div>                                       
+                                                <div class="col-md-6">
+                                                    {{ form_widget(item.itemModelo) }}
+                                                </div>                                       
+                                            </div>          
+
+                                        </td>    
+                                        <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number','min':'0'} }) }} </td>                                
+                                        <td class="precioTd right">
+                                            <div class="input-group">
+                                                {{ form_widget(item.precio, { 'attr': {'class' : 'number','min':'0'} }) }}                    
+                                                <span class="input-group-btn" style='width:46px'>
+                                                    {{ form_widget(item.moneda, { 'attr': {'style' : 'padding:0'} }) }}   
+                                                </span>              
+                                            </div>
+                                        </td> 
+                                        <td class="delTd" style="text-align:center;"></td>
+                                    </tr>
+
+
+                                {% endfor %}           
+                            </tbody>
+                            <tfoot>
+                            <th colspan="5" style="text-align:center">
+                                <button type="button" data-tipo="I" class="btn btn-sm btn-info linkAdd"> <i class="fa fa-plus-square"></i>&nbsp; INSUMO</button>
+                                <button type="button" data-tipo="E" class="btn btn-sm btn-primary linkAdd"> <i class="fa fa-plus-square"></i>&nbsp; EQUIPO</button>
+                            </th>
+                            <!--<th style="text-align:right" >TOTAL</th>
+                            <th id="precTot right" >{{ form_widget(form.total, { 'attr': {'class' : 'number','readonly' : 'true'} }) }}</th>
+                            <th colspan="3"></th>-->
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>                                  
+                <div class="box-footer">                    
+                    {% if entity.id  %}
+                        <a type="button" class="btn btn-app delete" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Eliminar</a>
+                    {%endif%}
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        {% if not entity.id  %}
+                            <button type="submit" class="btn btn-app" id="savenew"><i class="fa fa-save"></i> Guardar y Nuevo</button>
+                        {%endif%}
+                        <a type="button" class="btn btn-app" href="{{ path('compra_admin')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>     
+                <div style="display:none">    
+                    {{ form_end(form) }}
+                </div>                
+                {% if entity.id  %}
+                    {{ form(delete_form) }}
+                {%endif%}
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+    var $dataHolder;
+$(document).ready(function() {  
+        // Get the container who holds the collection
+    $dataHolder = $('.table tbody');    
+
+   $('[type="submit"]').on('click',function(){
+     if( !$('#appbundle_compra_proveedor').val() ){
+         alert('Debe completar el Proveedor!');
+         $('#appbundle_compra_proveedor').focus();
+         return false;
+     }  
+     if( $('.tablacompras tbody tr').length == 0  ){
+         alert('Debe ingresar items a la compra!');
+         return false;   
+     }else{
+         var band=true;
+         $dataHolder.find('tr').each(function(){
+            var tr = $(this);
+            var insumoTd = tr.find('.insumoTd');
+            var newItemTd = tr.find('.newItemTd');
+            if( newItemTd.data('tipo')=='I' && insumoTd.is(":visible") ){
+                //controlar insumo
+                if( !insumoTd.find('[id$="_insumo"]').val() ){
+                    alert('Debe indicar el insumo');
+                    insumoTd.find('[id$="_insumo"]').focus();
+                    band=false;
+                    return false;
+                }                    
+            }else{
+               if( !newItemTd.find('[id$="_tipo"]').val() ){
+                   alert('Debe indicar el tipo');
+                   newItemTd.find('[id$="_tipo"]').focus();
+                   band=false;
+                   return false;
+               }
+               if( !newItemTd.find('[id$="_nombre"]').val() ){
+                   alert('Debe ingresar una descripción!');
+                   newItemTd.find('[id$="_nombre"]').focus();
+                   band=false;
+                   return false;
+               }
+               if( !newItemTd.find('[id$="_itemMarca"]').val() ){
+                   alert('Debe indicar la marca');
+                   newItemTd.find('[id$="_itemMarca"]').focus();
+                   band=false;
+                   return false;
+               }
+               if( !newItemTd.find('[id$="_itemModelo"]').val() ){
+                   alert('Debe indicar la modelo');
+                   newItemTd.find('[id$="_itemModelo"]').focus();
+                   band=false;
+                   return false;
+               }
+            }
+         });
+     }   
+     if(!band){
+         return false;
+     }
+     
+    if( $(this).attr('id') == 'savenew')
+        $('#appbundle_compra_savenew').val('S');
+    else
+        $('#appbundle_compra_savenew').val('N');  
+    
+    //return false;
+   }); 
+   $('body').on('click','.buscarInsumo',function(){
+       btn = $(this);
+        var options = {
+           url: "{{ path('render_search_insumo') }}",
+           title:'Buscar Insumo',
+           size: eModal.size.lg,
+           buttons: [
+               {text: 'Seleccionar', style: 'success', close: true, 
+                   click: function(){
+                       var selectIDs = $('.ckItem:checked').map(function(){
+                            return $(this).data('id');
+                        }).get();
+                        if( selectIDs.length >1 ){
+                            alert('Debe seleccionar un insumo');
+                            return false;
+                        }
+                        // insertar insumo
+                        item = selectIDs[0];
+                        insumo = btn.parent().find('[id$="_insumo"]');
+                        cantidad = insumo.closest('tr').find('[id$="_cantidad"]');                        
+                        $.getJSON("{{path('find_insumo_data_by_id')}}",{id:item}, function(data){
+                            if(data.msj=='OK'){
+                               var newState = new Option(data.nombre, data.id, false, false);
+                                insumo.append(newState);                                 
+                                //selectedItems.push(data.id.toString());   
+                                insumo.val(data.id).trigger('change');
+                               cantidad.focus();
+                            }else{
+                                alert(data.msj);
+                                return false;
+                            }
+                        }); 
+                        
+                   } },
+               {text: 'Cancelar', style: 'danger', close: true }
+           ]
+       };
+       eModal.ajax(options);                             
+   });
+   
+   $('#appbundle_compra_razonSocial').on('change',function(){
+       var data = { ubic_id: $(this).val()  };
+       selector = $('#appbundle_compra_solicitante');
+        $.ajax({
+            type: 'post',
+            url:  "{{path('select_solicitantes')}}",
+            data: data,
+            success: function(data) {                
+                var id = selector.val();
+                selector.html('<option value="">Seleccionar...</option>');
+                for (var i = 0, total = data.length; i < total; i++) {
+                    selector.append('<option value="' + data[i].id + '" >' + data[i].nombre + '</option>');
+                }
+                if(id) selector.val(id);
+            }
+        });
+       $('#appbundle_compra_ordenCompra').focus();
+   });
+   $('#appbundle_compra_razonSocial').change();
+     
+   $('.linkAdd').on('click', function(e) {
+       var tipo = $(this).data('tipo');
+        e.preventDefault();
+        addNewItemCompra(tipo);
+        e.stopPropagation();
+    });
+    $('body').on('blur','[id$="_nombre"]',function(){
+        obj = $(this);
+        var tipo = obj.closest('.newItemTd').data('tipo');
+        if(tipo==='E'){
+            var url = "{{path('check_unique_nombre')}}";
+            var datos = {txt:obj.val(),tipo:tipo};
+            $.get(url,datos, function(data){            
+                if(data){
+                    alert('Ya existe un elemento con esta descripción');
+                    obj.focus();
+                    return false;
+                }   
+            });        
+        }
+    });
+    $('body').on('click','.addItem',function(){
+            var hldr = $(this).closest('.insumoTd').parent();
+            var hldrInsumo = hldr.find('.insumoTd');
+            hldrInsumo.find('select').html('');
+            hldrInsumo.hide();
+            hldrNew = hldr.find('.newItemTd');
+            hldrNew.find('.addParametro').data('tipo','I');
+            hldrNew.find('.input-group-addon i').removeClass('fa-desktop').addClass('fa-puzzle-piece');
+            hldrNew.show();
+    });
+    $('body').on('click','.backInsumoTd',function(){
+        var hldr = $(this).closest('.newItemTd').parent();
+        var hldrNewTd = hldr.find('.newItemTd');            
+        hldrNewTd.find('select').val('').trigger('change');
+        hldrNewTd.find('input').val('');
+        hldrNewTd.hide();
+        hldrInsumo = hldr.find('.insumoTd');
+        hldrInsumo.show();
+    });
+    $('body').on('change','[id$="_itemMarca"]',function(){
+        var selectModelos = $(this).closest('.newItemTd').find('[id$="_itemModelo"]');
+        var data = { marca_id: $(this).val()  };
+        $.ajax({
+            type: 'post',
+            url: $(this).attr('urlModelos'),
+            data: data,
+            success: function(data) {
+                changeDataSelect( selectModelos, data, false );
+                selectModelos.focus();
+            }
+        });
+    });
+    
+   $(document).keypress(function(e) {
+       var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ e.preventDefault(); }
+       /* if (e.which == 43) {
+            e.preventDefault();
+            $('#linkAdd').click();
+        }*/
+    });    
+    $('.cantTd input').change(function(){ 
+       if(isNaN( parseInt($(this).val()) )) $(this).val(0);  actualizaTotales(); 
+    });
+    $('.precioTd input').change(function(){ 
+       if(isNaN( parseFloat($(this).val()) )) $(this).val(0);  actualizaTotales(); 
+    });
+    
+    $dataHolder.find('tr').each(function(i){
+        var tr = $(this);
+        addItemFormCompraDeleteLink( tr.find('.delTd') );
+        tr.find('.ordTd').html(i+1);
+        var insumoTd = tr.find('.insumoTd');
+        var newItemTd = tr.find('.newItemTd'); 
+        selInsumo = insumoTd.find('select');        
+        selInsumo.select2({
+            ajax: {
+              url: "{{path('get-compra-insumos')}}",
+              dataType: 'json',
+              delay: 250,
+              processResults: function (data) {
+                return {
+                  results: data
+                };
+              }
+            }
+          });
+        /*var additem = tr.find('.addItem');    
+        additem.click(function(){
+            var hldr = $(this).closest('.insumoTd').parent();
+            var hldrInsumo = hldr.find('.insumoTd');
+            hldrInsumo.find('select').html('');
+            hldrInsumo.hide();
+            hldrNew = hldr.find('.newItemTd');
+            hldrNew.find('.addParametro').data('tipo','I');
+            hldrNew.find('.input-group-addon i').removeClass('fa-desktop').addClass('fa-puzzle-piece');
+            hldrNew.show();
+        }); 
+        var backInsumoTd = tr.find('.backInsumoTd'); 
+        backInsumoTd.click(function(){
+            var hldr = $(this).closest('.newItemTd').parent();
+            var hldrNewTd = hldr.find('.newItemTd');            
+            hldrNewTd.find('select').val('').trigger('change');
+            hldrNewTd.find('input').val('');
+            hldrNewTd.hide();
+            hldrInsumo = hldr.find('.insumoTd');
+            hldrInsumo.show();
+        });*/
+        newItemTd.find('[id$="_tipo"]').select2({
+            ajax: {
+              url: "{{path('get-autocomplete-tipo')}}?clase="+newItemTd.data('tipo'),
+              dataType: 'json',
+              delay: 250,
+              processResults: function (data) {
+                return {
+                  results: data
+                };
+              },
+              minimumInputLength: 3
+            }
+          });
+        newItemTd.find('[id$="_itemMarca"]').change();  
+    });
+    
+    
+    $('.select2-container').css('width','100%');
+    //actualizaTotales();    
+});
+function addNewItemCompra(tipo) {
+    var prototype = $dataHolder.data('prototype');
+    var index = $dataHolder.data('index');    
+    var newForm = prototype.replace(/items/g, index);
+    $dataHolder.append(newForm);
+    var insumoTd = $dataHolder.find('.insumoTd').last();
+    var newItemTd = $dataHolder.find('.newItemTd').last();
+    newItemTd.data('tipo',tipo);
+    if(tipo=='I'){
+        newItemTd.find('[id$="_nombre"]').attr('placeholder','Código de Barra');
+        newItemTd.hide();
+        selInsumo = insumoTd.find('select');
+        selInsumo.html('');
+        selInsumo.select2({
+            ajax: {
+              url: "{{path('get-compra-insumos')}}",
+              dataType: 'json',
+              delay: 250,
+              processResults: function (data) {
+                return {
+                  results: data
+                };
+              },
+              placeholder: 'Buscando el término',
+              minimumInputLength: 3
+            }
+          });       
+    }else{    
+        insumoTd.hide();        
+        newItemTd.find('.backInsumoTd').hide();
+        newItemTd.find('[id$="_nombre"]').attr('placeholder','Descripción');
+    }    
+    $dataHolder.data('index', index + 1);
+    addItemFormCompraDeleteLink($dataHolder.find('.delTd').last());
+    $dataHolder.find('.ordTd').last().html($dataHolder.data('index'));
+    $('.cantTd input').change(function(){ 
+        if(isNaN( parseInt($(this).val()) )) $(this).val(0); 
+        //actualizaTotales(); 
+    });     
+    $('.precioTd input').change(function(){ 
+        if(isNaN( parseFloat($(this).val()) )) $(this).val(0);  
+        actualizaTotales(); 
+    });     
+    
+    newItemTd.find('[id$="_tipo"]').select2({
+        ajax: {
+          url: "{{path('get-autocomplete-tipo')}}?clase="+tipo,
+          dataType: 'json',
+          delay: 250,
+          processResults: function (data) {
+            return {
+              results: data
+            };
+          },
+          minimumInputLength: 3
+        }
+      });    
+    
+    var selectModelos = newItemTd.find('[id$="_itemModelo"]');
+    selectModelos.html('');
+    selectModelos.select2();
+    newItemTd.find('[id$="_itemMarca"]').select2();           
+    $('.select2-container').css('width','100%');
+}
+function addItemFormCompraDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            var index = $dataHolder.data('index');
+            $dataHolder.data('index', index - 1);
+            $dataHolder.find('.ordTd').each(function(i) {
+               jQuery(this).html(i + 1);
+            });
+            actualizaTotales();
+        }
+    });
+}
+function actualizaTotales(){
+        var cantTot=0;
+        var precTot=0;
+        $("tr.item").each(function(){
+            var item = $(this);
+            var cant =  checknumero( item.find('.cantTd input'), 'I' ) ;
+            var prec =  checknumero( item.find('.precioTd input') ) ;
+            sbtotItm = prec * cant;
+            // incrementar totales
+            cantTot += cant;
+            precTot += sbtotItm;
+        });
+        $('#appbundle_compra_total').val(precTot.toFixed(2));
+    }
+   
+</script>    
+{% endblock %}

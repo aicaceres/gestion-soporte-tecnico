@@ -1,0 +1,146 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#dd4b39" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 margin='30px 0' text-align="center"> Orden de Compra N° {{ compra.nroOc }}</h2>              
+        
+        <table font-size="10px">
+            <tr>
+                <td height="10px" width="4 cm" vertical-align="middle" margin-bottom="10px" border.type="none">
+                    Fecha Compra: <strong>{{compra.fechaCompra|date('d-m-Y')}}</strong>
+                </td>
+                <td height="10px" width="3 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                    Razón Social: <strong>{{compra.razonSocial}}</strong>
+                </td>
+                <td height="10px" width="3 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                    N° OC: <strong>{{compra.ordenCompra}}</strong>
+                </td>
+                <td height="10px" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                    Area Req.: <strong>{{compra.solicitante}}</strong>
+                </td>
+            </tr>
+        </table>   
+        <table font-size="10px">
+            <tr>
+                <td height="10px" vertical-align="middle" margin-bottom="10px" border.type="none">
+                    Proveedor: <strong>{{compra.proveedor}}</strong>
+                </td>
+                <td height="10px" width="4 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                    N° Factura: <strong>{{compra.nroFactura}}</strong>
+                </td>
+                {% if compra.fechaEnvioProveedor %}
+                <td height="10px" width="3 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                    Pedido el: <strong>{{compra.fechaEnvioProveedor|date('d-m-Y')}}</strong>
+                </td>
+                {% endif %}
+                <td height="10px" width="4 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                    Estado: <strong font-size="9px">{{compra.estado}}</strong>
+                </td>
+            </tr>            
+        </table>   
+        <table font-size="10px">
+            <tr>
+                <td height="10px" vertical-align="middle" margin-bottom="10px" border.type="none">
+                    Observaciones: <strong>{{compra.descripcion}}</strong>
+                </td>                
+            </tr>            
+        </table>   
+        <h3>Detalle de la compra</h3>    
+        <table font-size="9px">
+                <tr>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm">#</td>
+                    <td colspan="2" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="8px">Detalle</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Cantidad</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Precio Unit.</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Total</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Recibido</td>
+                </tr>
+                {% for item in compra.detalles %}                        
+                    <tr>
+                        <td font-size='8px' height="20px" vertical-align="middle" text-align="right" padding-right="2px">{{ loop.index }}</td>
+                        <td height="20px" vertical-align="middle" width="14px" border.type="top+bottom">
+                            {% if item.claseDetalle=='I' %} <img ignore-error="true" src="{{insumoIco}}" width="14px" height="14px"/>
+                            {% else %} <img ignore-error="true" src="{{equipoIco}}" width="14px" height="14px"/> {% endif %}
+                        </td>
+                        <td height="20px" vertical-align="middle" padding-left="2px" border.type="top+bottom">{{ item.descripcion|e }}</td>
+                        <td height="20px" vertical-align="middle" padding-right="8px" text-align="right">{{ item.cantidad|number_format(0,'.',',') }}</td>    
+                        <td height="20px" vertical-align="middle" padding-right="8px" text-align="right"><span font-size='7px'>{{ item.moneda }}</span> {{ item.precio|number_format(2,'.',',') }}</td> 
+                        <td height="20px" vertical-align="middle" padding-right="8px" text-align="right"><span font-size='7px'>{{ item.moneda }}</span> {{ (item.cantidad*item.precio)|number_format(2,'.',',') }}</td> 
+                        <td height="20px" vertical-align="middle" padding-right="8px" text-align="right">{{ item.recibido|number_format(0,'.',',') }} </td> 
+                    </tr>
+                {% endfor %}
+               <!-- <tr>
+                    <td colspan="4" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="8px" font-style="bold" >TOTAL</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="8px" text-align="right" font-style="bold">{{ compra.total|number_format(2,'.',',') }}</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle"></td>
+                </tr> -->               
+        </table>
+        
+        {% if compra.recepciones|length>0 %}
+            {% for entrega in compra.recepciones %}    
+                <h3>Entrega N° {{loop.index}}</h3>
+                <table font-size="10px">
+                    <tr>
+                        <td height="10px" width="3 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                            Fecha Recepción: <strong>{{entrega.fechaRecepcion|date('d-m-Y')}}</strong>
+                        </td>
+                        <td height="10px" width="4 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                            N° Remito: <strong>{{entrega.nroRemito}}</strong>
+                        </td>                        
+                        <td height="10px" width="4 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                            N° Factura: <strong>{{entrega.nroFactura}}</strong>
+                        </td>                        
+                    </tr>
+                    {% if entrega.observaciones %}
+                    <tr>
+                        <td colspan="3" height="10px" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                            Observaciones: <strong>{{entrega.observaciones}}</strong>
+                        </td>
+                    </tr> 
+                    {% endif %}
+                </table>
+                <table font-size="9px">
+                    <tr>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm">#</td>
+                        <td colspan="2" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="8px">Detalle</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Precio Unit.</td>
+                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Recibido</td>
+                    </tr>
+                    {% for item in entrega.detalles %}      
+                        <tr>
+                            <td font-size='8px' height="20px" vertical-align="middle" text-align="right" padding-right="2px">{{ loop.index }}</td>
+                            <td height="20px" vertical-align="middle" width="14px" border.type="top+bottom">
+                                {% if item.compraDetalle.claseDetalle=='I' %} <img ignore-error="true" src="{{insumoIco}}" width="14px" height="14px"/>
+                                {% else %} <img ignore-error="true" src="{{equipoIco}}" width="14px" height="14px"/> {% endif %}
+                            </td>
+                            <td height="20px" vertical-align="middle" padding-left="2px" border.type="top+bottom">{{ item.descripcion|e }}</td>
+                            <td height="20px" vertical-align="middle" padding-right="8px" text-align="right"><span font-size='7px'>{{ item.moneda }}</span> {{ item.precio|number_format(2,'.',',') }}</td>    
+                            <td height="20px" vertical-align="middle" padding-right="8px" text-align="right">{{ (item.cantidad)|number_format(0,'.',',') }}</td>
+                        </tr>
+                    {% endfor %}                
+                </table>
+            {% endfor %}
+        {% endif %}           
+                    
+                    
+    </dynamic-page>
+</pdf>

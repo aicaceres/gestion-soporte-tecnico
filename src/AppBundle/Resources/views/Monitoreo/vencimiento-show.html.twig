@@ -1,0 +1,40 @@
+<fieldset style="padding-bottom:10px;">
+    <div class="col-md-3">
+        <span><strong>Tipo:</strong>&nbsp;{{entity.tipo}}</span>                        
+    </div>        
+    <div class="col-md-6">
+        <span><strong>Proveedor:</strong>&nbsp;{{entity.proveedor}}</span>                        
+    </div>
+    <div class="col-md-3">
+        <span><strong>Orden Compra:</strong>&nbsp;{{ entity.ordenCompra }}</span>
+    </div>  
+     
+</fieldset> 
+<fieldset style="padding-bottom:10px;">
+    <div class="col-md-8">
+        <span><strong>Detalle:</strong>&nbsp;{{entity.detalle}}</span>                        
+    </div>       
+    <div class="col-md-4">
+        <span><strong>Abono:</strong>&nbsp;{{ entity.moneda }}&nbsp;{{entity.abono}}</span>
+    </div>
+</fieldset> 
+<fieldset style="padding-bottom:10px;">    
+    <div class="col-md-3">
+        <span><strong>Fecha Inicio:</strong>&nbsp;{{entity.fechaInicio|date('d-m-Y')}}</span>                        
+    </div>
+    <div class="col-md-3">
+        <span><strong>Fecha Fin:</strong>&nbsp;{{entity.fechaFin|date('d-m-Y')}}</span>                        
+    </div>  
+    <div class="col-md-4">
+        <span><strong>Período:</strong>&nbsp;{{ entity.periodo }}</span>
+    </div> 
+    <div class="col-md-2">
+        <span class="label label-{{entity.estado}}" style="font-size:90%;letter-spacing: 1px;">{{ entity.estadoTxt|upper }}</span>
+    </div> 
+</fieldset> 
+<fieldset style="padding-bottom:10px;"> 
+    <div class="col-md-12">        
+        <span><strong>Observaciones:</strong>&nbsp;{{ entity.observaciones }}</span>
+    </div>
+</fieldset>                                  
+{% include "admin-form-data.html.twig" with {'table':entity} %}  

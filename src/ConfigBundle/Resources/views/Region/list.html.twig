@@ -1,0 +1,52 @@
+<table id="tablelist" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th class="no-sort hidden-xs">Abreviatura</th>
+                {% if table != 'Pais'%}
+                    {% if table != 'Provincia'%}
+                        <th class="no-sort hidden-xs">Código Postal</th>
+                        <th class="hidden-xs">Provincia</th>
+                    {% endif %}
+                    <th class="hidden-xs">Pais</th>
+                {% endif %}
+            <th class="no-sort thactions">
+                {% if app.user.access('configuracion_region') %}
+                &nbsp;<a href="javascript:void(0);" data-url="{{ path('configuracion_region_new', { 'table': table }) }}" data-toggle="tooltip" title="Agregar Nuevo" class="new"><i class="fa fa-plus-square"></i></a>
+                {% endif %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+               {% for entity in entities %}
+        <tr>
+            <td>{{ entity.id }}</td>
+            <td>{{ entity.name }}</td>
+            <td class="hidden-xs">{{ entity.shortname }}</td>
+               {% if table != 'Pais'%}
+                {% if table != 'Provincia'%}
+            <td class="hidden-xs">{{ entity.codpostal }}</td>
+            <td class="hidden-xs">{{ entity.provincia }}</td>
+            <td class="hidden-xs">{{ entity.provincia.pais }}</td>
+                {% else %}
+            <td class="hidden-xs">{{ entity.pais }}</td>
+                {% endif %}
+               {% endif %}
+            <td class="link-actions">
+                {% if app.user.access('configuracion_region') %}
+                <a href="javascript:void(0);" data-url="{{ path('configuracion_region_edit', { 'table': table, 'id': entity.id }) }}" class="edit" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
+                {% endif %}
+                {% if app.user.access('configuracion_region') %}
+                <form action="{{ path('configuracion_region_delete', { 'table': table, 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                    <input type="hidden" name="_method" value="DELETE" />
+                    {{ form_widget(deleteForms[entity.id]) }}
+                    <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click(); "><i class="fa fa-trash-o"></i></a>&nbsp;
+                    <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                </form>    
+                {% endif %}
+            </td>
+        </tr>
+               {% endfor %}
+    </tbody>
+</table>

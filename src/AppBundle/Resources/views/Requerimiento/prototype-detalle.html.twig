@@ -1,0 +1,32 @@
+<tr class="item" divdata="item_items">   
+    {% if item.vars.data.id is defined %}
+    <td class="ordTd"></td>
+    <td class="bcTd">{{ item.vars.data.equipo.barcode }}
+        <div style="display:none;">
+            {{ form_widget(item.barcode) }}
+            {{ form_widget(item.equipo) }}
+            {{ form_widget(item.equipoId) }}
+        </div>
+    </td>
+    <td class="eqTd">
+        {{ item.vars.data.equipo.textoOT }}
+    </td>    
+    {% else %}
+    <td class="ordTd"></td>
+    <td class="bcTd">{{ form_widget(item.barcode, { 'attr': {'class' : 'form-control' } }) }}</td>
+    <td class="eqTd">
+        <div class="input-group">
+            {{ form_widget(item.equipo, { 'attr': {'class' : 'form-control select2' } }) }}
+                <span class="input-group-btn" style="padding-left: 5px;">
+                    <button data-toggle="tooltip" title="Buscar equipo" type="button" data-url="{{path('render_search_equipo')}}" id=""
+                        class="btn btn-default btn-flat btn-xs searchEquipo " data-function="agregarEquipos" data-param="id"><i class="fa fa-search"></i></button>
+                </span>
+        </div>
+        {{ form_errors(item.equipo) }}  
+        {{ form_widget(item.equipoId) }}
+    </td>            
+    {% endif %}
+    <td>{{ form_widget(item.descripcion, { 'attr': {'class' : 'form-control' } }) }}
+    </td>    
+    <td class="link-actions"></td>
+</tr>

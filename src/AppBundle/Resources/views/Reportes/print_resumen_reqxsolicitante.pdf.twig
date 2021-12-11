@@ -1,0 +1,101 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#f39c12" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+                <h2 text-align="center">Reporte de Requerimientos por Sector</h2>
+                <h3 margin-bottom="5px" vertical-align="middle">Criterios de Filtro:</h3>
+                <table>
+                    <tr> 
+                        <td border.type="none" vertical-align="middle" font-style="bold">Ubicaciones</td>
+                        <td border.type="none" vertical-align="middle" font-style="bold">Edificios</td>
+                        <td border.type="none" vertical-align="middle" font-style="bold">Departamentos</td>
+                    </tr>
+                    <tr> 
+                        <td border.type="none" vertical-align="middle">{{ filtro.ubicaciones|trim }}</td>
+                        <td border.type="none" vertical-align="middle">{{ filtro.edificios|trim }}</td>
+                        <td border.type="none" vertical-align="middle">{{ filtro.departamentos|trim }}</td>
+                    </tr>
+                </table>                                
+                <div margin-bottom="5px" margin-top="5px" vertical-align="middle"><span font-style="bold">Tipos de Incidencias:</span> {{ filtro.tiposSoporte|trim }} </div>
+                <div margin-bottom="5px" vertical-align="middle"><span font-style="bold">Período: </span>{{ filtro.desde|date('d/m/Y') }} - {{ filtro.hasta|date('d/m/Y') }}</div>
+                
+                <div height="10px"></div>
+                <table>
+                    <tr breakable="true">
+                        <td border.type="none" width="50%">
+                            <table font-size="8">
+                                <tr>
+                                    <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center" width="4 cm"><strong>Área</strong></td>
+                                    <td font-size="6" border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"><strong>Finalizado</strong></td>
+                                    <td font-size="6" border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"><strong>Asignado</strong></td>
+                                    <td font-size="6" border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"><strong>S/Asignar</strong></td>
+                                    <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"><strong>Total</strong></td>
+                                </tr>  
+                                {% set totitem=0 %}                    
+                                {% for item in datos.table  %}                         
+                                    {% set totitem = item.finalizado + item.asignado + item.sinasignar %}
+                                    {% if item.tipo=='S' %}
+                                    <tr>                          
+                                        <td font-style="bold" background.color="antiquewhite" height="20px" vertical-align="middle" padding-left="5px" > {{ item.nombre }} </td>
+                                        <td font-style="bold" background.color="antiquewhite" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.finalizado }}</td>
+                                        <td font-style="bold" background.color="antiquewhite" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.asignado }}</td>
+                                        <td font-style="bold" background.color="antiquewhite" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.sinasignar }}</td>
+                                        <td font-style="bold" background.color="antiquewhite" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ totitem }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if item.tipo=='M' %}
+                                    <tr font-size="7">                          
+                                        <td font-style="bold" background.color="aliceblue" height="15px" vertical-align="middle" padding-left="8px" > {{ item.nombre }} </td>
+                                        <td font-style="bold" background.color="aliceblue" height="15px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.finalizado }}</td>
+                                        <td font-style="bold" background.color="aliceblue" height="15px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.asignado }}</td>
+                                        <td font-style="bold" background.color="aliceblue" height="15px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.sinasignar }}</td>
+                                        <td font-style="bold" background.color="aliceblue" height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ totitem }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if item.tipo=='I' %}
+                                    <tr font-size="6">                          
+                                        <td height="15px" vertical-align="middle" padding-left="10px" > {{ item.nombre }} </td>
+                                        <td height="15px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.finalizado }}</td>
+                                        <td height="15px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.asignado }}</td>
+                                        <td height="15px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.sinasignar }}</td>
+                                        <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ totitem }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if item.tipo=='T' %}
+                                    <tr>                          
+                                        <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" padding-left="5px"> {{ item.nombre }} </td>
+                                        <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.finalizado }}</td>
+                                        <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.asignado }}</td>
+                                        <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ item.sinasignar }}</td>
+                                        <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ totitem }}</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </table>
+                        </td>
+                        <td border.type="none" width="50%"><img ignore-error="true" src="{{grafico}}" width="100%"  margin-bottom="10px"/></td>
+
+                    </tr>
+                </table>
+        
+    </dynamic-page>
+</pdf>

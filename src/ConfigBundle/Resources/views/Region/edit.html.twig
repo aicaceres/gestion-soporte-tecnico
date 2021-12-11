@@ -1,0 +1,65 @@
+{% if entity.id  %}
+    {% set urldir=path('configuracion_region_update', { 'table': table, 'id': entity.id }) %}
+    {% if table == 'Localidad'%} {% set pais = entity.provincia.pais.id %} {%endif%}
+{% else %}
+    {% set urldir=path('configuracion_region_create',{ 'table': table }) %}
+    {% set pais='' %}
+{%endif%}
+
+<form action="{{urldir }}" name="configbundle_region" method="post">
+    {% if entity.id  %}
+        <input name="_method" value="PUT" type="hidden">
+    {%endif%}
+    <div class='box-body pad'>
+        {% include "form-notification.html.twig" %}
+        <div class="row">
+            {% if table != 'Pais'%}
+                <div class="col-md-6">
+                    <fieldset> 
+                    {{ form_row(form.pais, { 'attr': {'urlProvincia' : path('select_provincias'),'class' : 'pais_selector' } }) }}
+                    </fieldset>
+                </div> 
+                {% if table != 'Provincia'%}
+                    <div class="col-md-6">
+                        <fieldset> 
+                         {{ form_row(form.provincia, { 'attr': {'urlLocalidad' : path('select_localidades'),'class' : 'provincia_selector', 'required':'required' } }) }}
+                        </fieldset>
+                    </div> 
+                {% endif %}    
+            {% endif %}                  
+            <div class="col-md-6">
+                <fieldset>
+                    {{ form_row(form.name) }}
+                </fieldset>
+            </div>    
+            <div class="col-md-3">
+                <fieldset> 
+                    {{ form_row(form.shortname) }}
+                </fieldset>
+            </div>      
+            {% if table == 'Localidad'%}    
+            <div class="col-md-3">
+                <fieldset> 
+                   {{ form_row(form.codpostal) }}
+                </fieldset>
+            </div>   
+            {% endif %}    
+        </div>
+        {% include "admin-form-data.html.twig" with {'table':entity} %}   
+    </div>
+    <div class="box-footer">
+        <div class="btn-group pull-right">
+            <button id="save" type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>                        
+            <a type="button" href="{{ path('configuracion_region',{'table':table}) }}" class="btn btn-app"><i class="fa fa-reply"></i> Cancelar</a>     
+        </div>
+    </div>
+    {{ form_rest(form) }}
+</form>   
+{% if table == 'Localidad'%}
+<script type="text/javascript">
+$(document).ready(function() {
+    $(".pais_selector").val({{ entity.provincia.pais.id }});       
+    $(".pais_selector").change();    
+});
+</script>
+{% endif %}

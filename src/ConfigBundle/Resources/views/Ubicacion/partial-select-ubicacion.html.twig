@@ -1,0 +1,26 @@
+<div id="ubicacion-nueva">      
+    <div class="col-md-12">
+    <fieldset>
+        <div class="col-md-4">
+            {{ form_row(ubicform.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'), 'class' : 'ubicacion_selector' } }) }}   
+        </div>
+        <div class="col-md-8">
+            {{ form_row(ubicform.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+        </div>
+    </fieldset>      
+    <fieldset>
+        <div class="col-md-10">
+            {{ form_row(ubicform.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+        </div>
+        <div class="col-md-2">
+            {{ form_row(ubicform.piso, { 'attr': {'class' : 'piso_selector' } }) }}   
+        </div>
+    </fieldset>      
+    </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {      
+   $('#ubicacion-nueva').find('.ubicacion_selector').val(0).trigger('change');    
+}); 
+</script>
+         

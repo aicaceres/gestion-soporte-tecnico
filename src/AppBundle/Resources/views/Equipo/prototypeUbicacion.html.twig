@@ -1,0 +1,32 @@
+<fieldset>
+    <div class="col-md-2">
+        {{ form_row(item.fechaEntrega) }}   
+    </div>
+    <div class="col-md-3">
+        {{ form_row(item.conceptoEntrega) }}   
+    </div>
+    <div class="col-md-7">
+        {{ form_row(item.observaciones) }}   
+    </div>
+</fieldset>
+<fieldset>
+    <div class="col-md-2">
+        {{ form_row(item.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'),'class' : 'ubicacion_selector' } }) }}   
+    </div>
+    <div class="col-md-4">
+        {{ form_row(item.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+    </div>
+    <div class="col-md-4">
+        {{ form_row(item.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+    </div>
+    <div class="col-md-2">
+        {{ form_row(item.piso, { 'attr': {'class' : 'piso_selector' } }) }}   
+    </div>
+</fieldset> 
+<div class="col-md-12 datos-departamento">
+</div>    
+<div>                        
+{{ form_row(item.actual) }}
+    <button type="button" class="center-block btn {{btn_color}}" id="cancel-reubicacion" >Cancelar Reubicación</button>
+
+</div>    

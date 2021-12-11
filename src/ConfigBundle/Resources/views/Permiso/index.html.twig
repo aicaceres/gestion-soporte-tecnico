@@ -1,0 +1,56 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'>PERMISOS</h3>
+            </div><!-- /.box-header -->
+            <div class='box-body'>
+                <div class="clearfix">
+                    <a class="btn btn-flat pull-right {{btn_color}}" href="{{ path('permiso_new') }}" title="Agregar Nuevo"><i class="fa fa-user"></i> &nbsp;Agregar</a>
+                </div>
+                <div class="box-body table-responsive" style="padding: 15px" >
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Orden</th>
+                                <th>Nombre de Ruta</th>
+                                <th>Descripción</th>
+                                <th>Padre</th>
+                                <th class="no-sort">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+               {% for entity in entities %}
+                            <tr>
+                                <td>{{ entity.orden }}</td>
+                                <td>{{ entity.route }}</td>
+                                <td>{{ entity.text }}</td>
+                                <td>{{ entity.padre }}</td>
+                                <td class="link-actions">
+                                    <a href="{{ path('permiso_edit', { 'id': entity.id }) }}" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;                                  
+                                </td>
+                            </tr>
+               {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}    
+{{ parent() }}
+<script type="text/javascript">
+$(document).ready(function() {
+       var oTable = $('#tablelist').dataTable();
+    oTable.fnSort( [ [0,'asc'] ] );
+});
+</script>    
+{% endblock %}

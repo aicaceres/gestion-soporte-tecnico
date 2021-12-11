@@ -1,0 +1,280 @@
+{% extends "dataTableList.html.twig" %}
+{% block avanzu_admin_menumode %}sidebar-collapse sidebar-open {% endblock %}
+{% block page_content %}
+{% include "notification.html.twig" %}    
+<style>
+    table.equipolist tbody td:not(.tdnormal){
+        font-size: 12px;
+    }
+</style>
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; Equipos</h3>
+                    <div class="pull-right box-tools">
+                        {% if app.user.rol.admin and entities|length>0 %}
+                        <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                                data-id="" data-url="{{path('get_equipo_logs')}}"  >      <i class="fa fa-history"></i></button>  
+                        {% endif %}
+                        <form id="printform" name="printform" target="_blank" style="display:inline-block;" 
+                              action="{{path('print_listado_equipos')}}" method="post">
+                            <input type="hidden" id="criteria" name="criteria"/>
+                            <input type="hidden" id="searchterm" name="searchterm"/>
+                            <input type="hidden" id="datalist" name="datalist"/>
+                            <input type="hidden" id="option" name="option"/>
+                            <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir"> <i class="fa fa-print"></i></button> 
+                            <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i></button> 
+                        </form> 
+                         
+                    </div>                
+            </div><!-- /.box-header -->
+            <div class='box-body'>
+                <form id="searchform" action="{{ path('equipo') }}" method="get">
+                        <div class="col-md-12">
+                            <fieldset>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Tipo:</label>
+                                        <select class="select2 form-control" name="idTipo" id="selectTipo" >
+                                            <option value="0">Todos</option>
+                                            {%for tipo in tipos %}
+                                                <option {%if tipo.id==idTipo%} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Marca:</label>
+                                        <select class="select2 form-control" name="idMarca" id="selectMarca" >
+                                            <option value="0">Todas</option>
+                                            {%for marca in marcas %}
+                                            <option {%if marca.id==idMarca%} selected="selected" {%endif%} value="{{marca.id}}">{{marca.nombre}}</option>
+                                            {% endfor %}  
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Modelo:</label>
+                                        <select class="select2 form-control" name="idModelo" id="selectModelo">
+                                            <option value="0">Todos</option>
+                                            {%for modelo in modelos %}
+                                            <option {%if modelo.id==idModelo%} selected="selected" {%endif%} value="{{modelo.id}}">{{modelo.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Estado:</label>
+                                        <select class="select2 form-control" name="idEstado" id="selectEstado">
+                                            <option value="T" {%if idEstado=='T' %} selected="selected" {%endif%}>Todos</option>
+                                            {%for estado in estados %}
+                                            <option {%if estado.id==idEstado%} selected="selected" {%endif%} value="{{estado.id}}">{{estado.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>    
+                        <div class="col-md-12">
+                            <fieldset>
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label class="required">Ubic:</label>
+                                        <select class="select2 form-control" name="idUbicacion">
+                                            <option value="0">Todos</option>
+                                            {%for ubic in ubicaciones %}
+                                                <option {%if ubic.id==idUbicacion%} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Edificio:</label>
+                                        <select class="select2 form-control" name="idEdificio" >
+                                            <option value="0">Todos</option>
+                                            {%for ed in edificios %}
+                                            <option {%if ed.id==idEdificio%} selected="selected" {%endif%} value="{{ed.id}}">{{ed.nombre}}</option>
+                                            {% endfor %}  
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Depto:</label>
+                                        <select class="select2 form-control" name="idDepartamento">
+                                            <option value="0">Todos</option>
+                                            {%for dep in departamentos %}
+                                            <option {%if dep.id==idDepartamento%} selected="selected" {%endif%} value="{{dep.id}}">{{dep.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label class="required">Verificado:</label>
+                                        <select class="select2 form-control" name="verificado" id="verificado">
+                                            <option value="T" {%if verificado=='T'%} selected="selected" {%endif%} >Todos</option>
+                                            <option value="1" {%if verificado=='1'%} selected="selected" {%endif%} >Sí</option>
+                                            <option value="0" {%if verificado=='0'%} selected="selected" {%endif%} >No</option>                                            
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" id="aplicarfiltros" class="btn btn-default btn-sm" data-toggle="tooltip" title="Aplicar Filtros"><i class="glyphicon glyphicon-filter"></i> Aplicar</button>
+                                    <button type="button" id="limpiarfiltros" class="btn btn-default btn-sm" data-toggle="tooltip" title="Limpiar Filtros"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                                </div>    
+                            </fieldset>
+                        </div>    
+                    <div style="display: none; margin-right: 30px;">     
+                        &nbsp;&nbsp;&nbsp;
+                        <a href="javascript:void(0)" class="btn btn-sm btn-flat btn-default" onClick="jQuery('#searchform').submit();" title="Buscar"><i class="fa fa-search"></i> </a>
+                    </div>        
+                </form>
+                <div class="box-body table-responsive" style="padding: 15px" >
+                    <table id="tablelist" class="table table-bordered table-hover equipolist">
+                        <tfoot>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>N° Serie</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th>Ubicación</th>
+                                <th>Ubicación</th>
+                            </tr>
+                        </tfoot>
+                        <thead>
+                            <tr>                                
+                                <th>Tipo</th>
+                                <th class="hidden-xs">Marca</th>
+                                <th class="hidden-xs">Modelo</th>
+                                <th>N° Serie</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th class="no-sort" style="width:5px; padding:10px; text-align:center;"><i class="fa fa-check-square-o"></i></th>
+
+                                <th class="no-sort thactions" style="width:20px;">
+                                    {% if app.user.access('equipo_new') %}
+                                        &nbsp;<a href="{{ path('equipo_new') }}" data-toggle="tooltip" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                                        {% endif %}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">         
+$(document).ready(function() {           
+   /* $('.select2').change(function(){
+        if( $(this).attr('id')=='selectTipo' ){
+            $('#selectMarca').val('');
+        }
+        $('#searchform').submit();
+    });*/
+    //$('#verificado').parent().find('.select2-container').css('width','90px');
+    var table = $('#tablelist').DataTable({
+        "columnDefs": [
+        
+            // These are the column name variables that will be sent to the server
+            { "name": "tipo",   "targets": 0 },
+            { "name": "marca",   "targets": 1 },
+            { "name": "modelo",  "targets": 2 },
+            { "name": "nroSerie",  "targets": 3 },
+            { "name": "estado",  "targets": 4 },
+            { "name": "estado",  "targets": 5 },
+            { "name": "estado",  "targets": 6 },
+            { "name": "estado",  "targets": 7 },
+        
+        ],
+        // Server-side parameters
+        "processing": true,
+        "serverSide": true,
+        // Ajax call
+        "ajax": {
+            "url": "{{ path('equipo_list') }}",
+            "type": "POST"
+        },
+        // Classic DataTables parameters
+        "paging" : true,
+        "info" : true, 
+        "searching": true,
+        "pageLength": 10,
+        "order": [[2, 'asc']]
+    });
+    $('#limpiarfiltros').on('click',function(){
+        $('.select2').each(function(){
+            $(this).find('option:eq(0)').prop('selected',true);
+        }); 
+        //$('.select2').trigger('change');
+        $('#searchform').submit();
+    });
+    $('body').on('click','.plus',function(){              
+        if( $(this).hasClass('closed') ){
+            cleanEqData();
+            var eqdata = $('<tr class="eqdata"><td colspan="9"> Cargando datos...</td></tr>'); 
+            eqdata.insertAfter($(this).closest('tr')); 
+            $(this).parent().addClass('eqtr');
+            $.post('getDataEquipo',{id:$(this).data('id')}, function(data){
+                eqdata.find('td').html(data);                
+            });
+            $( this ).removeClass( 'closed' );   
+            $(this).find('i').toggleClass('fa-plus fa-minus');
+        }else{
+            cleanEqData();
+        }
+    });
+   $('body').on('click','.equipolist tr th, .pagination, .closeqdata',function(){
+       if($(".plus:not(.closed)").length>0 )
+        cleanEqData();
+    });
+   // var oTable = $('#tablelist').dataTable();
+   /* $('#pdf,#xls').on('click',function(){    
+        return false;
+        alert($(this).attr('id'));
+        $('#criteria').val($('#searchform').serialize());        
+        $('#searchterm').val( $('#tablelist_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) { 
+           // console.log(value[0]);
+            //var i = value[0].indexOf('value="');
+            /*if( i >-1 ){
+                var id = value[0].substr(i+7);
+                value[1]=fecha;
+            }*/
+      /*      value[0]=''; 
+             var i = value[7].indexOf('fa-check-square-o');
+            if( i >-1 ){
+                value[7]='Si';
+            }else{
+                value[7]='No';                
+            }
+            value.splice(8);
+            datos[index] = value;
+        });                 
+        $('#datalist').val(JSON.stringify(datos)); 
+        $('#option').val( $(this).attr('id') );
+        $('#printform').submit();
+    });   */
+});
+function cleanEqData(){
+    $('.eqdata').remove(); 
+    $('.plus').addClass( 'closed' ); 
+    $('.plus').parent().removeClass('eqtr');
+    $('body').find('.plus i').removeClass('fa-minus').addClass('fa-plus');  
+}
+</script>    
+{% endblock %}

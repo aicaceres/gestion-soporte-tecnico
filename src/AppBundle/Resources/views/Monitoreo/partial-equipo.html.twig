@@ -1,0 +1,15 @@
+<tr class="nivel4 {{padre}}" data-nivel="4" data-id="{{ padre~'Q'~equipo.id }}">
+    <td></td>                                
+    <td class="bg-{{monitoreo.estado}}"><i class="fa fa-desktop"></i> &nbsp;{{ equipo.textoOT}}</td>                                    
+    <td class="bg-{{monitoreo.estado}}">
+        <div style="width: 120px;">
+            <span>{{ ip }} </span>            
+            <span data-ip="{{ ip }}" style='font-weight:400;cursor:pointer;' class="badge pull-right btn-{{monitoreo.estado}} testip" title="{{ monitoreo.text }}">
+                {% if monitoreo.tiempo %}  {{ monitoreo.tiempo }}
+                {% else %} <i class="fa fa-times"></i>   
+                {% endif %}    
+            </span> 
+        </div> 
+    </td>
+    <td></td>                                    
+</tr> 

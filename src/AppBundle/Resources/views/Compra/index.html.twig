@@ -1,0 +1,210 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Órdenes de Compra</h3>
+                <div class="pull-right box-tools">
+                {% if app.user.access('view_logs') and entities|length>0 and false%}                    
+                        <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                                data-id="" data-url="{{path('get_insumo_logs')}}"  >   <i class="fa fa-history"></i></button>                      
+                {% endif %}   
+                    <form id="printform" name="printform" target="_blank" style="display:inline-block;" 
+                          action="{{path('print_listado_compras')}}" method="post">                        
+                        <input type="hidden" id="searchterm" name="searchterm"/>
+                        <input type="hidden" id="datalist" name="datalist"/>
+                        <input type="hidden" id="option" name="option"/>
+                        <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i></button> 
+                        <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i></button> 
+                    </form> 
+                </div>        
+            </div><!-- /.box-header -->
+            <div class='box-body' >
+                <form id="searchform" action="{{ path('compra_admin') }}" method="get" >
+                    <div class="col-md-12">
+                        <fieldset>
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    <label class="required">Razón Social:</label>
+                                    <select class="select2 form-control" name="razonSocialId" id="selectRazonSocial" >
+                                        <option value="0">Todos</option>
+                                        {%for raz in razonSocial %}
+                                            <option {%if raz.id== app.session.get('filtro_compras')['razonSocialId'] %} selected="selected" {%endif%} value="{{raz.id}}">{{raz.abreviatura}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group ">
+                                    <label class="required">Area Req.:</label>
+                                    <select class="select2 form-control" name="solicitanteId" id="selectSolicitante" >
+                                        <option value="0">Todas</option>
+                                        {% for sol in solicitantes %}
+                                            <option {%if sol.id== app.session.get('filtro_compras')['solicitanteId'] %} selected="selected" {%endif%} value="{{sol.id}}">{{sol.nombre}}</option>
+                                        {% endfor %}  
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    {% set estado = app.session.get('filtro_compras')['estado'] %}
+                                    <label>Estado:</label>
+                                    <select id="selEstado" name="estado" class="form-control select2">
+                                        <option value="0">Todos</option>
+                                        <option value="NUEVO" {%if estado=='NUEVO' %} selected="selected" {%endif%}>Nuevo</option>
+                                        <option value="ENVIADO" {%if estado=='ENVIADO' %} selected="selected" {%endif%}>Enviado</option>
+                                        <option value="RECEPCION PARCIAL" {%if estado=='RECEPCION PARCIAL' %} selected="selected" {%endif%}>Recepción Parcial</option>
+                                        <option value="RECIBIDO" {%if estado=='RECIBIDO' %} selected="selected" {%endif%}>Recibido</option>
+                                        <option value="ANULADO" {%if estado=='ANULADO' %} selected="selected" {%endif%}>Anualdo</option>
+                                    </select>
+                                </div> 
+                            </div>     
+                            <div class="col-md-2"> 
+                                {% if app.user.access('compra_new') %}
+                                    <a href="{{ path('compra_admin_new') }}" data-toggle="tooltip" class="btn btn-primary" style="margin-top:2px;white-space:normal;" title="Agregar Nuevo">NUEVA ORDEN DE COMPRA</a>
+                                {% endif %}
+                            </div>         
+                       </fieldset>    
+                    </div> 
+                    <div class="col-md-12">                
+                        <fieldset>             
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label class="required">Proveedor:</label>
+                                    <select class="select2 form-control" name="proveedorId" id="selectProveedor">
+                                        <option value="0">Todos</option>
+                                        {%for prov in proveedores %}
+                                            <option {%if prov.id== app.session.get('filtro_compras')['proveedorId'] %} selected="selected" {%endif%} value="{{prov.id}}">{{prov.nombre}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="required">Período:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{app.session.get('filtro_compras')['desde']}}">
+                                </div>   
+                            </div>    
+                            <div class="col-md-2"> 
+                                <label>&nbsp;</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{app.session.get('filtro_compras')['hasta'] }}">                                            
+                                </div>                                           
+                            </div>  
+                            <div class="col-md-3"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label style="width:100%;">&nbsp;</label>
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                            </div>                                 
+
+                        </fieldset>
+                    </div> 
+                </form>                      
+
+                <div class="table-responsive" style="padding: 15px">
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Razón Social</th>
+                                <th>N° Orden Compra</th>
+                                <th>Proveedor</th>
+                                <th>N° Factura</th>
+                                <th>N° Remito</th>
+                                <th>Estado</th>
+                                <th class="no-sort thactions"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in entities %}
+                                <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }} ">
+                                    <td><span class="hidden">{{ entity.fechaCompra|date('Ymd') }}</span>{{ entity.fechaCompra|date('d-m-Y') }}</td>                                
+                                    <td>{{ entity.razonSocial}}</td>
+                                    <td>{{ entity.ordenCompra}}</td>
+                                    <td>{{ entity.proveedor }}</td>
+                                    <td>{{ entity.nroFactura }}</td>                                    
+                                    <td>{{ entity.nroRemitoTxt|raw}}</td>
+                                    <td>{{ entity.estado }}</td>                                    
+                                    <td class="link-actions"> 
+                                        <a href="{{ path('print_compra',{'id':entity.id})}}" target="_blank" data-toggle="tooltip" title="Imprimir"><i class="fa fa-print"></i></a>&nbsp;
+                                        <a href="{{ path('compra_admin_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver"><i class="fa fa-folder-open"></i></a>&nbsp;
+                                        
+                                        {% if app.user.access('compra_edit') and entity.estado in ['NUEVO','ENVIADO'] %}
+                                        <a href="{{ path('compra_admin_edit', { 'id': entity.id }) }}" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
+                                        {% endif %}
+                                        {% if app.user.access('compra_recepcion') and entity.estado in ['ENVIADO','RECEPCION PARCIAL'] and entity.deletedAt is null %}
+                                        <a href="{{ path('compra_admin_recepcion', { 'id': entity.id }) }}" data-toggle="tooltip" title="Recibir"><i class="fa fa-truck"></i></a>&nbsp;
+                                        {% endif %}
+                                        {% if app.user.access('compra_delete') and entity.estado in ['NUEVO','ENVIADO'] and entity.deletedAt is null %}
+                                        <form action="{{ path('compra_delete', { 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                                            <input type="hidden" name="_method" value="DELETE" />
+                                            {{ form_widget(deleteForms[entity.id]) }}
+                                            <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click(); "><i class="fa fa-trash-o"></i></a>
+                                            <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                                        </form> 
+                                    {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {    
+   /* $('#selectProveedor').change(function(){
+        $('#searchform').submit();
+    });*/
+    $('#limpiar-filtros').on('click',function(){
+        $('#searchform').find('.select2').val(0);
+        $('#searchform').find('.datepicker').val('');
+        $('#searchform').submit();
+    });            
+        
+    $('#selectRazonSocial').on('change',function(){
+       var data = { ubic_id: $(this).val()  };
+       selector = $('#selectSolicitante');
+        $.ajax({
+            type: 'post',
+            url:  "{{path('select_solicitantes')}}",
+            data: data,
+            success: function(data) {                
+                var id = selector.val();
+                selector.html('<option value="0">Todas</option>');
+                for (var i = 0, total = data.length; i < total; i++) {
+                    selector.append('<option value="' + data[i].id + '" >' + data[i].nombre + '</option>');
+                }
+                if(id) selector.val(id);
+            }
+        });
+   });
+    var oTable = $('#tablelist').dataTable();
+        oTable.fnSort( [ [0,'desc'] ] );
+        
+   $('#pdf,#xls,#csv').on('click',function(){   
+        $('#option').val( $(this).attr('id') );             
+        $('#searchterm').val( $('#tablelist_filter input').val() );
+        $('#printform').submit();
+    });       
+        
+});
+</script>    
+{% endblock %}

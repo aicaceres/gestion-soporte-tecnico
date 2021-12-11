@@ -1,0 +1,108 @@
+{% extends "dataTableList.html.twig" %}
+
+{% if entity.id  %}
+    {% set pagetitle= 'Editar datos'%}
+{% else %}
+    {% set pagetitle= 'Alta de Nuevo Vencimiento' %}
+{%endif%}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-bell"></i> &nbsp; {{pagetitle}}  </h3>                    
+                </div><!-- /.box-header -->
+                {{ form_start(form) }}
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}
+                    
+                    <div class="row">                      
+                        <div class="col-md-12">
+                            <div class="col-md-3 form-group">
+                                {{ form_label(form.tipo) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.tipo, { 'attr': {'class' : 'select2' } }) }}                                
+                                    {% if app.user.access('configuracion_parametro') %}
+                                        <span class="input-group-btn" style="padding-left: 5px;">
+                                            <button data-toggle="tooltip" title="Agregar Tipo Vencimiento" type="button" data-tabla="TipoVencimiento" data-url="{{path('render_add_parametro')}}"
+                                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {{ form_errors(form.tipo) }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form_row(form.proveedor) }}
+                            </div>
+                            <div class="col-md-2">
+                                {{ form_row(form.ordenCompra, { 'attr': {'autofocus':'autofocus' } }) }}
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    {{ form_row(form.abono, { 'attr': {'class' : 'number','min':'0'} }) }}                    
+                                    <span class="input-group-btn" style='width:60px;vertical-align:bottom'>                                   
+                                        {{ form_widget(form.moneda) }}   
+                                    </span>              
+                                </div>
+                            </div>
+                        </div>                           
+                        <div class="col-md-12">
+                            <div class="col-md-6">
+                                {{ form_row(form.detalle) }}
+                            </div> 
+                            <div class="col-md-2">
+                                {{ form_row(form.fechaInicio) }}
+                            </div>                                                                                                  
+                            <div class="col-md-2">
+                                {{ form_row(form.fechaFin) }}
+                            </div>                                                                                                  
+                            <div class="col-md-2">
+                                {{ form_row(form.periodo) }}
+                            </div>                                                                                                  
+                        </div>                           
+                        <div class="col-md-12">
+                            <div class="col-md-12">
+                                {{ form_row(form.observaciones, { 'attr': {'rows':'1' } }) }}
+                            </div>                                                                                                                              
+                        </div>                           
+                    </div>                    
+                    {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                    {% include "admin-form-deleted-data.html.twig" with {'table':entity} %}                    
+                </div>                                  
+                <div class="box-footer">
+                    {% if entity.id  %}
+                        <a type="button" class="btn btn-app delete" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Eliminar</a>
+                    {%endif%}
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        {% if not entity.id  %}
+                            <button type="submit" class="btn btn-app" id="savenew"><i class="fa fa-save"></i> Guardar y Nuevo</button>
+                        {%endif%}
+                        <a type="button" class="btn btn-app" href="{{ path('monitoreo_vencimiento')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>     
+                <div style="display:none">    
+                    {{ form_end(form) }}
+                </div>                
+                {% if entity.id  %}
+                    {{ form(delete_form) }}
+                {%endif%}
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {      
+   $('[type="submit"]').on('click',function(){
+    if( $(this).attr('id') == 'savenew')
+        $('#appbundle_vencimiento_savenew').val('S');
+    else
+        $('#appbundle_vencimiento_savenew').val('N');    
+   });   
+     
+});
+</script>    
+{% endblock %}

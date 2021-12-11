@@ -1,0 +1,39 @@
+{% extends "base.html.twig" %}
+{% block page_content %}
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{box_color}}'>
+            <div class='box-header'>
+                <h3 class='box-title'> Permisos  </h3>
+            </div><!-- /.box-header -->
+                {{ form_start(form) }}
+                <div class='box-body pad'>
+                    {% include "form-notification.html.twig" %}
+                    <div class="row pad">
+                        <div class="col-md-6">
+                            {{ form_row(form.padre) }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form_row(form.orden) }}
+                        </div>
+                    </div>
+                    <div class="row pad">
+                        <div class="col-md-6">
+                            {{ form_row(form.route, { 'attr': {'style':'text-transform:lowercase' } }) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form_row(form.text) }}
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        <a type="button" class="btn btn-app" href="{{ path('permiso')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>                            
+            {{ form_end(form) }}
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}

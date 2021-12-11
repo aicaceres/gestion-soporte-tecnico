@@ -1,0 +1,69 @@
+<?php
+namespace ConfigBundle\Entity;
+use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Symfony\Component\Validator\Constraints as Assert;
+/**
+ * ConfigBundle\Entity\TipoVencimiento
+ * @ORM\Table(name="tipo_vencimiento")
+ * @ORM\Entity()
+ */
+class TipoVencimiento
+{
+    /**
+     * @var integer $id
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    protected $id;
+    /**
+     * @var string $nombre
+     * @ORM\Column(name="nombre", type="string", nullable=false)
+     * @Assert\NotBlank()
+     */
+    protected $nombre;  
+    
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Vencimiento", mappedBy="tipo")
+    */
+    protected $vencimientos;    
+
+    public function __toString() {
+        return $this->nombre;
+    }    
+
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set nombre
+     *
+     * @param string $nombre
+     * @return TipoTarea
+     */
+    public function setNombre($nombre)
+    {
+        $this->nombre = $nombre;
+
+        return $this;
+    }
+
+    /**
+     * Get nombre
+     *
+     * @return string 
+     */
+    public function getNombre()
+    {
+        return $this->nombre;
+    }
+
+}

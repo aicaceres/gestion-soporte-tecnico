@@ -1,0 +1,57 @@
+{% extends 'AvanzuAdminThemeBundle:layout:login-layout.html.twig' %}
+{% block stylesheets %}
+    {{ parent() }}
+        <link rel="stylesheet" href="{{ asset('bundles/app/style.css') }}" />
+{% endblock %}
+{% block title %}{{ appname }} - Ingresar{% endblock %}
+{% block page_content %}
+<div class="login-box">
+  <div class="login-logo">
+      <img src="{{ asset('bundles/app/img/home_login_tsg.png') }}" class="" />
+    <a href="{{'homepage'}}">       
+       <h3 style="color:white">THINK SOLUTIONS GROUP S.R.L.</h3>
+       <h4 style="color:white">{{ appname }}</h4>
+        </a>
+  </div>
+  <!-- /.login-logo -->
+  <div class="login-box-body">
+    <p class="login-box-msg">Iniciar Sesión</p>
+{% include "notification.html.twig" %}
+    <form action="{{ path("usuario_login_check") }}" method="post">
+        {% if error %}
+            <div class="callout callout-danger">{{ error.message|trans }}</div>
+        {% endif %}
+      <div class="form-group has-feedback">
+          <input style="text-transform: uppercase" type="text" class="form-control" name="_username" value="{{ last_username|upper }}" placeholder="Usuario">
+        <span class="glyphicon glyphicon-user form-control-feedback"></span>
+      </div>
+      <div class="form-group has-feedback">
+        <input type="password" class="form-control" name="_password" placeholder="Contraseña">
+        <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+      </div>
+      <div class="row">
+        <div class="col-xs-8">
+          <div class="checkbox icheck">
+            <label>
+              <input type="checkbox" id="no_cerrar" name="_remember_me" />  No cerrar sesión
+            </label>
+          </div>
+        </div>
+        <!-- /.col -->
+        <div class="col-xs-4">
+          <button type="submit" class="btn btn-primary btn-block btn-flat">Ingresar</button>
+        </div>
+        <!-- /.col -->
+      </div>
+    </form>
+
+    <a href="#" class="hidden">Olvidé mi contraseña</a>
+
+  </div>
+  <!-- /.login-box-body -->
+</div>
+
+{% endblock %}
+
+
+

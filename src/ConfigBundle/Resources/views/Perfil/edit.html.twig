@@ -1,0 +1,125 @@
+{% extends "base.html.twig" %}
+
+{% block page_content %}
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{box_color}}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-lock"></i> &nbsp; {{ (entity.id) ? 'Datos del perfil ' : 'Alta de Nuevo Perfil' }}  </h3>
+            </div><!-- /.box-header -->
+            {{ form_start(form) }}            
+                <div class='box-body pad'>
+                    {% include "form-notification.html.twig" %}
+                    <div class="row pad">
+                        <div class="col-md-6">
+                            <fieldset>
+                                {% if entity.id %}
+                                    <div class="form-group ">
+                                       <label for="configbundle_perfil_nombre" class="required">Nombre: {{entity.nombre|upper}}</label>
+                                    </div>                                     
+                                {% else %}
+                                    {{ form_row(form.nombre, { 'attr': {'style':'text-transform:uppercase' } }) }}
+                                {% endif %}
+                                {{ form_row(form.tecnico) }}     
+                            </fieldset>
+                        </div>
+                        <div class="col-md-6">
+                            <fieldset>
+                                    {{ form_row(form.descripcion) }}
+                                    {{ form_row(form.activo) }}                                         
+                            </fieldset>
+                        </div>
+                    </div> 
+                    <div class="row pad">
+                        {% for modulo in modulos %}
+                        <div class="col-md-6">
+                            <div class="box {{box_color}} box{{modulo.id}}">
+                                <div class="box-header with-border">
+                                    <input type="checkbox" id="chkmodulo{{modulo.id}}" class="chkmodulo" data-moduloid="{{modulo.id}}" 
+                                           {% if entity.access(modulo.route) %} checked="checked" {% endif%}/>
+                                    &nbsp;&nbsp;
+                                    <h3 class="box-title" style="font-size:15px">{{modulo.text}}</h3>
+                                    <div class="box-tools pull-right">
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                        </button>
+                                    </div>
+                                    <!-- /.box-tools -->
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="box-body">
+                                    
+                                    <select class="select2" multiple="multiple" data-placeholder="Seleccionar los permisos" 
+                                            data-moduloid="{{modulo.id}}" {% if not entity.access(modulo.route) %} disabled {% endif %}
+                                            id="configbundle_perfil_permisos_{{modulo.id}}" name="permisos[]"  style="width: 100%;">
+                                        <option value="{{modulo.id}}" {% if entity.access(modulo.route) %}selected {% endif%}>Ver {{modulo.text}}</option>
+                                        {% for permiso in modulo.hijos %}
+                                            <option value="{{permiso.id}}" {% if entity.access(permiso.route) %}selected {% endif%}>{{permiso.text}}</option>
+                                        {% endfor %}
+                                    </select> 
+                                    
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                        </div>
+                        {% endfor %} 
+                    </div> 
+                    {% include "admin-form-data.html.twig" with {'table':entity} %}   
+                </div>
+                <div class="box-footer">
+                    {% if entity.id and not entity.fijo %}
+                        <a type="button" class="btn btn-app delete" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Eliminar</a>
+                    {%endif%}
+
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        <a type="button" class="btn btn-app" href="{{ path('seguridad_perfil')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>
+                {{ form_end(form) }}
+                {% if entity.id  %}
+                    {{ form(delete_form) }}
+                {%endif%}
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}    
+{{ parent() }}
+<!-- Select2 -->
+<script type="text/javascript">
+$(document).ready(function() {
+    $slct = $('.select2').select2();
+    $slct.on("select2:select", function (e) { 
+         var modId = $(this).data('moduloid');
+         if( e.params.data.id == modId){
+            $('#chkmodulo'+modId).iCheck('check');      
+         }               
+    });   
+    
+     $slct.on("select2:unselect", function (e) { 
+         var modId = $(this).data('moduloid');
+         if( e.params.data.id == modId){
+            $('#chkmodulo'+modId).iCheck('uncheck');      
+         }
+      });       
+    $('.chkmodulo').on('ifChecked', function(event){
+       var modId = $(this).data('moduloid');
+       var box = $('.box'+modId);
+       if( box.hasClass('collapsed-box') )
+           box.find('.box-header button').trigger('click');
+        $('#configbundle_perfil_permisos_'+modId).attr('disabled',false);
+        $('#configbundle_perfil_permisos_'+modId).val(modId).trigger("change");
+        $('#configbundle_perfil_permisos_'+modId).select2("open");
+      });
+    $('.chkmodulo').on('ifUnchecked', function(event){    
+        var modId = $(this).data('moduloid');
+        $('#configbundle_perfil_permisos_'+modId).val(null).trigger("change");
+         $('#configbundle_perfil_permisos_'+modId).attr('disabled',true);
+      });
+{% if entity.admin %}
+       $('#configbundle_perfil_activo').iCheck('check'); 
+       $('#configbundle_perfil_activo').parent().parent().hide();                 
+    {% endif %}     
+});
+</script>    
+{% endblock %}

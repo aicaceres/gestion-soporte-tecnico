@@ -1,0 +1,130 @@
+{% extends "dataTableList.html.twig" %}
+{% block avanzu_admin_menumode %}sidebar-collapse sidebar-open {% endblock %}
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; Histórico de Stock</h3>  
+                <div class="pull-right box-tools">
+                    <form id="printform" name="printform" target="_blank" style="display:inline-block;" 
+                          action="{{path('print_historico')}}" method="post">
+                        <input type="hidden" id="criteria" name="criteria"/>
+                        <input type="hidden" id="searchterm" name="searchterm"/>
+                        <input type="hidden" id="datalist" name="datalist"/>
+                        <button type="submit" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir"> <i class="fa fa-print"></i></button> 
+                    </form> 
+                </div>
+            </div><!-- /.box-header -->
+            <div class='box-body'>
+                <form id="searchform" action="{{ path('insumo_historico') }}" method="get" class="form-horizontal" style="margin-bottom: 10px;">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">INSUMO:</label>
+                        <div class="col-sm-4">
+                            <select class="select2 form-control" id="selectInsumo" name="insumoId">
+                                <option value="0">Todos</option>
+                                {% for dep in insumos %}
+                                    <option value="{{dep.id}}" {% if dep.id==insumoId %} selected="selected" {% endif %}> {{dep.textoCompleto}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <label class="col-sm-1 control-label">PERÍODO:</label>
+                        <div class="col-sm-2">
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{desde}}">
+                            </div>   
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{hasta}}">
+                            </div>   
+                        </div>
+                        <div class="col-sm-1">
+                            <button type="submit"> <i class="fa fa-search"></i>  </button>
+                        </div>   
+                    </div>
+                </form>             
+                     
+
+                <div class="table-responsive"  style="padding: 15px" >
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th class='no-sort' style="text-align:center;width:5%">I/E</th>
+                                <th>Fecha hora</th>
+                                {% if not insumoId %}
+                                    <th>Insumo <span style="font-weight:normal">[ Tipo | Marca | Modelo ]</span></th>
+                                {%endif%}
+                                <th>Depósito</th>
+                                <th>Tipo Movimiento</th>
+                                <th>N° Comprob.</th>
+                                <th>Cantidad</th>
+                                <th>Stock</th>
+                                <th>Usuario</th>                               
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in entities %}
+                                <tr>  
+                                    <td style="text-align:center;">{% if entity.signo == '+'%}
+                                        <i class="fa fa-plus"></i>
+                                        {%else%}
+                                        <i class="fa fa-minus"></i>
+                                        {%endif%}
+                                    </td>
+                                    <td><span class="hidden">{{ entity.created|date('YmdH:i')~entity.id }}</span>{{ entity.created|date('d-m-Y H:i') }}</td>                                    
+                                {% if not insumoId %}
+                                    <td>{{ entity.insumo }}</td>
+                                {%endif%}
+                                    <td>{{ entity.deposito }}</td>
+                                    <td>{{entity.tipoMovimiento}}</td>
+                                    <td>{% if entity.tipo=='SOPORTE' and entity.equipo %}
+                                            {{ entity.equipo.textoCompleto }}
+                                         {% endif %}
+                                         {% if entity.urlMovimiento %} <a href="javascript:void(0)" class="view-historico" data-nro="{{ entity.nroComprobante }}" data-url="{{ entity.urlMovimiento }}" data-toggle="tooltip" title="Ver Movimiento">{{ entity.nroComprobante }}</a> {% endif %}                                                                 
+                                    </td>
+                                    <td style="text-align:right;padding-right: 15px;">{{entity.cantidad|number_format(0)}}</td>
+                                    <td style="text-align:right;padding-right: 15px;">{% if entity.stock %} {{entity.stock|number_format(0)}}{% endif %}</td>
+                                    <td>{{entity.createdBy.username}}</td>                               
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div><!-- /.box -->
+</div><!-- /.col-->
+            <!--     </div> ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {    
+    $('#selectInsumo').change(function(){
+        $('#searchform').submit();
+    });
+    var oTable = $('#tablelist').dataTable();
+        oTable.fnSort( [[1,'desc']] );
+        
+    $('#printform').on('submit',function(){
+        $('#criteria').val($('#searchform').serialize());        
+        $('#searchterm').val( $('#tablelist_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {             
+            datos[index] = value;
+        });  
+        $('#datalist').val(JSON.stringify(datos));        
+    });     
+});
+</script>    
+{% endblock %}

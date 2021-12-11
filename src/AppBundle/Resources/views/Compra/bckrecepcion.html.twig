@@ -1,0 +1,173 @@
+{% extends "base.html.twig" %}
+{% block page_content %}    
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Recepción de Compras  </h3>
+                </div><!-- /.box-header -->
+                <div class='box-body'>                    
+                    <div class="box box-solid">            
+                        <div class="box-body border-radius-none">                
+                            <fieldset style="padding-bottom:10px;">
+                                <div class="col-md-3">
+                                    <span><strong>Fecha Compra:</strong>&nbsp;{{entity.fechaCompra|date('d-m-Y')}}</span>                        
+                                </div>
+                                <div class="col-md-3">
+                                    <span><strong>Razón Social:</strong>&nbsp;{{entity.razonSocial}}</span>                        
+                                </div>
+                                <div class="col-md-2">
+                                    <span><strong>N° Orden:</strong>&nbsp;{{entity.ordenCompra}}</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span><strong>Área Req.:</strong>&nbsp;{{entity.solicitante}}</span>
+                                </div>
+                            </fieldset>    
+                            <fieldset style="padding-bottom:10px;">    
+                                <div class="col-md-6">
+                                    <span><strong>Proveedor:</strong>&nbsp;{{entity.proveedor}}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span><strong>N° Factura:</strong>&nbsp;{{entity.nroFactura}}</span>                        
+                                </div>
+                                <div class="col-md-3">
+                                    <span><strong>Pedido el:</strong>&nbsp;{{entity.fechaEnvioProveedor|date('d-m-Y')}}</span>                        
+                                </div>
+                            </fieldset>
+                            {% if entity.descripcion %}
+                                <fieldset style="padding-bottom:10px;">
+                                    <div class="col-md-12">
+                                        <span><strong>Observaciones:</strong>&nbsp;{{entity.descripcion}}</span>                        
+                                    </div>                                       
+                                </fieldset>
+                            {% endif %}
+                        </div>  
+                        {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="nav-tabs-custom" style="box-shadow:none;">
+                            <ul class="nav nav-tabs">
+                                <li><a href="#detalle" data-toggle="tab"><strong>Detalle de la Compra</strong></a></li>
+                                    {% if entity.recepciones|length>0 %}
+                                        {% for entrega in entity.recepciones %}
+                                        <li {% if entrega.id is null %}class="active" {% endif %}><a href="#entrega{{ loop.index }}" data-toggle="tab"> Entrega N° {{ loop.index }}</a></li>   
+                                        {% endfor %}
+                                    {% endif %}
+                                <li class="pull-right hidden">
+                                    <button type="button" id="recibir" data-compra="{{ entity.id }}" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Nueva Recepción"><i class="fa fa-truck"></i> Recepción</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane" id="detalle">
+
+                                    <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:6%;">#</th>
+                                                <th style="width:15%;"><i class="fa fa-barcode"></i> Código</th>                            
+                                                <th>Detalle</th>
+                                                <th style="width:8%;">Cantidad</th>
+                                                <th style="width:10%;">Precio Unit.</th>
+                                                <th style="width:10%;">Total</th>
+                                                <th style="width:10%;">Recibido</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in entity.detalles %}
+                                                <tr>
+                                                    <td>{{loop.index}}</td>
+                                                    <td>{{ item.codigoItem }}</td>
+                                                    <td>{{ item.descripcion }}</td>
+                                                    <td style="text-align:right" >{{ item.cantidad|number_format(2,'.',',') }} </td>                                
+                                                    <td style="text-align:right">{{ item.precio|number_format(2,'.',',') }} </td>
+                                                    <td style="text-align:right">{{ (item.cantidad*item.precio)|number_format(2,'.',',') }} </td>
+                                                    {% if entity.estado != 'NUEVO' %}
+                                                        <td style="text-align:right" >{{ item.recibido|number_format(2,'.',',') }} </td> 
+                                                    {% endif %}
+                                                </tr>
+                                            {% endfor %}           
+                                        </tbody>
+                                        <tfoot>
+                                        <th colspan="5" style="text-align:right" >TOTAL</th>
+                                        <th style="text-align:right" >{{ entity.total|number_format(2,'.',',') }}</th>
+                                        </tfoot>
+                                    </table>    
+                                    <div class="btn-group pull-right">                        
+                                        <a type="button" class="btn btn-app" href="{{ path('compra_admin')}}"><i class="fa fa-reply"></i> Volver</a>
+                                    </div>
+                                </div>
+                                <!-- /.tab-pane -->
+                                {% if entity.recepciones|length>0 %}
+                                    {% for entrega in entity.recepciones %}
+                                        
+                                        {% if entrega.id %}
+                                            <div class="tab-pane" id="entrega{{ loop.index }}">
+                                            {% include "AppBundle:Compra:partial-recibido.html.twig" %}
+                                            </div>
+                                        {% else %}
+                                            <div class="tab-pane active" id="entrega{{ loop.index }}">
+                                            {% include "AppBundle:Compra:partial-recibir.html.twig" %}
+                                            </div>
+                                        {% endif %}
+       
+                                    {% endfor %}
+                                {% endif %}                                
+
+                            </div>
+                            <!-- /.tab-content -->
+                        </div>
+                    </div>
+
+                </div>                                  
+                <div class="box-footer">
+
+                </div>     
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{ parent() }}
+<script src="{{ asset('bundles/app/bootstrap.file-input.js') }}" type="text/javascript"></script>
+    <script type="text/javascript">        
+        $(document).ready(function () {
+            $('.datepicker').datepicker();
+            $('input[type=file]').bootstrapFileInput();
+            $('.file-input-wrapper').removeClass('form-control');
+            $('.file-input-wrapper').addClass('btn-sm');
+            $('input[type=file]').removeClass('form-control');
+            $('form').on('submit',function(){
+                var res = true;
+                $('[id$="_cantidad"]').each(function(){                    
+                    max = $(this).parent().data('cantidad');                    
+                    if( ($(this).val() < 0) || ($(this).val() > max) ){
+                        alert('Cantidad fuera del rango!');
+                        $(this).val(max);
+                        $(this).focus();
+                        res = false;
+                        return false;
+                    }
+                });
+                return res;
+            });
+            /*$('#recibir').on('click',function(){
+                newli = $('<li><a href="#newentrega" data-toggle="tab">Nueva Entrega </a></li>');
+                newli.insertBefore( $('li.pull-right'));
+                newtab = $('<div class="tab-pane" id="newentrega"><i class="fa fa-spinner fa-spin"></i> Cargando datos...</div>');
+                $('.tab-content').append(newtab); 
+                // insertar contenido al tab nuevo
+                $.post($(this).data('url'),{id:$(this).data('compra')}, function(data){
+                    $('#newentrega').html(data); 
+                    $('#newentrega').find('.datepicker').datepicker();
+                    $('#newentrega').find('input[type=file]').bootstrapFileInput();
+                    $('#newentrega').find('.file-input-wrapper').removeClass('form-control');
+                    $('#newentrega').find('.file-input-wrapper').addClass('btn-sm');
+                    $('#newentrega').find('input[type=file]').removeClass('form-control');    
+                });
+                newli.find('a').click();
+                $(this).hide();
+            });*/
+        });        
+    </script>    
+{% endblock %}

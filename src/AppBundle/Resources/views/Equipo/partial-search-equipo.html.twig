@@ -1,0 +1,343 @@
+<style>
+    table.equipolist tbody td:not(.tdnormal){
+        font-size: 11px;
+    }
+    #filterData span, #summaryData span{
+        font-size: 12px;
+        padding: 3px 10px;
+    }
+    .periodo-compra{
+        display:inline-block;
+    }
+    #equipos_dt_table_wrapper div.dataTables_paginate ul.pagination {
+	font-size: 10px;
+    }
+    .dataTables_filter {
+	display: none;
+    }
+    /* Move tfood in the upper part of the table */
+    tfoot {
+        display: table-header-group;
+        font-size:11px;
+    }
+    #select2-selTipo-container, #select2-selMarca-container,#select2-selModelo-container,#select2-selEstado-container {
+        color:orangered;
+        
+     }    
+</style>
+        <div class="box-body table-responsive no-padding" style="padding: 15px" >
+            <table id="equipos_dt_table" style="font-size:90%;width:100%" class="table table-bordered table-hover equipolist">
+                <tfoot>
+                    <tr>
+                        <th style="padding:0">Tipo</th>
+                        <th style="padding:0;">N° Serie</th>
+                        <th style="padding:0">Descripción</th>
+                        <th style="padding:0;width:120px;">Marca</th>
+                        <th style="padding:0">Modelo</th>
+                        <th style="padding:0;width:120px;">Estado</th>
+                        <th style="padding:0">Ubicación</th>
+                        <th></th>
+                    </tr>
+                </tfoot>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>N° Serie</th>
+                        <th>Descripción</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Estado</th>
+                        <th class="no-sort">Ubicación</th>
+                        <th class="no-sort" style="width:20px;">
+                            <input type="checkbox" id="ckTodos" />
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>                        
+            </table>                        
+        </div>            
+
+<script type="text/javascript">         
+$(document).ready(function() { 
+    //var pos = 1;
+    $('#equipos_dt_table tfoot th').each( function (i) {
+        switch (i) {
+            case 0:
+              //tipo
+              selTipo = "<select required='false' id='selTipo' class='form-control' style='width:100%;'></select>";
+              $(this).html(selTipo);
+              break;            
+            case 1:
+              //nroserie
+              $(this).html( "<input id='input_nroSerie' type='text' class='form-control' placeholder='N° de Serie' style='width:100%;color:orangered;'/>" );
+              break;                        
+            case 2:
+              //nombre
+              $(this).html( "<input id='input_nombre' type='text' class='form-control' placeholder='Descripción' style='width:100%;color:orangered;'/>" );
+              break;                        
+            case 3:
+              //marca
+              selMarca = "<select id='selMarca' class='form-control' style='width:100%;'></select>";
+              $(this).html(selMarca);
+              break;            
+            case 4:
+              //modelo
+              selModelo = "<select id='selModelo' class='form-control' style='width:100%;'></select>";
+              $(this).html(selModelo);
+              break;            
+            case 5:
+              //estado
+              selEstado = "<select id='selEstado' class='form-control' style='width:100%;'></select>";
+              $(this).html(selEstado);
+              break;            
+            case 6:
+              //ubicacion
+              $(this).html( "<input id='input_ubicacion' type='text' class='form-control' placeholder='Ubicación' style='width:100%;color:orangered;'/>" );
+              break;                                        
+        }  
+       /* var title = $(this).text();
+        if(title){
+            $(this).html( "<input id='input" + pos + "' type='text' class='form-control' placeholder='" + title + "' style='width:100%;color:orangered;'/>" );
+        }else{
+            $(this).html( "" );
+        }
+        pos ++;*/
+    });
+    
+    var table = $('#equipos_dt_table').DataTable({
+        "columnDefs": [        
+            // These are the column name variables that will be sent to the server
+            { "name": "tipo",   "targets": 0 },
+            { "name": "nroSerie",   "targets": 1 },
+            { "name": "nombre",  "targets": 2 },
+            { "name": "marca",  "targets": 3 },
+            { "name": "modelo",  "targets": 4 },
+            { "name": "estado",  "targets": 5 },
+            { "name": "ubicacion",  "targets": 6 },
+            { "name": "checks",  "targets": 7 },
+            { "targets"  : 'no-sort', "orderable": false }       
+        ],
+        // Server-side parameters
+        "processing": true,
+        "serverSide": true,
+        // Ajax call
+        "ajax": {
+            "url": "{{ path('equipo_search_datatables') }}",
+            "type": "POST"
+        },
+        // Classic DataTables parameters
+        "paging" : true,
+        "info" : true, 
+        "searching": true,        
+        "pageLength": 25,
+        "bLengthChange": false,
+        "order": [[1, 'asc']],
+            "pagingType": "full_numbers",
+        "oLanguage": {
+            "oPaginate": {
+                "sFirst": "<<",
+                "sNext": ">",
+                "sLast": ">>",
+                "sPrevious": "<"
+            },
+            "sProcessing": "Cargando...",
+            "sLengthMenu": "Mostrar _MENU_ registros ",
+            "sZeroRecords": "Sin datos",
+            "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+            "sInfoEmpty": "Sin coincidencias",
+            "sInfoFiltered": "(filtrado de _MAX_ registros)",
+            "sSearch": "Buscar:"
+        }
+    }); 
+    
+    /// TIPO    
+    $('#selTipo').select2({
+        placeholder: {
+      id: "null",
+      text:"Tipo",
+      selected:'selected'
+    },        
+        allowClear: true,
+        dropdownParent: $('.modal'),
+        ajax: {
+          url: "{{path('get-autocomplete-equipo-tipo')}}",
+          dataType: 'json',
+          processResults: function (data) {
+            return {
+              results: data
+            };
+          }
+        }
+      });
+    $('#selTipo').on('select2:select', function (e) {   
+        var data = e.params.data.text;
+        var that = table.column(0);
+            if ( that.search() !== data )
+            {
+                that
+                    .search( data )
+                    .draw();
+            }
+    }); 
+    $("#selTipo").on("select2:unselecting", function() {
+        var that = table.column(0);
+        that.search( '' )
+            .draw();
+     });
+    
+     $("#input_nroSerie").on( 'keyup change', function () { 
+        var that = table.column(1);
+            if ( that.search() !== this.value )
+            {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        });
+     $("#input_nombre").on( 'keyup change', function () { 
+        var that = table.column(2);
+            if ( that.search() !== this.value )
+            {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        });
+    
+    /// MARCA    
+    $('#selMarca').select2({
+        placeholder: "Marca",
+        allowClear: true,
+        dropdownParent: $('.modal'),
+        ajax: {
+          url: "{{path('get-autocomplete-equipo-marca')}}",
+          dataType: 'json',
+          processResults: function (data) {
+            return {
+              results: data
+            };
+          }
+        }
+      });
+    $('#selMarca').on('select2:select', function (e) {
+        var data = e.params.data.text;
+        var that = table.column(3);
+            if ( that.search() !== data )
+            {
+                that
+                    .search( data )
+                    .draw();
+            }
+        $('#selModelo').val('').trigger('change');    
+    });  
+    $("#selMarca").on("select2:unselecting", function() {
+        var that = table.column(3);
+        that.search( '' )
+            .draw();
+        $('#selModelo').val('').trigger('change');
+     });
+    /// MODELO    
+    $('#selModelo').select2({
+        placeholder: "Modelo",
+        allowClear: true,
+        dropdownParent: $('.modal'),
+        ajax: {
+          url: "{{path('get-autocomplete-equipo-modelo')}}",
+          data: function (params) {
+            var query = {
+              search: params.term,
+              marca: $("#selMarca").val()
+            }
+            return query;
+          },
+          dataType: 'json',
+          processResults: function (data) {
+            return {
+              results: data
+            };
+          }
+        }
+      });
+    $('#selModelo').on('select2:select', function (e) {
+        var data = e.params.data.text;
+        var that = table.column(4);
+            if ( that.search() !== data )
+            {
+                that
+                    .search( data )
+                    .draw();
+            }
+    });  
+    $("#selModelo").on("select2:unselecting", function() {
+        var that = table.column(4);
+        that.search( '' )
+            .draw();
+     });    
+
+    /// ESTADO    
+    $('#selEstado').select2({
+        placeholder: "Estado",
+        allowClear: true,
+        dropdownParent: $('.modal'),
+        ajax: {
+          url: "{{path('get-autocomplete-equipo-estado')}}",
+          dataType: 'json',
+          processResults: function (data) {
+            return {
+              results: data
+            };
+          }
+        }
+      });
+    $('#selEstado').on('select2:select', function (e) {
+        var data = e.params.data.text;
+        var that = table.column(5);
+            if ( that.search() !== data )
+            {
+                that
+                    .search( data )
+                    .draw();
+            }    
+    });  
+    $("#selEstado").on("select2:unselecting", function() {
+        var that = table.column(5);
+        that.search( '' )
+            .draw();
+     });
+    
+$("#input_ubicacion").on( 'keyup change', function () { 
+        var that = table.column(6);
+            if ( that.search() !== this.value )
+            {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        });
+        
+  /*  pos = 1;
+    table.columns().every( function () {    
+        var that = this;    
+        $("#input"+pos).on( 'keyup change', function () {
+            if ( that.search() !== this.value )
+            {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        });
+        pos++;
+    });*/
+    
+    $('#ckTodos').on('click',function(){
+        if( $(this).prop('checked')){
+            $('.ckItem').prop('checked',true);
+        }else{
+            $('.ckItem').prop('checked',false);
+        }
+    });
+    
+});
+</script>    

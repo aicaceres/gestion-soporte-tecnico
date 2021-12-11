@@ -1,0 +1,105 @@
+{% extends "base.html.twig" %}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'>
+                        <i class="fa fa-user"></i> &nbsp; {{ (entity.id) ? 'Editar datos de '~entity.username|upper : 'Alta de Nuevo Usuario' }} 
+                    </h3>
+                </div><!-- /.box-header -->
+                {{ form_start(form) }}
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}
+                    <div class="row pad">
+                        <div class="col-md-6">
+                            <fieldset>
+                                {{ form_row(form.username, { 'attr': {'style':'text-transform:uppercase' } }) }}
+                                {{ form_row(form.nombre) }}
+                                {{ form_row(form.dni) }}
+                                <div class="form-group">
+                                    {{ form_label(form.email) }}
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+                                            {{ form_widget(form.email) }}
+                                    </div>
+                                    {{ form_errors(form.email) }}
+                                </div>
+
+                            </fieldset>
+                        </div>
+                        <div class="col-md-6">
+                            <fieldset>
+                                <div class="form-group">
+                                    {{ form_label(form.password.first,'Contraseña:') }}
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                                            {{ form_widget(form.password.first) }}
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    {{ form_label(form.password.second,'Repetir contraseña:') }}
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                                            {{ form_widget(form.password.second) }}
+                                    </div>
+
+                                </div>
+                                {{ form_errors(form.password.first) }}
+                                {% if entity.id %}
+                                    <p class="text-info ">
+                                        <i class="fa fa-info-circle" ></i> <small>Dejar en blanco si no desea cambiar su contraseña</small>
+                                    </p>
+                                {%endif%}
+                                <br>
+                                {{ form_row(form.rol) }}
+                                {{ form_widget(form.activo) }}
+                            </fieldset>
+                        </div>
+                        <div class="col-md-12">
+                            <fieldset>
+                                {{ form_row(form.edificios) }} 
+                            </fieldset>
+                        </div>
+                    </div>
+                    {% include "admin-form-data.html.twig" with {'table':entity} %}   
+                </div>    
+                <div class="box-footer">
+                    {% if entity.id  and app.user.access('seguridad_usuario_delete') and not entity.rol.admin %}
+                        <a type="button" class="btn btn-app delete" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Eliminar</a>
+                    {%endif%}
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        <a type="button" class="btn btn-app" href="{{ path('seguridad_usuario')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>      
+                {{ form_end(form) }}
+
+                {% if entity.id  %}
+                    {{ form(delete_form) }}
+                {%endif%}
+            </div><!-- /.box -->
+        </div><!-- /.col-->
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}
+<script type="text/javascript">
+$(document).ready(function() {         
+    {% if entity.rol.nombre == 'ROLE_ADMIN' %}            
+       $('#configbundle_usuario_activo').iCheck('check'); 
+       $('#configbundle_usuario_activo').parent().parent().hide();  
+       // no mostrar el select de edificios al administrador.. puede ver todos.       
+       //$('#configbundle_usuario_edificios').parent().hide();       
+    {% endif %}
+    $('#configbundle_usuario_edificios').select2();   
+    $('#configbundle_usuario_rol').on('change', function (e) {
+        if( $('#configbundle_usuario_rol').val()==1 ){
+            $('#configbundle_usuario_edificios').parent().hide();
+        }else{
+            $('#configbundle_usuario_edificios').parent().show(); 
+        }
+    });
+    
+});
+</script>    
+{% endblock %}

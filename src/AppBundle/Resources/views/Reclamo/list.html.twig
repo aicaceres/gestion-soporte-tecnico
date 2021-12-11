@@ -1,0 +1,119 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-exclamation-triangle"></i> &nbsp; Reclamos</h3>
+                       
+            </div><!-- /.box-header -->
+            <div class='box-body' >
+                <form id="searchform" action="{{ path('monitoreo_reclamo') }}" method="get" >                    
+                    <div class="col-md-12">                
+                        <fieldset>                                         
+                            <div class="col-md-2">
+                                <label class="required">Período:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{app.session.get('filtro_reclamo')['desde']}}">
+                                </div>   
+                            </div>    
+                            <div class="col-md-2"> 
+                                <label>&nbsp;</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{app.session.get('filtro_reclamo')['hasta'] }}">                                            
+                                </div>                                           
+                            </div>  
+                            <div class="col-md-2">
+                                <label class="required">Estado:</label>
+                                <div class="input-group">
+                                    <select class="select2 form-control" name="estado" id="estado" >
+                                        <option {%if app.session.get('filtro_reclamo')['estado'] == 'T' %} selected="selected" {%endif%} value="T">Todos</option>                                        
+                                        <option {%if app.session.get('filtro_reclamo')['estado'] == '1' %} selected="selected" {%endif%} value="1">Abierto</option>
+                                        <option {%if app.session.get('filtro_reclamo')['estado'] == '0' %} selected="selected" {%endif%} value="0">Cerrado</option>
+                                    </select>
+                                </div>   
+                            </div>  
+                            <div class="col-md-3"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label style="width:100%;">&nbsp;</label>
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                            </div>                                 
+
+                        </fieldset>
+                    </div> 
+                </form>                      
+
+                <div class="table-responsive" style="padding: 15px">
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Departamento</th>
+                                <th>Proveedor</th>
+                                <th>N° Ref.</th>
+                                <th class="no-sort">Detalle</th>
+                                <th class="no-sort">Estado</th>
+                                <th class="no-sort">Usuario</th>
+                                <th class="no-sort thactions"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reclamo in reclamos %}
+                                <tr>
+                                    <td><span class="hidden">{{ reclamo.fecha|date('Ymd') }}</span>{{ reclamo.fecha|date('d-m-Y') }}</td>                                
+                                    <td>{{ reclamo.proveedor.departamento.nombre }}</td>
+                                    <td>{{ reclamo.nombreProveedor }} </td>
+                                    <td>{{ reclamo.nroReferencia }}</td>
+                                    <td>{{ reclamo.detalle }}</td>                                    
+                                    <td>{% if reclamo.abierto==1 %} <span class="label bg-red">Abierto</span> {% else %} <span class="label bg-gray">Cerrado</span>{% endif %}</td>                                    
+                                    <td>{{ reclamo.createdBy.username }}</td>                                    
+                                    <td class="link-actions">
+                                        <a href="javascript:void(0)" data-url="{{ path('reclamo_view', { 'id': reclamo.id }) }}" class="viewReclamo" title="Editar"><i class="fa fa-folder-open"></i></a>&nbsp;
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {    
+    $('#limpiar-filtros').on('click',function(){                
+        $('#searchform').find('.select2').val('T');
+        $('#searchform').find('.datepicker').val('');
+        $('#searchform').submit();
+    });    
+    
+    var oTable = $('#tablelist').dataTable();
+        oTable.fnSort( [ [0,'desc'] ] );            
+        
+    $('.viewReclamo').on('click',function(){
+        var url = $(this).data('url');
+        var options = {
+           url: url,
+           title:'Reclamo',           
+           size: eModal.size.lg,
+           buttons:[]
+        };
+        eModal.ajax(options); 
+    });    
+});
+</script>    
+{% endblock %}

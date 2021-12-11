@@ -1,0 +1,415 @@
+{% extends "dataTableList.html.twig" %}
+{% block avanzu_admin_menumode %}sidebar-collapse sidebar-open {% endblock %}
+{% block page_content %}
+{% include "notification.html.twig" %}    
+<style>
+    table.equipolist tbody td:not(.tdnormal){
+        font-size: 12px;
+    }
+    #filterData span, #summaryData span{
+        font-size: 12px;
+        padding: 3px 10px;
+    }
+    .periodo-compra{
+        display:inline-block;
+    }
+</style>
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; Equipos</h3>
+                <div class="pull-right box-tools">
+                    {% if app.user.access('view_logs') and entities|length>0 %}
+                        <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                                data-id="" data-url="{{path('get_equipo_logs')}}"  >      <i class="fa fa-history"></i></button>  
+                        {% endif %}
+                    <form id="printform" name="printform" target="_blank" style="display:inline-block;" 
+                          action="{{path('print_listado_equipos')}}" method="post">                        
+                        <input type="hidden" id="searchterm" name="searchterm"/>
+                        <input type="hidden" id="datalist" name="datalist"/>
+                        <input type="hidden" id="option" name="option"/>
+                        <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir"> <i class="fa fa-print"></i></button> 
+                        <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i></button> 
+                        <button type="button" id="csv" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar CSV"> <i class="fa fa-file-text-o"></i></button> 
+                    </form> 
+
+                </div>                
+            </div><!-- /.box-header -->
+            <div class='box-body'>   
+                 {% set filtro = app.session.get('filtro_equipo') %}
+                <div id="filterData" style="display:none;">
+                    <div class="col-md-12">
+                        <h4 class="pull-left"  style="display:inline-block;margin:5px;">Criterios de Filtro: </h4>
+                        <button type="button" id="openFilter" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Ver Filtros"><i class="fa fa-chevron-down"></i> Mostrar</button>
+                    </div>    
+                    <div class="col-md-12 textos">                       
+                        <span id="spTipo" class="bg-primary"></span> 
+                        <span id="spMarca" class="bg-primary"></span>
+                        <span id="spModelo" class="bg-primary"></span>  
+                        <span id="spEstado" class="bg-primary"></span>                         
+                        <span id="spUbicacion" class="bg-primary"></span> 
+                        <span id="spEdificio" class="bg-primary"></span>  
+                        <span id="spDepartamento" class="bg-primary"></span>  
+                        <span id="spVerificado" class="bg-primary"></span> 
+                        <span id="spAdicional" class="bg-primary"></span> 
+                    </div>
+                </div> 
+                <div id="filterCriteria">
+                    <form id="searchform" action="{{ path('equipo') }}" method="get" >
+                        <div class="col-md-12">
+                        <h4 class="pull-left"  style="display:inline-block">Criterios de Filtro: </h4>                        
+                        <button type="button" id="closefilter" style="margin-left: 10px" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Ocultar Filtros"> <i class="fa fa-chevron-up"></i> Ocultar </button>
+
+                        <button type="button" id="limpiarfiltros" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Limpiar Filtros"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                        </div>
+                        <div class="col-md-12">
+                            <fieldset>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Tipo:</label>
+                                        <select class="select2 form-control" name="idTipo" id="selectTipo" >
+                                            <option value="0">Todos</option>
+                                            {%for tipo in tipos %}
+                                                <option {%if tipo.id==filtro['idTipo']%} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Marca:</label>
+                                        <select class="select2 form-control" name="idMarca" id="selectMarca" >
+                                            <option value="0">Todas</option>
+                                            {%for marca in marcas %}
+                                                <option {%if marca.id==filtro['idMarca']%} selected="selected" {%endif%} value="{{marca.id}}">{{marca.nombre}}</option>
+                                            {% endfor %}  
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Modelo:</label>
+                                        <select class="select2 form-control" name="idModelo" id="selectModelo">
+                                            <option value="0">Todos</option>
+                                            {%for modelo in modelos %}
+                                                <option {%if modelo.id==filtro['idModelo']%} selected="selected" {%endif%} value="{{modelo.id}}">{{modelo.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Estado:</label>
+                                        <select class="select2 form-control" name="idEstado" id="selectEstado">
+                                            <option value="T" {%if filtro['idEstado']=='T' %} selected="selected" {%endif%}>Todos</option>
+                                            {%for estado in estados %}
+                                                <option {%if estado.id==filtro['idEstado']%} selected="selected" {%endif%} value="{{estado.id}}">{{estado.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>    
+                        <div class="col-md-12">
+                            <fieldset>
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label class="required">Ubic:</label>
+                                        <select class="select2 form-control" name="idUbicacion" id="selectUbicacion">
+                                            <option value="0">Todos</option>
+                                            {%for ubic in ubicaciones %}
+                                                <option {%if ubic.id==filtro['idUbicacion']%} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Edificio:</label>
+                                        <select class="select2 form-control" name="idEdificio" id="selectEdificio">
+                                            <option value="0">Todos</option>
+                                            {%for ed in edificios %}
+                                                <option {%if ed.id==filtro['idEdificio']%} selected="selected" {%endif%} value="{{ed.id}}">{{ed.nombre}}</option>
+                                            {% endfor %}  
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Depto:</label>
+                                        <select class="select2 form-control" name="idDepartamento" id="selectDepartamento">
+                                            <option value="0">Todos</option>
+                                            {%for dep in departamentos %}
+                                                <option {%if dep.id==filtro['idDepartamento']%} selected="selected" {%endif%} value="{{dep.id}}">{{dep.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group ">
+                                        <label class="required">Verificado:</label>
+                                        <select class="select2 form-control" name="verificado" id="verificado">
+                                            <option value="T" {%if filtro['verificado']=='T'%} selected="selected" {%endif%} >Todos</option>
+                                            <option value="1" {%if filtro['verificado']=='1'%} selected="selected" {%endif%} >Sí</option>
+                                            <option value="0" {%if filtro['verificado']=='0'%} selected="selected" {%endif%} >No</option>                                            
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-3">                                     
+                                    <button type="submit" class="btn btn-default btn-sm pull-right"><i class="glyphicon glyphicon-filter"></i> Buscar</button>
+                                        <select class="form-control" name="opAdicional" id="selectAdicional" style="width:70%;font-size:12px">
+                                            {%for nombre in adicionales %}
+                                                <option {%if loop.index==filtro['opAdicional']%} selected="selected" {%endif%} value="{{loop.index}}">{{nombre}}</option>
+                                            {% endfor %} 
+                                            
+                                        </select>                                     
+                                    <input type="text" class="form-control" id="txtAdicional" name="txtAdicional" value="{{filtro['txtAdicional']}}"/>
+                                    <input style="width:50%;display:none;" type="text" class="form-control periodo-compra datepicker fechaPasada" id="fechaDesde" name="fechaDesde" value="{{filtro['fechaDesde']}}"/>
+                                    <input style="width:48%;display:none;" type="text" class="form-control periodo-compra datepicker fechaPasada" id="fechaHasta" name="fechaHasta" value="{{filtro['fechaHasta']}}"/>
+                                    <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/>                                    
+                                </div>    
+                            </fieldset>
+                        </div>    
+                    </form>
+                </div> 
+                <div class="box-body table-responsive" style="padding: 15px" >
+                    <table id="tablelist" class="table table-bordered table-hover equipolist">
+                        <thead>
+                            <tr>
+                                <th class="no-sort">&nbsp;</th>
+                                <th>Tipo</th>
+                                <th>N° Serie</th>
+                                <th>Descripción</th>
+                                <th class="hidden-xs">Marca</th>
+                                <th class="hidden-xs">Modelo</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th class="no-sort" style="width:5px; padding:10px; text-align:center;"><i class="fa fa-check-square-o"></i></th>
+
+                                <th class="no-sort thactions" style="width:20px;">
+                                    {% if app.user.access('equipo_new') %}
+                                        &nbsp;<a href="{{ path('equipo_new') }}" data-toggle="tooltip" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                                        {% endif %}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in entities %}
+                                <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }}">                                
+                                    <td class="plus closed" data-id="{{entity.id}}" style="vertical-align: middle;text-align: center;color: gray;">
+                                        <i class="fa fa-plus"></i></td>
+                                    <td>{{ entity.tipo }}</td>
+                                    <td>{{ entity.nroSerie }}</td>
+                                    <td>{{ entity.nombre }}</td>
+                                    <td class="hidden-xs">{{ entity.marca}}</td>
+                                    <td class="hidden-xs">{{ entity.modelo}}</td>
+                                    <td>{{ entity.estado}}</td>
+                                    <td>{%if entity.ubicacionActual%}{{ entity.ubicacionActual.texto}}{%else%}Sin Ubicación{%endif%}</td>
+                                    <td class="tdnormal" style="text-align:center;"> {% if entity.verificado %}<i class="fa fa-check-square-o"></i> {%else%}<i class="fa fa-square-o"></i> {%endif%}</td>
+                                    <td class="link-actions tdnormal">
+                                        {% if app.user.access('equipo_edit') %}
+                                            <a href="{{ path('equipo_edit', { 'id': entity.id }) }}" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
+                                            {% endif %}
+                                            {% if app.user.access('equipo_delete') %}
+                                            <form action="{{ path('equipo_delete', { 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                                                <input type="hidden" name="_method" value="DELETE" />
+                                                {{ form_widget(deleteForms[entity.id]) }}
+                                                <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click(); "><i class="fa fa-trash-o"></i></a>
+                                                <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                                            </form> 
+                                        {% endif %}
+                                        <a data-toggle="tooltip" title="Imprimir ficha del equipo" target="_blank"
+                                            href="{{path('print_ficha_equipo',{'id':entity.id})}}"  ><i class="fa fa-print"></i></a> 
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>                        
+                    </table>
+                        <br>
+                            <div class="col-md-12" id="summaryData">    
+                                {% set total, subtotal = 0,0 %}
+                                {% for sum in summary  %}
+                                    {% set total = total + sum.cantidad %}
+                                    {% if loop.index <= 10%}
+                                    <span class="bg-red"> {{sum.nombre}}: {{sum.cantidad}} </span> 
+                                    {% set subtotal = subtotal + sum.cantidad %}
+                                    {% endif %} 
+                                {% endfor %} 
+                                {% if (total-subtotal) >0%}
+                                <span class="bg-red"> OTROS: {{total-subtotal}} </span> 
+                                {% endif %}
+                            </div>    
+                       
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">         
+$(document).ready(function() {    
+    $('.periodo-compra').hide();
+    if (typeof(Storage) !== "undefined") {
+            // Code for localStorage/sessionStorage.  
+        if( localStorage.getItem('estFiltro') == 'open') {
+            $('#filterData').hide();
+            $('#filterCriteria').show();
+        }else{
+            $('#filterCriteria').hide();
+            $('#filterData').show();
+        } 
+    }
+    
+    if( $('#selectTipo').val()>0 ){ 
+        $('#spTipo').html('<b>TIPO: </b>'+$('#selectTipo option:selected').text() ); 
+    }else{ $('#spTipo').hide();}
+    if( $('#selectMarca').val()>0 ){ 
+        $('#spMarca').html('<b>MARCA: </b>'+$('#selectMarca option:selected').text() );  
+    }else{ $('#spMarca').hide();}
+    if( $('#selectModelo').val()>0 ){ 
+        $('#spModelo').html('<b>MODELO: </b>'+$('#selectModelo option:selected').text() );  
+    }else{ $('#spModelo').hide();}
+    if( $('#selectEstado').val()>0 ){ 
+        $('#spEstado').html('<b>ESTADO: </b>'+$('#selectEstado option:selected').text() );   
+    }else{ $('#spEstado').hide();}
+    if( $('#selectUbicacion').val()>0 ){ 
+        $('#spUbicacion').html('<b>UBICACIÓN: </b>'+$('#selectUbicacion option:selected').text() );
+    }else{ $('#spUbicacion').hide();}
+    if( $('#selectEdificio').val()>0 ){ 
+         $('#spEdificio').html('<b>EDIFICIO: </b>'+$('#selectEdificio option:selected').text() );
+    }else{ $('#spEdificio').hide();}
+    if( $('#selectDepartamento').val()>0 ){ 
+         $('#spDepartamento').html('<b>DEPARTAMENTO: </b>'+$('#selectDepartamento option:selected').text() );
+    }else{ $('#spDepartamento').hide();}
+    if( $('#verificado').val()!=='T' ){ 
+         $('#spVerificado').html('<b>VERIFICADO: </b>'+$('#verificado option:selected').text() ); 
+    }else{ $('#spVerificado').hide();}
+    if( $('#txtAdicional').val()!='' ){
+        $('#spAdicional').html( '<b>'+ $('#selectAdicional option:selected').text()+': </b>'+ $('#txtAdicional').val() );
+    }else if($('#fechaDesde').val()!='' || $('#fechaHasta').val()!=''){ 
+        $('#spAdicional').html( '<b>'+ $('#selectAdicional option:selected').text()+': </b>'+ $('#fechaDesde').val()+' - '+$('#fechaHasta').val() ) ;
+    }else{ $('#spAdicional').hide(); }
+
+  /* setTimeout(function(){
+       console.log( $('.select2').is(":focus") );
+        $('#filterCriteria').slideUp(400, 0, function () { 
+            $('#filterData').slideDown(400);
+        });
+    },10000);*/
+    $('#selectAdicional').on('change',function(){
+        if( $(this).val()=='3' ){
+            $('#txtAdicional').hide();
+            $('#txtAdicional').val('');
+            $('.periodo-compra').show();
+            $('#fechaDesde').focus();
+        }else{
+            $('.periodo-compra').hide();
+            $('.periodo-compra').val('');
+            $('#txtAdicional').show();
+            $('#txtAdicional').focus();
+        }        
+    });    
+     if( $('#selectAdicional').val()=='3' ){
+            $('#txtAdicional').hide();
+            $('.periodo-compra').show();
+        }else{
+            $('.periodo-compra').hide();
+            $('#txtAdicional').show();
+        }     
+    $('.select2').change(function(){
+       /** if( $(this).attr('id')=='selectTipo' ){
+            $('#selectMarca').val('');
+        }*/
+        $('#searchform').submit();
+    });
+        
+    $('#verificado').parent().find('.select2-container').css('width','90px');
+    $('#openFilter').on('click',function(){     
+        if (typeof(Storage) !== "undefined") {
+            // Code for localStorage/sessionStorage.  
+            localStorage.setItem('estFiltro', 'open');
+        } 
+        $('#filterData').slideUp(400, 0, function () { 
+                $('#filterCriteria').slideDown(400);
+            });
+    });
+    $('#closefilter').on('click',function(){
+        if (typeof(Storage) !== "undefined") {
+            // Code for localStorage/sessionStorage.  
+            localStorage.setItem('estFiltro', 'close');
+        }
+        $('#filterCriteria').slideUp(400, 0, function () { 
+                $('#filterData').slideDown(400);
+            });    
+    });
+    $('#limpiarfiltros').on('click',function(){
+        $('#opFiltro').val('limpiar');
+        $('.select2').each(function(){
+            $(this).find('option:eq(0)').prop('selected',true);
+        });         
+        $('#searchform').submit();
+    });
+    $('body').on('click','.plus',function(){              
+        if( $(this).hasClass('closed') ){
+            cleanEqData();
+            var eqdata = $('<tr class="eqdata"><td colspan="10"> Cargando datos...</td></tr>'); 
+            eqdata.insertAfter($(this).closest('tr')); 
+            $(this).parent().addClass('eqtr');
+            $.post('getDataEquipo',{id:$(this).data('id')}, function(data){
+                eqdata.find('td').html(data);                
+            });
+            $( this ).removeClass( 'closed' );   
+            $(this).find('i').toggleClass('fa-plus fa-minus');
+        }else{
+            cleanEqData();
+        }
+    });
+   $('body').on('click','.equipolist tr th, .pagination, .closeqdata',function(){
+       if($(".plus:not(.closed)").length>0 )
+        cleanEqData();
+    });
+       
+    var oTable = $('#tablelist').dataTable();
+     oTable.fnSort( [ [1,'asc'] ] );
+    $('#pdf,#xls,#csv').on('click',function(){   
+        if( ( $(this).attr('id')=='pdf' ) && ( parseInt('{{entities|length}}')>500 )  ){
+           if (!confirm('Muchos registros podrían hacer demasiado lenta la generación del PDF. Desea Continuar?')){
+               return false;
+           }
+        }
+        $('#option').val( $(this).attr('id') );             
+        $('#searchterm').val( $('#tablelist_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) { 
+            // console.log(value[0]);
+            //var i = value[0].indexOf('value="');
+            /*if( i >-1 ){
+                var id = value[0].substr(i+7);
+                value[1]=fecha;
+            }*/
+            value[0]=''; 
+             var i = value[8].indexOf('fa-check-square-o');
+            if( i >-1 ){
+                value[8]='Si';
+            }else{
+                value[8]='No';                
+            }
+            value.splice(9);
+            datos[index] = value;
+        });                 
+        $('#datalist').val(JSON.stringify(datos)); 
+        $('#printform').submit();
+    });   
+});
+function cleanEqData(){
+    $('.eqdata').remove(); 
+    $('.plus').addClass( 'closed' ); 
+    $('.plus').parent().removeClass('eqtr');
+    $('body').find('.plus i').removeClass('fa-minus').addClass('fa-plus');  
+}
+</script>    
+{% endblock %}

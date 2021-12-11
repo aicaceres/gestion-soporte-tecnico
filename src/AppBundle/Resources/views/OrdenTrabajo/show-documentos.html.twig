@@ -1,0 +1,24 @@
+<table  class="table table-bordered documentos"> 
+    <thead>
+       <tr>                              
+           <th style="width:8%">Fecha</th>
+           <th style="width:15%">Usuario</th>
+           <th>Descripción</th>
+           <th>Archivo</th>  
+       </tr>
+   </thead>   
+   <tbody>               
+       {% for doc in documentos  %}        
+           <tr>                                 
+               <td class="dateTd">{{ doc.created|date('d/m/Y') }} </td>
+               <td class="tecTd">{{ doc.createdBy.username }} </td>
+               <td class="descTd">{{ doc.descripcion }} </td>
+               <td class="pathTd">
+                    {% if doc.webPath %}                       
+                        <a href="{{ asset(doc.webPath) }}" target="_blank">{{ doc.path }}</a>
+                    {% endif %} 
+               </td>  
+           </tr> 
+       {% endfor %}         
+   </tbody>    
+</table> 

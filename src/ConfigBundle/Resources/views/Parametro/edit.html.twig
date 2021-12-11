@@ -1,0 +1,91 @@
+{{ form_start(form) }}
+    {% if entity.id  %}
+        <input name="_method" value="PUT" type="hidden">
+    {%endif%}
+    <div class='box-body pad'>
+        {% include "form-notification.html.twig" %}
+        <div class="row">
+            <div class="col-md-6">
+                <fieldset>
+                    {{ form_row(form.nombre, { 'attr': {'autofocus':'autofocus' } }) }}
+                </fieldset>
+            </div>    
+            {% if form.abreviatura is defined %}
+                <div class="col-md-3">
+                    <fieldset>
+                        {{ form_row(form.abreviatura) }}
+                    </fieldset>
+                </div>    
+            {% endif %}
+            {% if form.inicial is defined %}
+                <div class="col-md-3">
+                    <fieldset>
+                        {{ form_row(form.inicial) }}
+                        <p class="text-info ">
+                            <i class="fa fa-info-circle" ></i> <small>Valor por defecto en la carga de Equipos</small>
+                        </p>
+                    </fieldset>
+                </div>    
+            {% endif %}
+            {% if form.clase is defined %}
+                <div class="col-md-6">
+                    <fieldset>
+                        {{ form_row(form.clase) }}
+                    </fieldset>
+                </div>    
+            {% endif %}
+
+            {% if form.modelos is defined %}
+                <div class="col-md-12">
+                 <!--   <div class="col-md-8 col-md-offset-2"> -->
+                        {{ form_errors(form.modelos) }}
+                        <table id="modelos" class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%">Modelos</th>
+                                    <th colspan="2">Foto</th>
+                                    <th class="nosort aligncenter" style="width: 5%">
+                                        <a href="javascript:void(0)" class="btn btn-danger btn-xs linkAdd" title="Agregar Modelo" data-form="modelos" data-toggle="tooltip"><i class="fa fa-plus"></i> Agregar</a>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody data-index="{{form.modelos | length }}" class="collectionHolder"
+                                   data-prototype="{% filter escape %}{% include 'ConfigBundle:Parametro:prototypeModelo.html.twig' with {'item':form.modelos.vars.prototype} %}{% endfilter %}">
+                                {% for item in form.modelos %}        
+                                    <tr>          
+                                        <td>{{ form_widget(item.nombre) }}{{ form_errors(item.nombre) }}</td>            
+                                        <td style="width: 5%">
+                                        {% if item.vars.data.id and item.vars.data.webPath %}
+                                         <a href="{{ asset(item.vars.data.webPath)}}" target="_blank"> 
+                                             <img src="{{ asset(item.vars.data.webPath)}}" style="height:40px;width:40px;"/>  </a>                        
+                                        {% endif %}
+                                        </td>            
+                                        <td>{{ form_widget(item.file) }} {{ form_errors(item.file) }} </td>            
+                                        <td class="link-actions">
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>                 
+                   <!-- </div> -->        
+                </div>                                 
+            {% endif %}    
+        </div>
+        {% include "admin-form-data.html.twig" with {'table':entity} %}      
+    </div>
+    <div class="box-footer">
+        {% if entity.id  %}
+            <a type="button" class="btn btn-app delete" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Eliminar</a>
+        {%endif%}
+        <div class="btn-group pull-right">
+            <button id="save" type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>                        
+            <a type="button" href="{{ path('configuracion_parametro',{'table':table}) }}" class="btn btn-app"><i class="fa fa-reply"></i> Cancelar</a>     
+        </div>
+    </div>
+    <div style='display:none;'>
+        {{ form_end(form) }}
+    </div>
+    {% if entity.id  %}
+        {{ form(delete_form) }}
+    {%endif%}    
+</form>   

@@ -1,0 +1,266 @@
+{{ form_start(form) }}    
+<div class='box-body no-padding'>
+    <div class="col-md-12">
+        <div class="col-md-2">
+            {{ form_row(form.fecha) }}
+        </div>
+        <div class="col-md-2">
+            {{ form_row(form.hora) }}
+        </div>       
+        <div class="col-md-8">
+            {{ form_row(form.descripcion,{'attr':{'rows':'1'}}) }}
+        </div>
+    </div>  
+    <div class="col-md-12">
+        <div class="box-group" id="accordion">
+            <div class="panel box box-solid box-default" id="accEqSalientes">
+                <div class="box-header">
+                    <h3 class="box-title">Equipo a reemplazar</h3>
+                    <div class="box-tools pull-right">                        
+                        <button type="button" class="btn btn-box-tool bg-default btn-sm" data-toggle="collapse" href="#equipos-salientes"><i class="fa fa-minus"></i>
+                        </button>
+                    </div>            
+                </div>
+                <div id="equipos-salientes" class="panel-collapse collapse in">
+                    <div class="box-body">
+                        <div class="col-md-8">                                            
+            {{ form_row(form.ordenTrabajoDetalle,{'label':'Tipo - Descripción - N° de Serie - Marca - Modelo'}) }}
+                        </div>
+                        <div class="col-md-4">      
+                            <div class="form-group ">
+                                <label>Descripción:</label>
+                                <input type="text" id="descr_out" name="descr_out" required="required" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-12 ubicacion">
+                            {% set ubicacionActual = form.ubicacion %}
+                            <fieldset>
+                                <div class="col-md-4">
+                                    <div class="form-group ">
+                                        <label>Cambiar estado a:&nbsp;</label>
+                                        <select id="estado" name="estado" class="form-control select2">
+                                            <option value="">--</option>
+                                            {% for est in estados if est.abreviatura!='OP' %}
+                                                <option {% if est.inicial %}selected="selected" {% endif %} value="{{ est.id }}" >{{ est.nombre }}</option>
+                                            {% endfor %}    
+                                        </select> 
+                                        {{ form_row(form.estadoId) }}
+                                    </div>            
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(ubicacionActual.conceptoEntrega) }}   
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(ubicacionActual.observaciones,{'attr':{'rows':1}}) }}   
+                                </div>
+                            </fieldset>   
+                            <fieldset>
+                                <div class="col-md-2">
+                                    {{ form_row(ubicacionActual.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'), 'class' : 'ubicacion_selector' } }) }}   
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(ubicacionActual.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(ubicacionActual.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+                                </div>
+                                <div class="col-md-2">
+                                    {{ form_row(ubicacionActual.piso, { 'attr': {'class' : 'piso_selector' } }) }}   
+                                </div>
+                            </fieldset>                         
+                        </div>                           
+                    </div>
+                </div>
+            </div>    
+            <div class="panel box box-solid box-default" id="accEqNuevos">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Reemplazar por</h3>
+                    <div class="box-tools pull-right">                
+                        <button type="button" class="btn btn-box-tool bg-default btn-sm" data-toggle="collapse"  href="#equipos-nuevos"><i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="equipos-nuevos" class="panel-collapse collapse in">
+                    <div class="box-body">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                {{ form_row(form.equipoNuevo,{'label':'Tipo - Descripción - N° de Serie - Marca - Modelo'}) }}
+                                <span class="input-group-btn" style="padding-left: 5px;">
+                                    <button data-toggle="tooltip" title="Buscar equipo" type="button" data-url="{{path('render_search_equipo')}}" 
+                                            class="btn btn-primary btn-flat btn-xs searchAddEquipo " data-function="agregarEquipo" data-param="id"><i class="fa fa-search"></i></button>
+                                </span>
+                            </div>
+                        </div>                       
+                        <div class="col-md-4">      
+                            <div class="form-group ">
+                                <label>Descripción:</label>
+                                <input type="text" id="descr_in" name="descr_in" value="{{ entity.ordenTrabajoDetalles[0].equipo.nombre }}" required="required" class="form-control">
+                            </div>
+                        </div>
+                        <div  class="col-md-12">                                                        
+                            <div class='box box-default box-solid eqNuevosDatatable'>
+                                <div class='box-header'>                                    
+                                    <h6 class="text-primary" style="margin:0;font-weight:bold;">Buscar Equipos</h6> 
+                                    <div class="pull-right box-tools">
+                                        <button type="button" class="btn btn-box-tool closesearch" ><i class="fa fa-close"></i></button>
+                                    </div>
+                                </div><!-- /.box-header -->
+                                <div id="datatableslist" class='box-body'></div>       
+                            </div>                             
+                        </div>
+                        
+                        <div class="col-md-12 ubicacion">
+                            {% set ubicacionActual = form.ubicacionNueva %}
+                            <fieldset>
+                                <div class="col-md-4">
+                                    <div class="form-group ">
+                                        <label>Cambiar estado a:&nbsp;</label>
+                                        <select id="estadoNuevo" name="estadoNuevo" class="form-control select2">
+                                            {% for est in estados %}
+                                                <option {% if est.abreviatura=='OP' %}selected="selected" {% endif %} value="{{ est.id }}" >{{ est.nombre }}</option>
+                                            {% endfor %}    
+                                        </select> 
+                                        {{ form_row(form.estadoNuevoId) }}
+                                    </div>            
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(ubicacionActual.conceptoEntrega) }}   
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(ubicacionActual.observaciones,{'attr':{'rows':1}}) }}   
+                                </div>
+                            </fieldset>   
+                            <fieldset>
+                                <div class="col-md-2">
+                                    {{ form_row(ubicacionActual.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'), 'class' : 'ubicacion_selector' } }) }}   
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(ubicacionActual.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_row(ubicacionActual.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+                                </div>
+                                <div class="col-md-2">
+                                    {{ form_row(ubicacionActual.piso, { 'attr': {'class' : 'piso_selector' } }) }}   
+                                </div>
+                            </fieldset>                         
+                        </div>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+  
+</div>
+<div style='display:none;'>
+    {{ form_end(form) }}
+</div>
+  
+<script type="text/javascript">
+    var $insumosHolder;
+$(document).ready(function() {    
+    $('#appbundle_tarea_ubicacionNueva_ubicacion').change();
+    $('#appbundle_tarea_ubicacion_ubicacion').change();
+    $('#estado').on('change',function(){
+        $('#appbundle_tarea_estadoId').val( $(this).val() );
+    });
+    $('#estadoNuevo').on('change',function(){
+        $('#appbundle_tarea_estadoNuevoId').val( $(this).val() );
+    });
+    $('#appbundle_tarea_estadoId').val( $('#estado').val() );    
+    $('#appbundle_tarea_estadoNuevoId').val( $('#estadoNuevo').val() );    
+    
+    date = $('#appbundle_tarea_fecha').datepicker();
+    date.css('z-index', 'auto');    
+    $('#appbundle_tarea_hora').timepicker({ 'timeFormat': 'G:i' });    
+    $('#appbundle_tarea_ordenTrabajoDetalle').select2({
+            dropdownParent: $('.modal')
+        });
+    
+    $('#appbundle_tarea_equipoNuevo').select2({
+            dropdownParent: $('.modal')
+        });
+    $('.panel').on('show.bs.collapse', function () {
+        var icon = $(this).find('button i');
+        icon.removeClass('fa-plus').addClass('fa-minus');
+    });
+    $('.panel').on('hide.bs.collapse', function () {
+        var icon = $(this).find('button i');
+        icon.removeClass('fa-minus').addClass('fa-plus');
+    });
+    
+    $('.ubicacion select').css('font-size','12px');
+    $('.eqNuevosDatatable').find('.closesearch').on('click',function(){
+        $('.eqNuevosDatatable').hide();
+        $('#datatableslist').html('');
+    });
+    $('.eqNuevosDatatable').hide();
+        
+    var sel = $('#appbundle_tarea_equipoNuevo');    
+    $('.searchAddEquipo').on('click',function(){
+        var xmlRequest = $.ajax({
+            url: $(this).data('url'),
+            type: 'GET',
+            success: function(data){
+               $('.eqNuevosDatatable').show();
+               $('#datatableslist').html(data);  
+               $('#datatableslist').find('#ckTodos').hide();
+               $('#equipos_dt_table').on('click','.ckItem',function(){ 
+                   var buscar = true;
+                   ck = $(this);
+                   item = $(this).data('id');  
+                   var selectedItems = (sel.select2("val")) ? sel.select2("val") : [];
+                   if( selectedItems.length>0 ){
+                       // verifico que el item no existe en el select
+                       if( selectedItems.indexOf(item.toString()) > -1 ){
+                           $('.eqNuevosDatatable').hide();
+                           //ck.attr('checked',false);
+                           buscar = false;
+                       }
+                   }
+                    if( buscar ){
+                        //buscar datos y agregar item al select
+                        $.getJSON("{{path('find_equipo_data_by_id')}}",{id:item}, function(data){
+                            if(data.msj=='OK'){
+                               //barcode.val( data.barcode );
+                                var newState = new Option(data.nombre, data.id, false, false);
+                                sel.append(newState);                                 
+                                //selectedItems.push(data.id.toString());   
+                                sel.val(data.id).trigger('change');                               
+                                //ck.attr('checked',false);
+                                $('.eqNuevosDatatable').hide();
+                                $('#descr_out').val(data.descripcion); 
+                            }else{
+                                alert(data.msj);
+                                ck.attr('checked',false);
+                                return false;
+                            }
+                        }); 
+                    }
+                   
+                });               
+            }            
+        });                    
+    });     
+    sel.on('select2:select',function(e){
+        id = e.params.data.id;
+        $.getJSON("{{path('find_equipo_data_by_id')}}",{id:id}, function(data){
+            if(data.msj=='OK'){
+              $('#descr_out').val(data.descripcion); 
+            }
+        });                    
+    });
+  /*  
+    $.ajax({
+        type: 'post',
+        url:  "{{ path('get_equipos_stocktecnico') }}" ,
+            success: function(data) {
+                changeDataSelect( sel, data );
+                sel.select2();                
+            }
+    });*/
+    
+    $('#appbundle_tarea_descripcion').focus();
+    
+});
+</script>

@@ -1,0 +1,288 @@
+{{ form_start(form) }}    
+<div class='box-body no-padding'>
+    <div class="col-md-12">
+        <div class="col-md-2">
+            {{ form_row(form.fecha) }}
+        </div>
+        <div class="col-md-2">
+            {{ form_row(form.hora) }}
+        </div>       
+        <div class="col-md-8">
+            {{ form_row(form.descripcion,{'attr':{'rows':'1'}}) }}
+        </div>
+    </div> 
+    <div class="col-md-12">
+        <div class="col-md-12">
+            {{ form_row(form.textoAdicional,{'attr':{'rows':'1'}}) }}
+        </div>        
+    </div> 
+                            
+    <div class="col-md-12">
+        <div class="box-group" id="accordion">
+            <div class="col-md-6" style="padding:5px">
+                <div class="panel box box-solid box-danger" id="accEqSalientes">
+                    <div class="box-header">
+                        <h3 class="box-title">Equipo/s a reemplazar</h3>
+                        <div class="box-tools pull-right">                        
+                            <button type="button" class="btn btn-box-tool bg-default btn-sm" data-toggle="collapse" href="#equipos-salientes"><i class="fa fa-minus"></i>
+                            </button>
+                        </div>            
+                    </div>
+                    <div id="equipos-salientes" class="panel-collapse collapse in">
+                        <div class="box-body">
+                            <div class="col-md-12" style="padding:0">
+                                <table class="table table-hover table-bordered" style="font-size:90%">
+                                    <tr>
+                                        <th style="width:3%">#</th>
+                                        <th style="width:60%" >Equipo <small style="font-weight:normal">[Tipo | Descripción | N° serie | Marca | Modelo ]</small></th>
+                                        <th>Descripción</th>
+                                    </tr>
+                                    {% for det in entity.ordenTrabajoDetalles %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ det.equipo.textoOT }}</td>
+                                            <td><input class="form-control desc_equipo" style="font-size:90%" type="text" name="desc_out[]" value="{{ det.equipo.nombre}}" data-id="{{ det.equipo.id }}"/></td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>                                                        
+                            <div class="col-md-12 ubicacion">
+                                {% set ubicacionActual = form.ubicacion %}
+                                <fieldset>
+                                    <div class="col-md-6">
+                                        <div class="form-group ">
+                                            <label>Cambiar estado a:&nbsp;</label>
+                                            <select id="estadoAnt" name="estado" class="form-control select2">
+                                                {% for est in estados if est.abreviatura!='OP' %}
+                                                    <option {% if est.inicial %}selected="selected" {% endif %} value="{{ est.id }}" >{{ est.nombre }}</option>
+                                                {% endfor %}    
+                                            </select> 
+                                            {{ form_row(form.estadoId) }}
+                                        </div>            
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(ubicacionActual.conceptoEntrega) }}   
+                                    </div>
+                                </fieldset>   
+                                <fieldset>
+                                    <div class="col-md-4">
+                                        {{ form_row(ubicacionActual.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'), 'class' : 'ubicacion_selector' } }) }}   
+                                    </div>
+                                    <div class="col-md-8">
+                                        {{ form_row(ubicacionActual.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+                                    </div>
+                                </fieldset>                         
+                                <fieldset>
+                                    <div class="col-md-10">
+                                        {{ form_row(ubicacionActual.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ form_row(ubicacionActual.piso, { 'attr': {'class' : 'piso_selector' } }) }}   
+                                    </div>
+                                </fieldset>                         
+                                <fieldset>
+                                    <div class="col-md-12">
+                                        {{ form_row(ubicacionActual.observaciones,{'attr':{'rows':1}}) }}   
+                                    </div>
+                                </fieldset>                         
+                            </div>                           
+                        </div>
+                    </div>
+                </div> 
+            </div> 
+            <div class="col-md-6" style="padding:5px">             
+                <div class="panel box box-solid box-success" id="accEqNuevos">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Reemplazar por</h3>
+                        <div class="box-tools pull-right">                
+                            <button type="button" class="btn btn-box-tool bg-default btn-sm" data-toggle="collapse"  href="#equipos-nuevos"><i class="fa fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="equipos-nuevos" class="panel-collapse collapse in">
+                        <div class="box-body">
+                            <div class="col-md-12" style="padding:0">
+                                <table id="eqNuevos" data-ord="0" class="table table-hover table-bordered" style="font-size:90%">
+                                    <thead>
+                                    <tr>
+                                        <th style="width:3%">#</th>
+                                        <th style="width:50%" >Equipo <small style="font-weight:normal">[Tipo | Descripción | N° serie | Marca | Modelo ]</small></th>
+                                        <th>Descripción</th>
+                                        <th style="width:3%"><a href="javascript:void(0)" data-toggle="tooltip" title="Buscar equipo" data-url="{{path('render_search_equipo')}}" 
+                                                class="searchAddEquipo " data-function="agregarEquipo" data-param="id"><i class="fa fa-search"></i></a></th>
+                                    </tr>                                    
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-12 ubicacion">
+                                {% set ubicacionActual = form.ubicacionNueva %}
+                                <fieldset>
+                                    <div class="col-md-6">
+                                        <div class="form-group ">
+                                            <label>Cambiar estado a:&nbsp;</label>
+                                            <select id="estadoNuevo" name="estadoNuevo" class="form-control select2">
+                                                {% for est in estados %}
+                                                    <option {% if est.abreviatura=='OP' %}selected="selected" {% endif %} value="{{ est.id }}" >{{ est.nombre }}</option>
+                                                {% endfor %}    
+                                            </select> 
+                                            {{ form_row(form.estadoNuevoId) }}
+                                        </div>            
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form_row(ubicacionActual.conceptoEntrega) }}   
+                                    </div>
+                                </fieldset>   
+                                <fieldset>
+                                    <div class="col-md-4">
+                                        {{ form_row(ubicacionActual.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'), 'class' : 'ubicacion_selector' } }) }}   
+                                    </div>
+                                    <div class="col-md-8">
+                                        {{ form_row(ubicacionActual.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+                                    </div>
+                                </fieldset>                         
+                                <fieldset>
+                                    <div class="col-md-10">
+                                        {{ form_row(ubicacionActual.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ form_row(ubicacionActual.piso, { 'attr': {'class' : 'piso_selector' } }) }}   
+                                    </div>
+                                </fieldset>                         
+                                <fieldset>
+                                    <div class="col-md-12">
+                                        {{ form_row(ubicacionActual.observaciones,{'attr':{'rows':1}}) }}   
+                                    </div>
+                                </fieldset>                         
+                            </div>                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+                                    
+    <!-- DATATABLES BUSQUEDA DE EQUIPOS  -->                                
+    <div  class="col-md-12">                                                        
+        <div class='box box-default box-solid eqNuevosDatatable' id="eqNuevosDatatable">
+            <div class='box-header'>                                    
+                <h5 style="margin:0;font-weight:bold;">Buscar Equipos</h5> 
+                <div style="text-align:center;margin-top:-20px">
+                    <button type="button" class="btn btn-box-tool bg-yellow-gradient btnselectEquipo" > AGREGAR EQUIPOS SELECCIONADOS </button>
+                </div>
+                <div class="pull-right box-tools">
+                    <button type="button" class="btn btn-box-tool closesearch" ><i class="fa fa-close"></i></button>
+                </div>
+            </div><!-- /.box-header -->
+            <div id="datatableslist" class='box-body'></div>       
+        </div>                             
+    </div>                                    
+  
+</div>
+<div style='display:none;'>
+    {{ form_end(form) }}
+</div>
+  
+<script type="text/javascript">
+$(document).ready(function() {    
+    $('#appbundle_tarea_ubicacionNueva_ubicacion').change();
+    $('#appbundle_tarea_ubicacion_ubicacion').change();
+    $('#estadoAnt').on('change',function(){        
+        $('#appbundle_tarea_estadoId').val( $(this).val() );
+    });
+    $('#estadoNuevo').on('change',function(){
+        $('#appbundle_tarea_estadoNuevoId').val( $(this).val() );
+    });
+    $('#appbundle_tarea_estadoId').val( $('#estadoAnt').val() );    
+    $('#appbundle_tarea_estadoNuevoId').val( $('#estadoNuevo').val() );    
+    
+    date = $('#appbundle_tarea_fecha').datepicker();
+    date.css('z-index', 'auto');    
+    $('#appbundle_tarea_hora').timepicker({ 'timeFormat': 'G:i' });    
+    /*$('#appbundle_tarea_ordenTrabajoDetalle').select2({
+            dropdownParent: $('.modal')
+        });
+    
+    $('#appbundle_tarea_equipoNuevo').select2({
+            dropdownParent: $('.modal')
+        });*/
+    $('.panel').on('show.bs.collapse', function () {
+        var icon = $(this).find('button i');
+        icon.removeClass('fa-plus').addClass('fa-minus');
+    });
+    $('.panel').on('hide.bs.collapse', function () {
+        var icon = $(this).find('button i');
+        icon.removeClass('fa-minus').addClass('fa-plus');
+    });
+    
+    $('.ubicacion select').css('font-size','12px');
+    $('.eqNuevosDatatable').find('.closesearch').on('click',function(){
+        $('.eqNuevosDatatable').hide();
+        $('#datatableslist').html('');
+    });
+    $('.eqNuevosDatatable').hide();
+             
+    $('.searchAddEquipo').on('click',function(){
+        var xmlRequest = $.ajax({
+            url: $(this).data('url'),
+            type: 'GET',
+            success: function(data){
+               $('.eqNuevosDatatable').show();
+               $('#datatableslist').html(data);  
+               //$('#datatableslist').find('#ckTodos').hide();
+               $('.modal-body').animate({
+                    scrollTop: $('.eqNuevosDatatable').offset().top 
+                }, 1000);                        
+            }            
+        });                    
+    });     
+    
+    $('#eqNuevosDatatable').on('click','.btnselectEquipo',function(){    
+        var selectIDs = $('.ckItem:checked').map(function(){
+                 return $(this).data('id');
+             }).get();                         
+         $.each(selectIDs, function (i, item) {  
+             var buscar = true; 
+             $('.id_equipo').each(function(){
+                 if( $(this).val()==item ){
+                     buscar = false;                                
+                 }
+             });             
+             if( buscar ){
+                //buscar datos y agregar item al select
+                $.getJSON("{{path('find_equipo_data_by_id')}}",{id:item}, function(data){
+                    if(data.msj=='OK'){
+                        var tr = $('<tr><td class="ord"></td><td class="eq"></td><td class="desc"></td><td class="del"></td></tr>');
+                        $('#eqNuevos tbody').append(tr);
+                        ord = $('#eqNuevos tbody').find('tr').length ;
+                        tr.find('.ord').html(ord);
+                        tr.find('.eq').html(data.nombre);
+
+                        input = $('<input class="form-control desc_equipo" style="font-size:90%" type="text" name="desc_in[]" value="'+data.descripcion+'"> <input class="id_equipo" type="hidden" name="eqid_in[]" value="'+data.id+'">  ');
+                        tr.find('.desc').html(input);
+                        tr.find('.del').html('<a href="javascript:void(0)" class="delEq" data-id="'+data.id+'" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');                        
+                    }else{
+                        alert(data.msj);
+                        return false;
+                    }
+                });                                                         
+            }
+         });         
+         $('.modal-body').animate({
+             scrollTop: $('#accordion').offset().top 
+         }, 1000);                                                
+         $('.eqNuevosDatatable').hide();
+    });
+
+    $('body').on('click','.delEq',function(){
+       //quitar de la tabla
+       $(this).closest('tr').remove();
+       $('#eqNuevos tr').each(function(i){
+           $(this).find('td.ord').html(i);
+       });       
+    });
+    
+    $('#appbundle_tarea_descripcion').focus();    
+});
+</script>

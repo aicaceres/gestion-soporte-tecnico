@@ -1,0 +1,66 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; Insumos</h3>
+                 {% if app.user.access('view_logs') and entities|length>0%}
+                    <div class="pull-right box-tools">
+                        <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                            data-id="" data-url="{{path('get_insumo_logs')}}"  >      <i class="fa fa-history"></i></button>  
+                    </div>
+                    {% endif %}   
+            </div><!-- /.box-header -->
+            <div class='box-body'>
+                <div class="box-body table-responsive" style="padding: 15px" >
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Código de Barra</th>
+                                <th>Tipo</th>
+                                <th class="hidden-xs">Marca</th>
+                                <th class="hidden-xs">Modelo</th>
+                                <th>Stock</th>                                
+                                <th class="no-sort thactions">
+                                    {% if app.user.access('insumo_new') %}
+                                    &nbsp;<a href="{{ path('insumo_adm_new') }}" data-toggle="tooltip" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                                    {% endif %}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+               {% for entity in entities %}
+                            <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }} ">                                
+                                <td>{{ entity.barcode }}</td>
+                                <td>{{ entity.tipo }}</td>
+                                <td class="hidden-xs">{{ entity.marca}}</td>
+                                <td class="hidden-xs">{{ entity.modelo}}</td>
+                                <td class="number">{{ entity.stockTotal|number_format(0,'','.') }}</td>
+                                <td class="link-actions">
+                                    {% if app.user.access('insumo_edit') %}
+                                    <a href="{{ path('insumo_adm_edit', { 'id': entity.id }) }}" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
+                                    {% endif %}
+                                    {% if app.user.access('insumo_delete') %}
+                                    <form action="{{ path('insumo_delete', { 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                                        <input type="hidden" name="_method" value="DELETE" />
+                                        {{ form_widget(deleteForms[entity.id]) }}
+                                        <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click(); "><i class="fa fa-trash-o"></i></a>
+                                        <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                                    </form> 
+                                    {% endif %}
+                                </td>
+                            </tr>
+               {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}

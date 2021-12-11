@@ -1,0 +1,127 @@
+<style>
+    .header{
+      text-align:center; 
+      padding: 0 !important;
+    }
+    .header span{
+        letter-spacing: 3px;  
+        font-size: 11px !important;
+        font-weight: bold;
+    }
+    .header.sinAsignar{
+        background-color:skyblue;
+    }
+    .header.asignados{
+        background-color:gainsboro;
+    }
+</style>
+<div class='box-body no-padding'>
+    <div class="col-md-12">
+        <table id="req" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Solicitante</th>
+                    <th>N° Incidencia</th>
+                    <th>Tipo</th>
+                    <th>Equipos</th>
+                    <th class="nosort" style="width: 5%">                            
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if sinAsignar|length>0 %}
+                        <tr><td colspan="6" class="header sinAsignar"><span>SIN ASIGNAR</span></td></tr>
+                    {% for req in sinAsignar %}        
+                        <tr>  
+                            <td>{{ req.fechaRequerimiento|date('d-m-Y') }}</td>                                
+                            <td>{{ req.solicitante.nombreCompleto}}</td>
+                            <td>{% if req.altaPrioridad %}
+                                <i class="fa fa-exclamation-circle text-red"></i>
+                                <input type="hidden" id="pr-{{ req.id }}" value="{{ req.altaPrioridad }}"/>
+                                {% endif %}{{ "%06d" | format(req.id)}}
+                            </td>
+                            <td>{{ req.tipoSoporte }}</td>           
+                            <td id="eq-{{ req.id }}">{{ req.detalles|length }}</td>    
+                            <td class="link-actions">
+                                    <div id="desc-{{ req.id }}" class="hidden" >{{ req.descripcion }}</div>
+                                    <button data-id="{{ req.id }}" class="btn btn-xs btn-flat btn-info btn-asignar" > Asignar </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    No hay requerimientos sin asignar
+                {% endif %}
+                {% if asignados|length>0 %}    
+                        <tr><td colspan="6" class="header asignados"><span>ASIGNADOS</span></td></tr>
+                    {% for req in asignados %}        
+                        <tr>  
+                            <td>{{ req.fechaRequerimiento|date('d-m-Y') }}</td>                                
+                            <td>{{ req.solicitante.nombreCompleto}}</td>
+                            <td>{% if req.altaPrioridad %}
+                                <i class="fa fa-exclamation-circle text-red"></i>
+                                <input type="hidden" id="pr-{{ req.id }}" value="{{ req.altaPrioridad }}"/> 
+                                {% endif %}{{ "%06d" | format(req.id)}}
+                            </td>
+                            <td>{{ req.tipoSoporte }}</td>           
+                            <td id="eq-{{ req.id }}">{{ req.detalles|length }}</td>    
+                            <td class="link-actions">
+                                <div id="desc-{{ req.id }}" class="hidden" >{{ req.descripcion }}</div>
+                                <button data-id="{{ req.id }}" class="btn btn-xs btn-flat btn-info btn-asignar" > Asignar </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>                             
+    </div>                                 
+</div>
+<script type="text/javascript">   
+$(document).ready(function() {    
+   $('.btn-asignar').on('click',function(){
+       var id = $(this).data('id');
+       var eq = parseInt($('#eq-'+id).html()) ; 
+       var prioridad = $('#pr-'+id).val() ; 
+       $('#appbundle_ordentrabajo_requerimiento').val( id );   
+       $('#appbundle_ordentrabajo_descripcion').val( $('#desc-'+id).html() );
+       if( prioridad ){
+           $('#appbundle_ordentrabajo_altaPrioridad').iCheck('check');           
+       }else{
+           $('#appbundle_ordentrabajo_altaPrioridad').iCheck('uncheck');  
+       }       
+       $.getJSON("{{path('find_detalle_by_reqid')}}",{id:id}, function(data){ 
+              var equipos = data['equipos'];
+              for (var i = 0, total = equipos.length; i < total; i++) {
+                    addNewEquipo();
+                    $dataHolder.find('.bcTd input').last().val(equipos[i].eqBc);
+                    $dataHolder.find('.bcTd input').last().attr('disabled',true);
+                    $dataHolder.find('.bcTd button.buscarEquipo').last().hide();
+                    $dataHolder.find('textarea').last().val(equipos[i].obs);
+                    var eqTd = $dataHolder.find('.eqTd').last();
+                    eqTd.find('.eqNombre').html(equipos[i].eqNombre);
+                    eqTd.find('[id$="_equipoId"]').val(equipos[i].eqId);
+                    eqTd.find('[id$="_reqdetalleId"]').val(equipos[i].id);                    
+                }     
+              $('#infoRequerimiento').html( data['info'] );  
+             $('#infoRequerimiento').find('.delReqAsociado').on('click',function(){        
+                if(confirm('Desea quitar la asociación de este requerimiento a la orden de trabajo?')){
+                    $('#appbundle_ordentrabajo_requerimiento').val( '' ); 
+                    $('#appbundle_ordentrabajo_descripcion').val( '' );
+                    // quitar equipos solo los agregados del requerimiento!!
+                    var items = $dataHolder.find('tr.item');
+                    items.each(function(){
+                        if( $(this).find('[id$="_reqdetalleId"]').val() ){
+                            $(this).remove();
+                        }
+                    });
+                    $('#appbundle_ordentrabajo_altaPrioridad').iCheck('uncheck');  
+                    $('#infoRequerimiento').html('');
+                    $('#reqDetalle').show();
+                }
+            });
+        });        
+       $('#reqDetalle').hide();
+       $('.cerrar').click();
+   }); 
+});
+</script>    

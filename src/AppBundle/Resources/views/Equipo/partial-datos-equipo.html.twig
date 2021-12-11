@@ -1,0 +1,59 @@
+<div class="col-md-12 datos-equipo">
+    <button type="button" class="pull-right closeqdata"> <i class="fa fa-close"></i> </button>
+    <fieldset>
+        <div>
+            <b>Código de Barra:</b> {{ datos.barcode}}
+        </div>
+        <div>
+            <b>Descripción:</b> {{ datos.nombre}}
+        </div>
+        <div>
+            <b>Código:</b> {{ datos.codigo}}
+        </div>
+    </fieldset>     
+    <fieldset>     
+        <div>
+            <b>Proveedor:</b> {{ datos.proveedor}}
+        </div>
+        <div>
+            <b>Fecha Compra:</b>{%if datos.fechaCompra%} {{ datos.fechaCompra|date('d-m-Y')}} {%endif%}
+        </div>
+        <div>
+            <b>N° Remito:</b> {{ datos.nroRemito}}
+        </div>
+        <div>
+            <b>N° Factura:</b> {{ datos.nroFactura}}
+        </div>
+    </fieldset>  
+    <fieldset>  
+        <div>
+            <b>Observaciones:</b> {{ datos.observaciones}}
+        </div>
+    </fieldset>         
+    <fieldset>  
+         {%if datos.ubicacionActual%}
+        <div>
+            <b>Ubicación:</b> {{ datos.ubicacionActual.texto}}
+        </div>
+        <div>
+            <b>Dirección:</b>{{ datos.ubicacionActual.departamento.direccion}}
+        </div>
+        <div>
+            <b>Localidad:</b>{{ datos.ubicacionActual.departamento.localidad.nombreCompleto}}
+        </div>                                    
+        <div>
+            <b>Teléfono:</b>{{ datos.ubicacionActual.departamento.telefono}}
+        </div>                            
+        <div>
+            <b>Responsable:</b> {{ datos.ubicacionActual.departamento.responsable}}
+        </div> 
+        <div>
+            <b>Red:</b> {{ datos.ubicacionActual.redIp}}
+        </div> 
+        {%else%}
+            <div>
+            <b>Sin Ubicación</b> 
+        </div> 
+        {%endif%}
+    </fieldset>      
+</div>

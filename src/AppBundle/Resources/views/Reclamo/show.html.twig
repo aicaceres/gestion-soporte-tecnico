@@ -1,0 +1,50 @@
+<input id='title_estado' type="hidden" value= '  {% if reclamo.abierto==1 %} <span class="label bg-red">Abierto</span> {% else %} <span class="label bg-gray">Cerrado</span>{% endif %}  ' />
+<div class='col-md-12 no-padding' id="reclamo_show">    
+    <h5 style="background-color:lightgray;padding: 6px 15px;margin:0 0 2px 0;"><strong>{{reclamo.proveedor.departamento.nombreCompleto}}</strong> </h5>
+    {% if reclamo.tipoProveedor %}
+    <fieldset>
+        <div class="col-md-12">
+            <div style="display:inline-block"> {{ reclamo.iconoProveedor|raw }}&nbsp;  <strong>{{ reclamo.nombreProveedor|upper}}</strong> - {{ reclamo.tipoConexionProveedor }}&nbsp; &nbsp;&nbsp;</div>
+            <div style="display:inline-block;font-size:12px;">&nbsp; <i class="fa fa-phone"></i>&nbsp; {{ reclamo.telefonoProveedor}} &nbsp;</div>
+            <div style="display:inline-block;font-size:12px;">&nbsp; <i class="fa fa-envelope"></i>&nbsp; {{ reclamo.emailProveedor }}&nbsp;</div>
+            <div style="display:inline-block;font-size:12px;">&nbsp; <i class="fa fa-user"></i>&nbsp; {{ reclamo.referenciaProveedor}}&nbsp; </div>                            
+        </div>                                            
+    </fieldset> 
+    <hr style="margin:3px 0 0 0;">
+    {% endif %}    
+    <div class="col-md-12">
+        
+    </div>
+    <div class="col-md-12">  
+        <h4> Detalle Histórico: </h4>
+        <table class="table">
+            <tr>
+                <th style="width:3%">#</th>
+                <th style="width:15%">Fecha/Hora</th>
+                <th style="width:15%">N° Ref.</th>
+                <th>Referente</th>
+                <th>Descripción</th>
+                <th style="width:15%">Usuario</th>
+            </tr>
+            {% for res in resumen %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ res.fecha|date('d-m-Y H:i') }}</td>
+                    <td>{{ res.nroReferencia }}</td>
+                    <td>{{ res.referente }}</td>
+                    <td>{{ res.detalle|nl2br }}</td>
+                    <td>{{ res.usuario }}</td>
+                </tr>                            
+            {% endfor %}
+        </table>
+    </div>
+           
+</div>
+<script type="text/javascript">                    
+$(document).ready(function() {
+    $('#reclamo_show').closest('.modal-body').addClass('no-padding'); 
+    dialog = $('#reclamo_show').closest('.modal-dialog');    
+    dialog.find('.modal-title').html('Reclamo N° {{reclamo.nroReferencia}}'+'  '+ $('#title_estado').val() ); 
+    dialog.find('.modal-title span').css('margin-left','20px')
+});
+</script> 

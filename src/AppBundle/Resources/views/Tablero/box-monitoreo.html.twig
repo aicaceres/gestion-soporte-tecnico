@@ -1,0 +1,65 @@
+<style>
+    .nivel1{
+        font-size: 14px;        
+    } 
+    .nivel1 span.semaforo span{
+        font-size: 14px;       
+    } 
+    .badge.cero {
+        opacity: 0.3;
+    }
+    .semaforo {
+        padding: 0;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="box box-default">    
+    <div class="box-header with-border">
+        <h3 class="box-title"><i class="fa fa-sitemap"></i> &nbsp;Monitoreo de red</h3>
+        <div class="box-tools pull-right">
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+        </div>
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+
+        <table class="table table-bordered">
+            <thead>
+                <tr class="bg-navy">                        
+                    <th> Ubicación </th>
+                    <th style="width:100px"> Estado <i class="fa fa-refresh pull-right hidden"></i> </th>                            
+                </tr>
+            </thead>
+            <tbody>                
+                {% for ubicacion in ubicaciones %}
+                    {% if ubicacion.id in app.user.ubicacionesPermitidas or app.user.rol.admin %}
+                    <tr class="nivel1" data-nivel="1" data-id="U{{ ubicacion.id }}">
+                        <td>{{ ubicacion.abreviatura|upper}} {% if ubicacion.reclamosAbiertos %} &nbsp; <a href="{% if app.user.access('monitoreo_reclamo') %} {{ path('monitoreo_reclamo') }} {% else %} javascript:void(0); {% endif %}"> <span class="label bg-orange" title="Reclamos abiertos">{{ ubicacion.reclamosAbiertos }}</span> </a>{% endif %} 
+                            <i style="margin-top:2px" data-id="{{ ubicacion.id }}" class="fa fa-circle-o-notch fa-spin testipubic pull-right hidden"></i>
+                        </td> 
+                        <td style="text-align:center;padding:3px 0 0 0">
+                            <span class="semaforo">
+                                <span class="badge cero bg-green">0</span>
+                                <span class="badge cero bg-yellow2">0</span>
+                                <span class="badge cero bg-red">0</span>
+                            </span>
+                        </td>                                                                                                    
+                    </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr><td colspan="2" style="text-align:center"> 
+                        <button class="btn btn-xs init">Iniciar Test</button>
+                        <button class="btn btn-xs abort hidden">Cancelar Test</button>
+                        <a href="{{ path('monitoreo_estadored') }}" class="btn btn-xs btn-default pull-right"><small>Ir a Monitoreo</small></a>
+                    </td></tr>
+            </tfoot>
+        </table>            
+    </div>
+    <!-- /.box-body -->
+</div>
+<!-- /.box -->

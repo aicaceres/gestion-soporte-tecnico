@@ -1,0 +1,49 @@
+{% if app.user.access('requerimiento') %}
+    <div class="box box-default">    
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-briefcase"></i> &nbsp;Requerimientos Sin Asignar</h3>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body"> 
+
+            <table class="table no-margin">                
+                <thead>
+                    <tr>                        
+                        <th> Fecha </th>
+                        <th> Solicitante </th>
+                        <th> N° Incidencia </th>
+                        <th> N° JIRA </th>
+                        <th> Tipo </th>
+                        <th> Tiempo </th>
+                        <th> Asignar </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if reqsinasignar|length > 0 %}
+                    {% for req in reqsinasignar %}
+                        <tr class="{%if req.altaPrioridad %}altaPrioridad{%endif%}">
+                            <td>{{ req.fechaRequerimiento|date('d/m/Y') }}</td>
+                            <td>{{ req.solicitante.nombreCompleto }}</td>
+                            <td><a href="javascript:void(0)" class="view-req" data-nro="{{ "%06d" | format(req.id)}}" data-url="{{ path('soporte_requerimiento_show', { 'id': req.id }) }}" data-toggle="tooltip" title="Ver OT">{{ "%06d" | format(req.id)}}</a></td>
+                            <td>{{ req.jira }}</td>
+                            <td>{{ req.tipoSoporte }}</td>
+                            <td>{{ req.tiempo }}</td>
+                            <td>{% if app.user.access('requerimiento_asign') %}<a href="javascript:void(0)" data-url="{{ path('render_asignar_requerimiento',{'id':req.id}) }}" data-nro="{{ "%06d" | format(req.id)}}" class="btn btn-info btn-xs asignar-req" data-toggle="tooltip" title="Asignar requerimiento" >ASIGNAR</a> {% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                    {% else %}
+                        <tr><td colspan="7" style="text-align:center;" class="text-orange"><h5>NO HAY REQUERIMIENTOS PENDIENTES</h5></td></tr>
+                    {% endif %}
+                </tbody>                        
+            </table>
+
+        </div>
+        <!-- /.box-body -->
+    </div>
+    <!-- /.box -->
+{% endif %}

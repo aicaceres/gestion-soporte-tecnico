@@ -1,0 +1,20 @@
+{% import "AvanzuAdminThemeBundle:layout:macros.html.twig" as macro %}
+<!-- Sidebar user panel -->
+<div class="user-panel">
+    <div class="pull-left image">
+     {{ macro.avatar('bundles/app/img/logomin.png', app.user.username,'no' )  }}
+    </div>
+    <div class="pull-left info">
+        <p>{{ app.user.nombre }}</p>
+        <a href="{{path('usuario_logout')}}"><i class="fa fa-sign-out"></i> Cerrar Sesión</a>
+    </div>
+</div>
+<form action="{{ path('buscar_equipo') }}" target="_blank" method="post" class="sidebar-form hidden">
+    <div class="input-group">
+        <input type="text" name="search_term" id="search_term" class="form-control" placeholder="Buscar equipo...">
+        <span class="input-group-btn">
+            <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+            </button>
+        </span>
+    </div>
+</form>    

@@ -1,0 +1,78 @@
+<fieldset style="padding-bottom:10px;">
+    <div class="col-md-12">
+        <span style="padding-right:20px;"><strong>Fecha:</strong>&nbsp;{{entity.fechaRequerimiento|date('d-m-Y [H:i]')}}</span>                        
+    
+        <span style="padding-right:20px;"><strong>Tipo de Incidencia:</strong>&nbsp;{{entity.tipoSoporte}}</span>
+    
+        <span style="padding-right:20px;"><strong>N° Incidencia:</strong>&nbsp;{{ "%06d" | format(entity.id)}}</span>
+    
+        <span style="padding-right:20px;"><strong>N° JIRA:</strong>&nbsp;{{entity.jira}}</span>
+    
+        <span style="padding-right:20px;{% if entity.estado=='CANCELADO'%}color:red;{%endif%}"><strong>Estado:</strong>&nbsp;{{entity.estado}}</span>
+    </div> 
+</fieldset> 
+<fieldset style="padding-bottom:10px;">
+    <div class="col-md-7">
+        <span><strong>Area Solicitante:</strong>&nbsp;{{entity.solicitante.nombreCompleto}}</span>                        
+    </div>
+    <div class="col-md-5">
+        <span><strong>Nombre del Solicitante:</strong>&nbsp; {{entity.responsable}}</span>
+    </div>    
+</fieldset>    
+<fieldset style="padding-bottom:15px;">
+    <div class="col-md-12">
+        <span><strong>Descripcion del Requerimiento:</strong>&nbsp;{{entity.descripcion}}</span>                        
+    </div>                                       
+</fieldset>
+<div class="col-md-12">
+    <div class="col-md-12">
+        <h5 class="text-yellow" style="margin:0 0 4px;">EQUIPOS ASOCIADOS</h5>
+        <hr style="margin-top:0;margin-bottom: 5px;border:2px solid #f39c12;">
+        <table id="equipos" class="table">
+            <thead>
+                <tr>
+                    <th style="width:3%">#</th>
+                    <th style="width:15%">Código de Barra</th>
+                    <th style="width:42%">Tipo - Descripción - N° de Serie - Marca - Modelo</th>
+                    <th style="width:35%">Obs. Adicionales</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in entity.detalles  %}        
+                    <tr class="item" divdata="item_items">
+                        <td>{{ loop.index }}</td>
+                        <td>{{ item.equipo.barcode }}</td>
+                        <td>{{ item.equipo.textoOT }}</td>    
+                        <td>{{ item.descripcion }}</td> 
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div style="text-align:center;margin-bottom: 20px;">
+        {% if entity.id %}
+            <a href="{{ path('print_requerimiento_recepcion_equipo',{'id':entity.id})}}" class="btn btn-default" target="_blank" ><i class="fa fa-print"></i>&nbsp; Acta de Recepción</a>                                                    
+            {% if entity.estado=='FINALIZADO' %}
+                <a href="{{ path('print_requerimiento_acta_finalizacion',{'id':entity.id})}}" class="btn btn-default" target="_blank" ><i class="fa fa-print"></i>&nbsp; Acta de Finalización</a>                                                    
+            {% endif %}                    
+        {% endif %}                    
+        </div>    
+    </div>    
+</div>                                     
+{% include "admin-form-data.html.twig" with {'table':entity} %}
+<div class="col-md-12">
+{% if entity.ordentrabajoAsociadas %}
+    <fieldset style="padding-bottom:10px;">
+        <div class="col-md-12">
+            {% if app.user.access('ordentrabajo') %}
+                <span><strong>Órdenes de trabajo asociadas:</strong>&nbsp;
+                    {% for ot in entity.ordentrabajoAsociadas %}
+                        <span title="Técnico {{ ot.tecnico.nombre }}"> #{{ ot.nroOT }}</span> &nbsp;
+                    {% endfor %}    
+                </span>
+            {% else %}
+                <span><strong>Técnico/s:</strong>&nbsp;{{entity.tecnicosAsignadosTxt}}</span>
+            {% endif %}
+        </div>                                       
+    </fieldset>
+{% endif %}
+</div>

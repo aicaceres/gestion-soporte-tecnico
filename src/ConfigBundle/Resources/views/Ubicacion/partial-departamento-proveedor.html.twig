@@ -1,0 +1,88 @@
+<div class='box datos-proveedor collapsed-box {{box_second_color}} '>
+    <div class='box-header'>
+        <i class="fa fa-sitemap "></i>
+        <h3 class="box-title">Datos de Conexión &nbsp;&nbsp;  </h3>                   
+        <div class="pull-right box-tools">
+            <button type="button" class="btn btn-box-tool btn-datos-proveedor" ><i class="fa fa-plus"></i>
+                </button>
+        </div>
+    </div><!-- /.box-header -->
+    <div class='box-body'>
+        <div class="row">                   
+            <fieldset>
+                <div style="margin: 0 15px 15px;border-bottom: 2px solid gray;background-color: #eee;padding: 3px 0px 2px 6px;font-weight: bold;"> <i class="glyphicon glyphicon-link"></i> VÍNCULO-ENLACE</div>
+                <div class="col-md-4">
+                    {{ form_row(form.proveedor.enlaceProveedor, { 'attr': {'autofocus':'autofocus' } }) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_row(form.proveedor.enlaceTipoConexion) }}
+                </div>    
+                <div class="col-md-4">
+                    {{ form_row(form.proveedor.enlaceReferenciaCliente) }}
+                </div>                
+            </fieldset>
+            <fieldset>
+                <div class="col-md-6">
+                    {{ form_row(form.proveedor.enlaceTelefonoReclamo) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.proveedor.enlaceEmailReclamo) }}
+                </div>    
+            </fieldset>
+            
+            <fieldset>
+                <div style="margin: 0 15px 15px;border-bottom: 2px solid gray;background-color: #eee;padding: 3px 0px 2px 6px;font-weight: bold;"><i class="fa fa-internet-explorer" ></i> INTERNET</div>
+                <div class="col-md-4">
+                    {{ form_row(form.proveedor.internetProveedor, { 'attr': {'autofocus':'autofocus' } }) }}
+                </div>
+                <div class="col-md-4">
+                    {{ form_row(form.proveedor.internetTipoConexion) }}
+                </div>    
+                <div class="col-md-4">
+                    {{ form_row(form.proveedor.internetReferenciaCliente) }}
+                </div>                
+            </fieldset>
+            <fieldset>
+                <div class="col-md-6">
+                    {{ form_row(form.proveedor.internetTelefonoReclamo) }}
+                </div>
+                <div class="col-md-6">
+                    {{ form_row(form.proveedor.internetEmailReclamo) }}
+                </div>    
+            </fieldset>                                        
+
+                            <fieldset>
+                <div class="col-md-3 col-md-offset-3">
+                   <div class="form-group">
+                        {{ form_label(form.ipPrincipal) }}
+                        <div class="input-group input-group-sm">                            
+                                {{ form_widget(form.ipPrincipal) }}
+                            <span class="input-group-btn">
+                                <button type="button" data-url="{{ path('pruebaping') }}" 
+                                        class="checkip btn btn-info btn-flat">Test <i class="fa fa-spinner fa-spin hidden"></i></button>
+                              </span>
+                        </div>                        
+                    </div>
+                </div>    
+                <div class="col-md-3">
+                    <div class="form-group">
+                        {{ form_label(form.ipRespaldo) }}
+                        <div class="input-group input-group-sm">                            
+                                {{ form_widget(form.ipRespaldo) }}
+                            <span class="input-group-btn">
+                                <button type="button" data-url="{{ path('pruebaping',{ 'ip': entity.ipRespaldo }) }}" 
+                                        class="checkip btn btn-info btn-flat">Test <i class="fa fa-spinner fa-spin hidden"></i></button>
+                              </span>
+                        </div>                        
+                    </div>
+                </div>    
+            </fieldset>     
+            <fieldset>
+                <div class="col-md-12">
+                    {{ form_row(form.proveedor.observaciones, { 'attr': {'rows':'1' } }) }}
+                </div>
+            </fieldset>
+        </div>
+
+    </div>      
+</div> 

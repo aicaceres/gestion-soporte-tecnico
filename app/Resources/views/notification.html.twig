@@ -1,0 +1,17 @@
+{% for type, messages in app.session.flashbag.all() %}
+    {% for message in messages %}
+        {# type = danger, info, warning, check #}
+        {# icon = ban, info, warning, check #}
+    <div class="alert alert-{{ type }} alert-dismissable">
+        {% if type=='danger' %}
+            <i class="fa fa-ban"></i>
+        {% elseif type=='success' %}    
+            <i class="fa fa-check"></i>
+        {% else %}    
+            <i class="fa fa-{{ type }}"></i>
+        {% endif %}    
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        {{ message }}
+    </div>
+    {% endfor %}
+{% endfor %}

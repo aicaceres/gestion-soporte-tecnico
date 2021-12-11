@@ -1,0 +1,91 @@
+{% extends "dataTableList.html.twig" %}
+{% set table = app.request.attributes.get('table') %}
+{% block page_content %}    
+<div class='row'>
+    <div class='col-md-12'>
+        <div class="box box-solid">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="box-header">
+                            <i class="fa fa-building-o"></i>
+                            <h3 class="box-title">Ubicaciones</h3>
+                        </div>
+                        <!-- Navigation - folders-->
+                        <div style="margin-top: 15px;">
+                            <ul class="nav nav-pills nav-stacked" id="tab-parametro">
+                                <li class="header">Seleccionar</li>
+                                <li><a href="{{ path('configuracion_ubicacion',{ 'table': 'Ubicacion' }) }}"> Ubicación</a></li>
+                                <li><a href="{{ path('configuracion_ubicacion',{ 'table': 'Edificio' }) }}"> Edificio</a></li>
+                                <li><a href="{{ path('configuracion_ubicacion',{ 'table': 'Departamento' }) }}"> Departamento</a></li>
+                            </ul>
+                        </div>
+                    </div><!-- /.col (LEFT) -->
+                    <div class="col-md-10">
+                        <div class='box box-solid {{box_color}}'>
+                            <div class='box-header'>
+                                <h3 class='box-title'><i class="fa fa-building-o"></i> &nbsp;{{title}}</h3>
+                            </div><!-- /.box-header -->
+                            <div class='box-body pad'>
+                                {% include "notification.html.twig" %}                                
+                                <div class="box-body table-responsive pad">
+                                        <!-- content -->                                        
+                                </div>
+                            </div>
+                        </div><!-- /.box -->
+                    </div><!-- /.col (RIGHT) -->
+                </div><!-- /.row -->
+            </div><!-- /.box-body -->
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script type="text/javascript">
+$(document).ready(function() {     
+    $('.table-responsive').html({{ html|raw }});        
+    $('#searchform').find('.select2').change(function(){
+        if( $(this).attr('id')=='selectUbicacion' ){
+            $('#selectEdificio').val('');
+        }
+        $('#searchform').submit();
+    });
+    $('.nav-pills a[href$="' + "{{ table }}" + '"]').parent('li').addClass('active');
+    $('.new,.edit').on('click',function(){
+        var loading = '<div class="overlay"><i class="fa fa-spinner fa-spin"></i></div>';
+        var tabla = "{{ table }}";
+        $('.table-responsive').html(loading);
+        var url = $(this).data('url');
+        $.ajax({
+            type: 'get',
+            url: url,
+            success: function(data) {
+                $('.table-responsive').html(data);               
+                $('input').iCheck({
+                    checkboxClass: 'icheckbox_square-blue',
+                    radioClass: 'iradio_square-blue',
+                    increaseArea: '20%' // optional
+                  }); 
+                $('#configbundle_ubicacion_pisos').select2();
+                $('#configbundle_ubicacion_nombre').focus();
+            }
+        });        
+    });   
+    $('.monitorear-ip').on('click',function(){
+        var spin = $(this).find('.fa-spin');
+        spin.removeClass('hidden');
+        var url = $(this).data('url');
+        $.ajax({
+            type: 'get',
+            url: url,
+            success: function(data) {
+                alert(data);
+                spin.addClass('hidden');
+            }
+        }); 
+    });
+}); 
+</script>
+{% endblock %}

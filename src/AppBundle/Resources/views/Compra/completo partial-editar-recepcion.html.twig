@@ -1,0 +1,108 @@
+
+
+<div id="modal-edit-recepcion">
+{{ form_start(form) }}
+{% include "form-notification.html.twig" %}
+<div class="col-md-12">
+    <fieldset>
+        <div class="col-md-2">
+            {{ form_row(form.fechaRecepcion) }}
+        </div> 
+        <div class="col-md-3">
+            {{ form_row(form.nroRemito) }}
+        </div> 
+        <div class="col-md-3" {% if entity.nroFactura %} style="display:none;" {% endif %}>
+            {{ form_row(form.nroFactura) }}
+        </div> 
+        <div class="col-md-4">
+            {{ form_row(form.file) }}
+            {{ form_errors(form.file) }}
+            {% if entity.webPath %}
+                <a href="{{ asset(entity.webPath)}}" target="_blank"> <i class="fa fa-file-text"></i> Ver Comprobante </a>                        
+            {% endif %}</span>
+        </div> 
+    </fieldset>     
+    <fieldset>
+         <div class="col-md-4">
+            {{ form_row(form.deposito) }}
+        </div>
+        <div class="col-md-8">
+            {{ form_row(form.observaciones) }}
+        </div> 
+    </fieldset>     
+</div>
+    <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover table-recibir">
+        <thead>
+            <tr>
+                <th style="width:30px;text-align:center">#</th>
+                <th>Detalle</th>
+                <th style="width:15%;">N° Serie</th>
+                <th style="width:13%;">Precio Unit.</th>
+                <th style="width:8%;">Pendiente</th>
+                <th style="width:10%;">Recibido</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in form.detalles %}
+                {% set clase = item.vars.data.compraDetalle.claseDetalle  %}
+                <tr {% if clase=='E' %}data-eqid="{{ item.vars.data.equipo.id }}"{% endif %}>
+                    <td style="vertical-align:middle;padding-left:10px;font-weight:bold">{{loop.index}}</td>
+                    <td class="insumoTd" {% if not item.vars.data.insumo %} style="display:none"{% endif %} >
+                        <div class="col-md-12" style="padding-left: 0;">
+                             {{ form_widget(item.insumo) }} 
+                        </div>             
+                    </td>    
+                    <td class="newItemTd" data-tipo="{{ clase }}" {% if item.vars.data.insumo %} style="display:none"{% endif %} >
+                        <div class="col-md-12" style="padding:0">
+                            <div class="col-md-6" style="padding-left: 0;">                    
+                                {{ form_widget(item.tipo) }} 
+                                {{ form_errors(item.tipo) }}                                                                        
+                            </div>
+                            <div class="col-md-6" style="padding-left: 0;">
+                                {%if clase=='E' %}
+                                    {{ form_widget(item.nombre) }}
+                                {%else%}    
+                                    <div class="input-group"> 
+                                        {{ form_widget(item.nombre) }}
+                                        <span class="input-group-btn" style="padding-left: 10px;">
+                                            <button data-toggle="tooltip" title="Seleccionar insumo existente" type="button" 
+                                                    class="btn btn-default btn-flat btn-xs backInsumoTd"><i class="fa fa-times"></i></button>
+                                        </span>
+                                    </div> 
+                                {%endif%}    
+                            </div>                                       
+                        </div> 
+                        <div class="col-md-12" style="padding  : 6px 0;">
+                            <div class="col-md-6" style="padding-left: 0;">
+                                {{ form_widget(item.itemMarca, { 'attr': {'urlModelos' : path('select_modelos') } }) }}
+                            </div>                                       
+                            <div class="col-md-6" style="padding-left: 0;">
+                                {{ form_widget(item.itemModelo) }}
+                            </div>                                       
+                        </div>          
+                    </td>
+                    <td>{% if clase=='E' %} {{ form_widget(item.nroSerie, { 'attr': {'required' : 'required' } }) }}
+                        {% else %} <div style="display:none;">{{ form_widget(item.nroSerie) }}</div> {% endif %}
+                        <div class="hidden">{{ form_row(item.compraDetalle) }}</div>        
+                    </td>
+                    <td class="precioTd"><div class="input-group">
+                            {{ form_widget(item.precio, { 'attr': {'class' : 'number','min':'0'} }) }}                    
+                            <span class="input-group-btn" style='width:46px'>
+                                {{ form_widget(item.moneda, { 'attr': {'style' : 'padding:0;font-size:11px'} }) }}   
+                            </span>              
+                        </div>
+                    </td>
+                    <td class="cant-pendiente" style="text-align:right" >{% if clase=='E' %} 0 {% else %} {{ item.vars.data.compraDetalle.cantidadPendiente|number_format(0,'.','') }} {% endif %}</td>                                
+                    <td data-cantidad="{% if clase=='I' %}{{ item.vars.data.cantidad }}{% else %} 0{% endif %}">{% if clase=='E' %} {{ form_widget(item.cantidad, { 'attr': {'class' : 'number','min':'0','max':'1'} }) }}
+                        {% else %} {{ form_widget(item.cantidad, { 'attr': {'class' : 'number','min':'0'} }) }} {% endif %}  </td>
+                </tr>
+            {% endfor %}           
+        </tbody>
+    </table>    
+
+    <div style="display:block">    
+        {{ form_end(form) }}
+    </div>         
+</div>         
+ 
+    

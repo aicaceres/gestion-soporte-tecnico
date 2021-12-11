@@ -1,0 +1,128 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#dd4b39" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 margin='30px 0' text-align="center"> Orden de Trabajo N° {{ ot.nroOT }}</h2>              
+        
+        <table font-size="9px">
+                <tr>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">N° de Jira</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">Fecha</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">Área Solicitante</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="5 cm">Tipo de Incidencia</td>                    
+                </tr>                
+                    <tr>
+                        <td height="20px" vertical-align="middle" text-align="center">{{ ot.jira }}</td>
+                        <td height="20px" vertical-align="middle" text-align="center">{{ ot.fechaOrden|date('d/m/Y') }}</td>
+                        <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ ot.requerimiento.solicitante.nombreCompleto }}</td>    
+                        <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ ot.requerimiento.tipoSoporte }}</td> 
+                    </tr>                             
+        </table>
+ 
+        <table font-size="9px">
+                <tr>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" >DETALLE DE LA OT</td>
+                </tr>                
+                    <tr>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{ ot.descripcion }}</td>
+                    </tr>                             
+        </table>
+        {% if ot.getTareasGenerales %}
+        <table font-size="9px">
+                <tr>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" >TAREAS REALIZADAS</td>
+                </tr>  
+                {% for item in ot.tareas if item.ordenTrabajoDetalles|length==0 and item.tipoTarea.abreviatura == 'TS'  %}  
+                 <tr>
+                     <td height="20px" vertical-align="middle" padding-left="5px">                     
+                        {{ item.descripcion|raw }}                        
+                     </td>
+                 </tr> 
+                 {% endfor %}
+        </table>                
+        {% endif %}    
+        
+        {% if ot.detalles|length>0 %}
+            {% set cntin,cntout = 0,0  %}
+             {% for item in ot.detalles  %}
+                {% if item.tipoRecambio=='IN' %}
+                    {% set cntin = cntin + 1 %}
+                {% else %} 
+                    {% set cntout = cntout + 1 %}
+                {% endif %}                    
+            {% endfor %}   
+            <h3 font-size="12px">Equipamiento {% if cntin==0 %} entregado {% else %} asociado{% endif %}:</h3>                
+            <table font-size="9px">
+                    <tr font-style="bold">
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="0.5 cm">#</td>
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="3 cm">Equipo</td>
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="5 cm">Marca/Modelo</td>
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="3 cm">N° Serie</td>                        
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center">Observaciones</td>
+                    </tr>
+                    {% for item in ot.detalles if item.tipoRecambio=='OUT'  %}        
+                        <tr>
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ loop.index }}</td>
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.tipo.nombre }}</td>
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.marca~' / '~item.equipo.modelo }}</td>    
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.nroSerie }}</td> 
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.descripcion }}</td> 
+                        </tr>
+                                                
+                    {% endfor %}                
+            </table>  
+            {% if cntin>0 %}
+            <h3  font-size="12px">Equipamiento entregado:</h3>               
+            <table font-size="9px">
+                    <tr font-style="bold">
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="0.5 cm">#</td>
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="3 cm">Equipo</td>
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="5 cm">Marca/Modelo</td>
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="3 cm">N° Serie</td>                        
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center">Observaciones</td>
+                    </tr>
+                    {% for item in ot.detalles if item.tipoRecambio=='IN'  %}        
+                        <tr>
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ loop.index }}</td>
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.tipo.nombre }}</td>
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.marca~' / '~item.equipo.modelo }}</td>    
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.nroSerie }}</td> 
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.descripcion }}</td> 
+                        </tr>
+                                                
+                    {% endfor %}                
+            </table>     
+            {% endif %}
+            
+        {% endif %}
+        
+        
+        
+        <p margin-top='50px' font-size="12px">Recibe: .................................................................................... DNI:........................... Firma:</p>
+        <p font-size="12px" margin-top='20px' padding-bottom="10px">Responsable Área: ................................................................................................... Firma:</p>
+        <p font-size="10px" padding="0">{{ ot.requerimiento.solicitante.nombreCompleto }}</p>           
+
+        <p font-size="12px" margin-top='30px' padding-bottom="10px">Responsable Servicio técnico: .................................................................................. Firma:</p>
+        <p font-size="10px" padding="0">{{ ot.tecnico }}</p>            
+        
+    </dynamic-page>
+</pdf>

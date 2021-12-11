@@ -1,0 +1,75 @@
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <i class="fa fa-table"></i>
+
+        <h3 class="box-title">Discriminado por Tipo de Incidencia</h3>
+
+        <div class="box-tools pull-right">
+            <form id="printform_anualxIncidencia" name="printform" target="_blank" style="display:inline-block;" 
+                          action="{{path('print_reporte')}}" method="POST">                        
+                        <input type="hidden" id="grafico_anualreqxIncidencia" name="grafico"/>  
+                        <input type="hidden" class="tiposalida" name="tiposalida"/>
+                        <input type="hidden" name="reporte" value="reqanualxincidencia"/>
+                        <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i> </button> 
+                        <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i> </button> 
+                    </form>
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="box-body">  
+        <div class="col-md-12">               
+            <canvas height="100px" id="grafico-anual-reqxincidencia"></canvas>
+        </div> 
+        
+        {% set selTipos = app.session.get('filtro_reportes_soporte_anual')['selTipos'] %} 
+        {% set corte = (reqxIncidencia.tipos|length)/2 %}
+        
+        {% set anio, nulos = app.session.get('filtro_reportes_soporte_anual')['anio'], 0  %}           
+        <div class="col-md-6">              
+        {% for inc in reqxIncidencia.tipos %}          
+            {% if loop.index == corte|number_format(0)+1 %}
+            </div>
+                <div class="col-md-6">
+            {% endif %}               
+        <div class="col-md-12">                
+                <table class="table-resumen xts table table-bordered table-hover">
+                    <tr><th class="title" colspan="5" style="text-align:center;background-color:antiquewhite;">{{ inc.nombre|upper }} <span class="porcentaje"></span></th></tr>
+                    <tr>
+                        <th> Período {{ anio }}</th>
+                        <th> Finalizado </th>
+                        <th> Asignado </th>
+                        <th> Sin Asignar </th>
+                        <th> Total </th>                        
+                    </tr>  
+                    {% set fin,asig,sinasig,total = 0,0,0,0 %}                    
+                    {% for item in reqxIncidencia.table %}
+                             {% set tpid = (item.tipoSoporte) ? item.tipoSoporte : 0 %}                        
+                            {% if tpid==inc.id %}
+                                {% set suma = item.finalizado + item.asignado + item.sinasignar %}
+                                {% set fin,asig,sinasig,total = fin+item.finalizado, asig+item.asignado, sinasig+item.sinasignar, total+suma %}
+                                <tr class="detalle">
+                                    <td>{{ meses[(item.mes|number_format)-1 ] }}-{{ item.anio }}</td>
+                                    <td>{{ item.finalizado }}</td>
+                                    <td>{{ item.asignado }}</td>
+                                    <td>{{ item.sinasignar }}</td>
+                                    <td>{{ suma }}</td>                                                                         
+                                </tr>
+                            {% endif %}
+                        
+                    {% endfor %}
+                    <tr class="tipoT">
+                        <th>TOTALES</th>
+                        <th>{{ fin }}</th>
+                        <th>{{ asig }}</th>
+                        <th>{{ sinasig }}</th>
+                        <th class="totalval">{{ total }}</th>                        
+                    </tr>
+                </table>
+        </div>                   
+        {% endfor %}
+        </div>
+        
+    </div>
+    <!-- /.box-body-->
+</div>

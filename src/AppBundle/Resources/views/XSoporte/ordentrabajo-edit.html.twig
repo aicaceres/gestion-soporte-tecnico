@@ -1,0 +1,395 @@
+{% extends "base.html.twig" %}
+{% if entity.id  %}
+    {% set pagetitle= 'Editar datos de la Orden de Trabajo'%}
+{% else %}
+    {% set pagetitle= 'Nueva Orden de Trabajo' %}
+{%endif%}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-briefcase"></i> &nbsp; {{pagetitle}}  </h3>
+                    {% if entity.id and app.user.access('view_logs') %}
+                        <div class="pull-right box-tools">
+                            <button type="button" class=" hidden btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                                    data-id="{{entity.id}}" data-url="{{path('get_insumo_logs')}}"  >      <i class="fa fa-history"></i></button>                      
+                        </div>
+                    {% endif %}
+                </div><!-- /.box-header -->
+                {{ form_start(form) }}
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}                    
+                    <div class="row">                                        
+                        <div class="col-md-12">
+                            <div class="col-md-2">
+                                {{ form_row(form.fechaOrden) }}
+                            </div>
+                            <div class="col-md-1">
+                                {{ form_row(form.hora) }}
+                            </div>
+                            {% if entity.id %}
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label for="appbundle_ordentrabajo_nroOrden">N° OT :</label>
+                                        <input type="text" id="appbundle_ordentrabajo_nroOrden" class="form-control" style="text-align:center"
+                                               readonly="readonly" value="{{ "%06d" | format(entity.nroOrden)}}">
+                                    </div>
+                                </div>                                
+                            {% endif %}                          
+                            <div class="col-md-3">
+                                {{ form_row(form.tecnico, { 'attr': { 'class' : 'select2' } }) }}   
+                            </div>
+                            <div class="col-md-2">
+                                {{ form_row(form.jira) }}                                  
+                            </div>
+                            <div class="col-md-2">
+                                {% if entity.id %}
+                                    {{ form_row(form.estado) }}  
+                                {% else %}
+                                    {{ form_row(form.estado, { 'attr': { 'disabled' : 'disabled' } }) }}  
+                                {% endif %}                                 
+                            </div>
+                                <div class="col-md-1">
+                            {% if not entity.id %}
+                                    <button style="white-space:normal;" type="button" id="reqDetalle"  class="btn btn-sm btn-default" title="Ver Requerimientos de Soporte" >
+                                        <i class="fa fa-briefcase"></i> Requerimientos de Soporte</button>
+                            {% endif %}     
+                                </div>
+                        </div>                         
+                        <div class="col-md-12" id="infoRequerimiento">
+                        </div>    
+                        <div class="col-md-12">
+                            <div class="col-md-10">
+                                {{ form_row(form.descripcion) }}
+                            </div>    
+                            <div class="col-md-2">                                
+                                <div class="form-group ">
+                                    {% if not entity.id %} <label>&nbsp;</label> {% endif %}                                    
+                                    {{ form_widget(form.altaPrioridad) }}
+                                </div>                               
+                                {% if entity.id and entity.requerimiento %}
+                                    <button style="white-space:normal;width:110px" type="button" id="reqDetalle" class="btn btn-default btn-sm" 
+                                            data-id="{{ entity.requerimiento.id }}" title="Ver el requerimiento que originó la OT" >
+                                        <i class="fa fa-briefcase"></i> &nbsp; Requerimiento N° {{ "%06d" | format(entity.requerimiento.id)}}</button>
+                                    {% endif %}
+
+                            </div>                            
+                        </div>
+
+                        <div class="col-md-12">    
+                            <h5 class="text-yellow" style="margin:0 20px 4px;">EQUIPOS ASOCIADOS</h5>
+                            <hr style="margin:0 15px 10px;border:2px solid #f39c12;">
+                            <div class="col-md-4 equiposAsociados {% if (form.detalles|length)==0 %}hidden{% endif %}" >
+                                <input type="checkbox" id="ckEstadoEquipo" name="ckEstadoEquipo" checked />&nbsp;
+                                <small style="display:inline-block;font-weight:normal;">Cambiar equipo a:&nbsp;</small>
+                                {{ form_widget(form.estadoEquipo) }}  
+                            </div>
+                            <div class="col-md-8 equiposAsociados {% if (form.detalles|length)==0 %}hidden{% endif %}" >    
+                                <input type="checkbox" id="ckubicacionEquipo" name="ckubicacionEquipo"  checked />&nbsp;
+                                <small class="ubicEquipo" style="display:inline-block;font-weight:normal;padding-left:10px">Modificar ubicación a:&nbsp;</small>
+                                <small id="spanUbicacion" class="ckubic"> {{ servTecnico.nombreCompleto }} </small>
+                                <select class="ckubic" id="pisos" style="margin-left:10px">
+                                    {% for piso in servTecnico.pisos %}
+                                        <option value="{{ piso.id }}">{{ piso.nombre }}</option>
+                                    {% endfor %}
+                                </select>        
+                                <button type="button" id="newUbicacion" class="btn btn-sm btn-default ckubic" title="Cambiar a otra ubicación" style="margin-left:10px"><i class="fa fa-refresh"></i></button>  
+                                    {{ form_widget(form.dptoUbicacionNueva) }} {{ form_widget(form.pisoUbicacionNueva) }} 
+                            </div>  
+
+                            <div class="col-md-12">                                
+                                <table style="font-size:85%" id="equipos" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:3%">#</th>
+                                            <th style="width:20%">Código de Barra</th>
+                                            <th>Tipo - Descripción - N° de Serie - Marca - Modelo</th>
+                                            <th style="width:35%">Obs. Adicionales</th>
+                                            <th class="nosort aligncenter" style="width: 5%">
+                                                <a href="javascript:void(0)" class="btn btn-warning btn-xs linkAdd" title="Agregar Equipos" data-form="detalles" data-toggle="tooltip"><i class="fa fa-plus"></i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-index="{{form.detalles | length }}" class="collectionHolder"
+                                           data-prototype="{% filter escape %}{% include 'AppBundle:Soporte:prototype-ordentrabajo-detalle.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                                        {% for item in form.detalles  %}        
+                                            {% include "AppBundle:Soporte:prototype-ordentrabajo-detalle.html.twig" with {'item':item} %}                                  
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>    
+                        </div>         
+
+                    </div>                    
+                    {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                    {% include "admin-form-deleted-data.html.twig" with {'table':entity} %}
+                </div>                                  
+                <div class="box-footer">
+                    {% if entity.id  %}
+                        <a type="button" class="btn btn-app delete" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Eliminar</a>
+                    {%endif%}
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        <a type="button" class="btn btn-app" href="{{ path('soporte_ordentrabajo')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>     
+                <div style="display:none">    
+                    {{ form_end(form) }}
+                </div>                
+                {% if entity.id  %}
+                    {{ form(delete_form) }}
+                {%endif%}
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+    var $dataHolder;
+$(document).ready(function() {    
+    $('#appbundle_ordentrabajo_hora').timepicker({ 'timeFormat': 'G:i' });
+    $('#appbundle_ordentrabajo_estadoEquipo').val(7);  
+    $('#appbundle_ordentrabajo_estadoEquipo').removeClass('form-control');
+    $('#appbundle_ordentrabajo_estadoEquipo').select2();
+    $('.equiposAsociados .select2-container--focus').attr('width','auto');
+    
+   $(document).keypress(function(e) {        
+       var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13' && !$(e.target).is("textarea") ){ e.preventDefault(); }
+    });     
+    $('#reqDetalle').on('click',function(){
+        {% if entity.id %}
+            var url = "{{path('find_req_asociado')}}?id="+$(this).data('id');
+            var title = 'Requerimiento Origen';    
+        {% else %}
+            var url = "{{path('find_req_abiertos')}}";
+            var title = 'Requerimientos de Soporte'; 
+        {% endif %}                      
+        var options = {
+           url: url,
+           title:title,
+           size: eModal.size.lg,
+           buttons: [
+               {text: 'Cerrar', style: 'warning cerrar', close: true }
+           ]
+       };
+       eModal.ajax(options); 
+    });
+   // Get the container who holds the collection
+    $dataHolder = $('.table tbody');
+    $dataHolder.find('tr').each(function(i) {
+        $holder = $(this);
+        var idx = i + 1;
+        $holder.find('.ordTd').html(idx);
+        var srchBtn = $holder.find('.searchEquipo');
+        srchBtn.attr('id','srchbtn_'+idx);
+        srchBtn.on('click',function(e){
+            bc= $(this).closest('td.bcTd').find('input');
+            if(bc.val()){
+                e.stopPropagation(); 
+                bc.trigger(
+                    $.Event( 'keypress', { keyCode: $.ui.keyCode.ENTER, which: $.ui.keyCode.ENTER } )
+                );
+            }
+        });
+        var barcode = $holder.find('.bcTd input');
+        barcode.keypress(function(e){ 
+            var keycode = (e.keyCode ? e.keyCode : e.which);
+            if(keycode == '13'){                   
+                var tr = $(this).closest('tr');
+                barcodeClick( $(this) , tr );                   
+            }
+        });  
+        barcode.on('blur',function(){
+            barcodeBlur($(this));
+        });
+
+        addDeleteLink($(this).find('.link-actions'));
+    });
+   
+   $('.linkAdd').on('click', function(e) {
+        e.preventDefault();
+        addNewEquipo();
+        e.stopPropagation();        
+    });
+    $('#ckEstadoEquipo').on('ifUnchecked', function(){        
+        $(this).closest('.equiposAsociados').find('.select2').hide(); 
+    });
+    $('#ckEstadoEquipo').on('ifChecked', function(){
+        $(this).closest('.equiposAsociados').find('.select2').show();     
+      });
+    $('#ckubicacionEquipo').on('ifUnchecked', function(){        
+        $(this).closest('.equiposAsociados').find('.ckubic').hide(); 
+    });
+    $('#ckubicacionEquipo').on('ifChecked', function(){
+        $(this).closest('.equiposAsociados').find('.ckubic').show();     
+      });
+    $('#pisos').change(function(){
+        $('#appbundle_ordentrabajo_pisoUbicacionNueva').val( $(this).val() );
+    });  
+      $('#newUbicacion').on('click',function(){
+         var options = {
+           url: "{{ path('render_select_ubicacion') }}",
+           title:'Seleccionar ubicación',
+           size: eModal.size.lg,
+           buttons: [
+               {text: 'Seleccionar', style: 'success', close: true, 
+                   click: function(){   
+                       if( !$('#ubicacion-nueva').find('.departamento_selector').val() ||
+                           !$('#ubicacion-nueva').find('.piso_selector').val()    ){
+                               alert('Debe ingresar todos los datos para la reubicación');
+                               return false;
+                           }
+                       $('#appbundle_ordentrabajo_dptoUbicacionNueva').val( $('#ubicacion-nueva').find('.departamento_selector').val());
+                       $('#appbundle_ordentrabajo_pisoUbicacionNueva').val($('#ubicacion-nueva').find('.piso_selector').val());
+                       $('#spanUbicacion').html( 
+                            $('#ubicacion-nueva').find('.ubicacion_selector option:selected').html()+' - '+
+                            $('#ubicacion-nueva').find('.edificio_selector option:selected').html()+' - '+
+                            $('#ubicacion-nueva').find('.departamento_selector option:selected').html()
+                               );
+                       $('#pisos').html('');
+                       $('#ubicacion-nueva').find('.piso_selector option').clone().appendTo($('#pisos'));
+                       $('#pisos').val( $('#ubicacion-nueva').find('.piso_selector').val() );
+                   } },
+               {text: 'Cancelar', style: 'danger', close: true }
+           ]
+       };
+       eModal.ajax(options);  
+      });
+    // sacar items en blanco antes de guardar.
+    $('[name="appbundle_ordentrabajo"]').on('submit',function(){
+        $('[id$="_equipoId"]').each(function(){ 
+            if( !$(this).val() ){
+                $(this).closest('tr').remove();
+            }            
+        });        
+    });    
+});
+
+function addNewEquipo($bc=null) {
+    var prototype = $dataHolder.data('prototype');
+    var index = $dataHolder.data('index');    
+    var newForm = prototype.replace(/items/g, index);
+    $dataHolder.append(newForm);
+    $dataHolder.data('index', index + 1);
+    addDeleteLink($dataHolder.find('.link-actions').last());
+    $dataHolder.find('.ordTd').last().html($dataHolder.data('index'));     
+    srchBtn = $dataHolder.find('.bcTd button').last()
+    srchBtn.attr('id','srchbtn_'+$dataHolder.data('index'));
+    srchBtn.on('click',function(e){
+            bc= $(this).closest('td.bcTd').find('input');
+            if(bc.val()){
+                e.stopPropagation(); 
+                bc.trigger(
+                    $.Event( 'keypress', { keyCode: $.ui.keyCode.ENTER, which: $.ui.keyCode.ENTER } )
+                );
+            }
+        });
+    var barcode = $dataHolder.find('.bcTd input').last();
+    barcode.on('keypress',function(e){ 
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ 
+            barcodeClick(barcode, $dataHolder.find('tr').last() );            
+        }
+    });  
+    barcode.on('blur',function(){        
+        barcodeBlur($(this));
+    });
+    if($bc){
+        barcode.val($bc);
+        barcode.trigger(
+            jQuery.Event( 'keypress', { keyCode: $.ui.keyCode.ENTER, which: $.ui.keyCode.ENTER } )
+        );
+    }
+    /*var btnBuscar = $dataHolder.find('.buscarEquipo').last();
+    btnBuscar.on('click',function(){
+        barcode.trigger(
+            jQuery.Event( 'keypress', { keyCode: $.ui.keyCode.ENTER, which: $.ui.keyCode.ENTER } )
+        );
+    });*/
+    if ($('.equiposAsociados').hasClass('hidden')){
+        $('.equiposAsociados').removeClass('hidden');
+    }
+    barcode.focus();
+}
+function barcodeBlur(obj){
+    if( obj.val()===''){
+        $tr = obj.closest('tr').find('.eqTd');
+        $tr.find('[id$="_equipoId"]').val(''); 
+        $tr.find('.eqNombre').html(''); 
+     }else{
+        obj.trigger(
+            jQuery.Event( 'keypress', { keyCode: $.ui.keyCode.ENTER, which: $.ui.keyCode.ENTER } )
+        ); 
+     }
+}
+function addDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find('.bcTd input').val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            var index = $dataHolder.data('index');
+            $dataHolder.data('index', index - 1);
+            $dataHolder.find('.ordTd').each(function(i) {
+               jQuery(this).html(i + 1);
+            });
+        }
+    });
+}
+function barcodeClick(barcode,obj ){
+    res = false;
+    id = '{{entity.id}}';
+    $.getJSON("{{path('find_equipo_by_barcode')}}",{bc:barcode.val().toUpperCase(),id:id}, function(data){ 
+            if(!data){
+                alert('el código de barra no pertenece a un equipo o ya se encuentra en otra OT abierta.');
+                res = true;
+            }else{
+                index = $('tr', obj.closest("table")).index(obj);
+                if( checkDuplicado( data.id, index-1 ) ){
+                    alert( 'Este equipo ya fue agregado a la lista!' );
+                    res = true;
+                }
+            }
+            if(res){
+                barcode.val('');
+                obj.find('.eqTd .eqNombre').html('');
+                obj.find('[id$="_equipoId"]').val('');
+                return false;
+            }else{
+                obj.find('.eqTd .eqNombre').html(data.nombre);
+                obj.find('[id$="_equipoId"]').val(data.id);
+            }                                  
+    });
+}
+function checkDuplicado(id,index){
+    // revisar que no se haya seleccionado ya ese valor en otra fila.
+    res = false;    
+    $dataHolder.find('[id$="_equipoId"]').each(function(i) {
+        if( $(this).val() == id && i!=index)
+            res = true;
+    });
+    return res;
+}
+function agregarEquipos(list,idx){
+    // cargar el primero en el tr ya agregado.
+    item = list.shift();    
+    $btn =  $("#"+idx);   
+    barcode = $btn.closest('td.bcTd').find('input');
+    barcode.val(item);
+    barcode.trigger(
+            jQuery.Event( 'keypress', { keyCode: $.ui.keyCode.ENTER, which: $.ui.keyCode.ENTER } )
+        );
+    //cargar los demás si hubiere
+    for(var i in list){
+        addNewEquipo( list[i] ); 
+    }
+}
+</script>    
+{% endblock %}

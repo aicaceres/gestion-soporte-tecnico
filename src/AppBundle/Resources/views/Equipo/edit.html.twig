@@ -1,0 +1,329 @@
+{% extends "base.html.twig" %}
+{% if entity.id  %}
+    {% set pagetitle= 'Editar datos de Equipo'%}
+{% else %}
+    {% set pagetitle= 'Alta de Nuevo Equipo' %}
+{%endif%}
+{% block stylesheets %}
+    {{parent()}}
+    <link rel="stylesheet" href="{{ asset('bundles/app/jquery-ui/jquery-ui.min.css') }}">       
+{% endblock %}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; {{pagetitle}}  </h3>
+                    {% if entity.id  %}
+                    <div class="pull-right box-tools">
+                        {% if app.user.access('view_logs') %}
+                        <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                            data-id="{{entity.id}}" data-url="{{path('get_equipo_logs')}}"  >      <i class="fa fa-history"></i></button>                      
+                        {% endif %}
+                        <a class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir ficha del equipo" target="_blank"
+                            href="{{path('print_ficha_equipo',{'id':entity.id})}}"  ><i class="fa fa-print"></i> &nbsp; Ficha</a>                      
+                        
+                    </div>
+                    {% endif %}                    
+                </div><!-- /.box-header -->
+                {{ form_start(form) }}
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <fieldset>
+                                <div class="col-md-4 form-group">
+                                    {{ form_label(form.tipo) }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.tipo, { 'attr': {'class' : 'select2' } }) }}                                
+                                        {% if app.user.access('configuracion_parametro') %}
+                                            <span class="input-group-btn" style="padding-left: 5px;">
+                                                <button data-toggle="tooltip" title="Agregar Tipo Equipo" type="button" data-tabla="Tipo" data-tipo="E" data-url="{{path('render_add_parametro')}}"
+                                                        class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    {{ form_errors(form.tipo) }}
+                                </div>  
+                                <div class="col-md-4">
+                                    {{ form_label(form.marca) }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.marca, { 'attr': {'urlModelos' : path('select_modelos'),'class' : 'select2'  } }) }}
+                                        {% if app.user.access('configuracion_parametro') %}
+                                            <span class="input-group-btn" style="padding-left: 5px;">
+                                                <button data-toggle="tooltip" title="Agregar Marca" type="button" data-tabla="Marca" data-url="{{path('render_add_parametro')}}"
+                                                        class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    {{ form_errors(form.marca) }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form_label(form.modelo) }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.modelo, { 'attr': {'class' : 'select2' } }) }}                                
+                                        {% if app.user.access('configuracion_parametro') %}
+                                            <span class="input-group-btn" style="padding-left: 5px;">
+                                                <button data-toggle="tooltip" title="Agregar Modelo" type="button" data-tabla="Modelo" data-url="{{path('render_add_parametro')}}"
+                                                        class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                            </span>
+                                        {% endif %}                                
+                                    </div>
+                                    {{ form_errors(form.modelo) }}
+                                </div>                                
+                            </fieldset>  
+                        </div>        
+                        <div class="col-md-10">      
+                            <fieldset>
+                                <div class="col-md-6">
+                                    {{ form_row(form.nombre) }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form_row(form.nroSerie) }}
+                                </div> 
+                                <div class="col-md-3">
+                                    {% if entity.id %}
+                                    <div class="form-group ">
+                                        <label for="appbundle_equipo_barcode">Código de Barra:</label>
+                                        <input type="text" readonly="readonly" id="appbundle_equipo_barcode" class=" form-control" value="{{entity.barcode}}">
+                                    </div>
+                                    {%endif%}
+                                </div>
+                            </fieldset>  
+                            <fieldset>  
+                                <div class="col-md-5">
+                                    {{ form_label(form.proveedor) }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.proveedor, { 'attr': {'class' : 'select2' } }) }}                                
+                                        {% if app.user.access('proveedor') %}
+                                            <span class="input-group-btn" style="padding-left: 5px;">
+                                                <button data-toggle="tooltip" title="Agregar Proveedor" type="button" data-tabla="Proveedor" data-url="{{path('render_add_proveedor')}}"
+                                                        class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    {{ form_errors(form.proveedor) }}
+                                </div>  
+                                <div class="col-md-2">
+                                    {{ form_row(form.fechaCompra) }}
+                                </div>
+                                <div class="col-md-2">
+                                    {{ form_row(form.nroOrdenCompra) }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form_row(form.nroRemito) }}
+                                </div>
+                            </fieldset>  
+                            <fieldset>  
+                                <div class="col-md-3">
+                                    {{ form_row(form.nroFactura) }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form_row(form.observaciones) }}
+                                </div>
+                                <div class="col-md-3">
+                                    {{ form_row(form.estado, { 'attr': {'class' : 'select2' } }) }}
+                                </div>
+                            </fieldset>  
+                        </div>  
+                        <div class="col-md-2">
+                            <fieldset>
+                                <div class="col-md-12 pad" style="padding:5px 0;" data-fotourl="{{path('foto_modelo')}}">
+                                    {% if entity.id and entity.modelo.webPath %}
+                                        <img id="myImg" alt="{{ entity.tipoMarcaModelo }}" src="{{ asset(entity.modelo.webPath) }}" class="fotoimg"/>
+                                    {% else %}
+                                        <img id="myImg" alt="Sin imagen" src="{{ asset('uploads/empty.jpg') }}" class="fotoimg"/>
+                                    {% endif %}
+                                </div>                                
+                            </fieldset>   
+                            <fieldset>
+                                <div class="col-md-12" style="padding:15px 0px 0px" >
+                                    {{ form_widget(form.verificado) }}
+                                    {{ form_errors(form.verificado) }}
+                                </div>
+                            </fieldset>   
+                                
+                        </div>         
+                    </div>                                      
+                    {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                    {% include "admin-form-deleted-data.html.twig" with {'table':entity} %}
+                    {% if entity.importado %}
+                        {% set imp = entity.importado %} 
+                    <div class="row" style="padding-top:12px;">
+                        <div class="col-md-12">
+                            {% include "AppBundle:Equipo:partial-importados.html.twig" %} 
+                        </div>                                                    
+                    </div>                         
+                    {% endif %}    
+                    <div class="row">
+                        <div class="col-md-12">                            
+                            {% include "AppBundle:Equipo:partial-ubicacion.html.twig" %} 
+                        </div>                                                    
+                    </div>                    
+                    
+                </div>                                  
+                <div class="box-footer">
+                    {% if entity.id  %}
+                        <a type="button" class="btn btn-app delete" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Eliminar</a>
+                    {%endif%}
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        {% if not entity.id  %}
+                            <button type="submit" class="btn btn-app" id="savenew"><i class="fa fa-save"></i> Guardar y Nuevo</button>
+                        {%endif%}
+                        <a type="button" class="btn btn-app cancelar" href="{{ path('equipo')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>     
+                <div style="display:none">    
+                    {{ form_end(form) }}
+                </div>                
+                {% if entity.id  %}
+                    {{ form(delete_form) }}
+                {%endif%}
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+<!-- The Modal -->
+<div id="myModal" class="fotomodal">
+  <!-- The Close Button -->
+  <span class="close">&times;</span>
+  <!-- Modal Content (The Image) -->
+  <img class="fotomodal-content" id="img01">
+  <!-- Modal Caption (Image Text) -->
+  <div id="caption"></div>
+</div>    
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script src="{{ asset('bundles/app/bootstrap.file-input.js') }}" type="text/javascript"></script>    
+<script src="{{ asset('bundles/app/jQueyMask/jquery.mask.min.js') }}" type="text/javascript"></script>    
+<script type="text/javascript">
+var preguntar = true; 
+const lista = $.parseJSON('{{lista_ubicaciones}}') ;   
+const admin = '{{app.user.rol.admin}}';
+window.onbeforeunload=function(){   
+    if(preguntar){
+        return false; 
+    }
+};      
+$(document).ready(function() {     
+    $('input[type=file]').bootstrapFileInput();
+    $('.file-input-wrapper').removeClass('form-control');
+    $('.file-input-wrapper').addClass('btn-sm');
+    $('#appbundle_equipo_file').removeClass('form-control');
+    $('#appbundle_equipo_marca').change();
+    $('#appbundle_equipo_verificado').parent().parent().css('font-weight','bold');
+    $('#appbundle_equipo_verificado').parent().parent().css('color','orangered');
+    $('#appbundle_equipo_verificado').parent().parent().css('padding','0');
+    $('#appbundle_equipo_verificado').parent().css('margin-right','5px');
+    // restringuir las ubicaciones no permitidas        
+    if( !admin ){
+        const lista = $.parseJSON('{{lista_ubicaciones}}') ;     
+        $('#ubicacion-actual').find(".ubicacion_selector option").each( function(){
+            item = parseInt($(this).val())
+            if( $.inArray( item , lista) == -1 ){
+                $(this).remove();
+            }        
+        });  
+    }
+    $('#ubicacion-actual').find(".ubicacion_selector").change(); 
+    
+    $(document).keypress(function(e) {        
+       var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13' && !$(e.target).is("textarea") ){ e.preventDefault(); }
+    });
+    
+    $('.cancelar').on('click',function(){
+        if( !confirm('Desea cancelar? Los cambios realizados se perderán.') )            
+            return false;
+        else preguntar = false; 
+    });
+   $('[type="submit"]').on('click',function(){       
+       preguntar = false;   
+        if( $(this).attr('id') == 'savenew')
+            $('#appbundle_equipo_savenew').val('S');
+        else
+            $('#appbundle_equipo_savenew').val('N');    
+   });
+   
+  $('#reubicar').on('click',function(){      
+      //verificar que no haya datos requeridos faltantes en la asignacion actual
+      $("#tab_actual").find('select').attr('required',true);      
+      var invalid = $("#tab_actual").find('input:required:invalid,select:required:invalid');    
+      if(invalid.length>0){
+          alert('Debe completar todos los datos requeridos de la ubicación actual.');
+          $('#li-actual a').click();          
+          invalid[0].focus();
+          return false;
+      } 
+      $("#ubicacion-actual").find('[id$="actual"]').val(0);
+    
+      addNewUbicacion( $('#tab_actual') );
+      $(this).hide();
+  });      
+        
+  $('body').on('click','#cancel-reubicacion',function(){
+      if( confirm('Desea cancelar la reubicación del equipo?') ){
+         $('#nueva-ubicacion').html('');
+         $('#reubicar').show();         
+         $('#ubicacion-actual').show();
+         $("#ubicacion-actual").find('[id$="actual"]').val(1);
+      }
+  });    
+  
+    $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ', {
+        translation: {
+          'Z': {
+            pattern: /[0-9]/, optional: true
+          }
+        }    
+    });
+    
+    $('#appbundle_equipo_modelo').on('change',function(){
+        $.get("{{path('foto_modelo')}}",{id:$(this).val()}, function(data){            
+                $('.fotoimg').attr('src',data);                
+            });
+    });
+    
+    // Get the modal
+    var modal = $("#myModal");
+    // Get the image and insert it inside the modal - use its "alt" text as a caption
+    var modalImg = $("#img01");
+    var captionText = $("#caption");
+    $("#myImg").on('click',function(){
+        modal.css('display','block');
+        modalImg.attr('src',$(this).attr('src'));
+        captionText.text($(this).attr('alt'));
+    });
+    // When the user clicks on <span> (x), close the modal
+    modal.find('.close').on('click',function(){
+        modal.css('display','none');
+    });  
+    
+});
+
+function addNewUbicacion($collectionHolder) {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/itemform/g, index);
+    $('#nueva-ubicacion').html(newForm);
+    $collectionHolder.data('index', index + 1);
+    $('#nueva-ubicacion').find('.datepicker').datepicker();
+    $('#nueva-ubicacion').find('.select2').select2();
+    $('#nueva-ubicacion').find('[id$="actual"]').val(1);
+    $('#ubicacion-actual').hide();
+    $('#nueva-ubicacion').show();
+        // restringuir las ubicaciones no permitidas        
+    if( !admin ){ 
+        $('#nueva-ubicacion').find(".ubicacion_selector option").each( function(){
+            item = parseInt($(this).val())
+            if( $.inArray( item , lista) == -1 ){
+                $(this).remove();
+            }        
+        });  
+    }
+    $('#nueva-ubicacion').find(".ubicacion_selector").change();
+}
+</script>    
+{% endblock %}

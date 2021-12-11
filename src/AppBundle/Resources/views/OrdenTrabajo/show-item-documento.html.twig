@@ -1,0 +1,14 @@
+<tr>
+    <td class="dateTd">{{ doc.created|date('d/m/Y') }} </td>
+    <td class="tecTd">{{ doc.createdBy.username }} </td>
+    <td class="descTd">{{ doc.descripcion }} </td>
+    <td class="pathTd">
+         {% if doc.webPath %}
+             <a href="{{ asset(doc.webPath) }}" target="_blank">{{ doc.path }}</a>
+         {% endif %} 
+    </td>
+    <td class="delTd">
+        <a href="javascript:void(0)" title="Quitar" class="btn btn-primary btn-xs deldoc" 
+           data-url='{{ path('del-tarea-documentacion',{'id':doc.id}) }}'><i class="fa fa-trash"></i></a>
+    </td>
+</tr> 

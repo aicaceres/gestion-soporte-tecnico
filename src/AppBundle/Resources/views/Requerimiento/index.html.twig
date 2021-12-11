@@ -1,0 +1,266 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-briefcase"></i> &nbsp; Requerimientos de Soporte</h3>                
+                    <div class="pull-right box-tools">
+                        {% if app.user.access('view_logs') and entities|length>0 and false%}
+                        <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                                data-id="" data-url="{{path('get_insumo_logs')}}"  >   <i class="fa fa-history"></i></button>  
+                        {% endif %}          
+                        <form id="printform" name="printform" target="_blank" style="display:inline-block;" 
+                                action="{{path('print_listado_requerimientos')}}" method="post">                        
+                              <input type="hidden" id="searchterm" name="searchterm"/>
+                              <input type="hidden" id="datalist" name="datalist"/>
+                              <input type="hidden" id="option" name="option"/>
+                              <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir"> <i class="fa fa-print"></i> Listado</button> 
+                          </form>         
+                    </div>
+                 
+            </div><!-- /.box-header -->
+            <div class='box-body' >
+                <form id="searchform" action="{{ path('soporte_requerimiento') }}" method="get" >
+                    <div class="col-md-12">                        
+                        <fieldset>                          
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    <label>Ubicación:</label>
+                                    <select id="selUbicacion" name="idUbicacion" urledificio="{{ path('select_edificios') }}" class="ubicacion_selector form-control select2">
+                                        <option {%if app.session.get('filtro_requerimiento')['idUbicacion']==0 %} selected="selected" {%endif%} value="0">Todos</option>
+                                        {%for ubic in ubicaciones %}
+                                            <option {%if ubic.id == app.session.get('filtro_requerimiento')['idUbicacion'] %} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                                        {% endfor %} 
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label>Edificio:</label>                                    
+                                    <select id="selEdificio" name="idEdificio" urldepartamento="{{ path('select_departamentos') }}" class="edificio_selector form-control select2">
+                                        <option value="{{ app.session.get('filtro_requerimiento')['idEdificio'] }}" >Todos</option>
+                                        {%for edif in edificios %}
+                                            <option {%if edif.id == app.session.get('filtro_requerimiento')['idEdificio'] %} selected="selected" {%endif%} value="{{edif.id}}">{{edif.nombre}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label>Área Solicitante:</label>
+                                    <select id="selDepartamento" name="idDepartamento" urldatosdepartamento="{{ path('datos_departamento') }}" class="departamento_selector form-control select2">
+                                        <option value="{{ app.session.get('filtro_requerimiento')['idDepartamento'] }}" >Todos</option>
+                                        {%for dep in departamentos %}
+                                            <option {%if dep.id == app.session.get('filtro_requerimiento')['idDepartamento'] %} selected="selected" {%endif%} value="{{dep.id}}">{{dep.nombre}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>  
+                            <div class="col-md-1"> 
+                                {% if app.user.access('requerimiento_new') %}
+                                    <a href="{{ path('soporte_requerimiento_new') }}" data-toggle="tooltip" class="btn btn-primary" style="margin-top:2px;white-space:normal;" title="Agregar Nuevo">NUEVO REQUERIMIENTO</a>
+                                {% endif %}
+                            </div>                               
+
+                        </fieldset>                        
+                    </div> 
+                    <div class="col-md-12">                
+                       <fieldset> 
+                            <div class="col-md-3">
+                                <div class="form-group ">
+                                    <label>Tipo de Incidencia:</label>
+                                    <select id="tipoSoporte" name="idTipo" class="form-control select2">
+                                        <option {%if app.session.get('filtro_requerimiento')['idTipo']==0 %} selected="selected" {%endif%} value="0">Todos</option>
+                                        {%for tipo in tipoSoporte %}
+                                            <option {%if tipo.id == app.session.get('filtro_requerimiento')['idTipo'] %} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                        {% endfor %} 
+                                    </select>
+                                </div>
+                            </div>    
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    {% set estado = app.session.get('filtro_requerimiento')['estado'] %}
+                                    <label>Estado:</label>
+                                    <select id="selEstado" name="estado" class="form-control select2">
+                                        <option value="0" {%if estado==0 %}selected="selected" {%endif%}>Todos</option>
+                                        <option value="SIN ASIGNAR" {%if estado=='SIN ASIGNAR' %} selected="selected" {%endif%}>Sin Asignar</option>
+                                        <option value="ASIGNADO" {%if estado=='ASIGNADO' %} selected="selected" {%endif%}>Asignado</option>
+                                        <option value="FINALIZADO" {%if estado=='FINALIZADO' %} selected="selected" {%endif%}>Finalizado</option>
+                                        <option value="CANCELADO" {%if estado=='CANCELADO' %} selected="selected" {%endif%}>Cancelado</option>
+                                    </select>
+                                </div>
+                            </div>                                     
+                            <div class="col-md-2">
+                                <label class="required">Período:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{filtro.desde}}">
+                                </div>   
+                            </div>    
+                            <div class="col-md-2"> 
+                                <label>&nbsp;</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{filtro.hasta}}">                                            
+                                </div>                                           
+                            </div>     
+                            <div class="col-md-3"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label style="width:100%;">&nbsp;</label>
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                            </div>  
+                        </fieldset>
+                    </div> 
+                                    
+                </form>                      
+
+                <div class="table-responsive" style="padding: 15px">
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Solicitante</th>
+                                <th>N° Incidencia</th>
+                                <th>N° JIRA</th>
+                                <th>Tipo</th>
+                                <th>Estado</th>
+                                <th>Tiempo</th>
+                                <th class="no-sort thactions"> Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in entities %}
+                                <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }}   
+                                    {{ (entity.estado in ['SIN ASIGNAR','ASIGNADO'] and entity.altaPrioridad) ? "altaPrioridad" : ""  }}
+                                    ">
+                                    <td><span class="hidden">{{ entity.fechaRequerimiento|date('YmdHi') }}</span>{{ entity.fechaRequerimiento|date('d-m-Y') }}</td>                                
+                                    <td>{{ entity.solicitante.nombreCompleto}}</td>
+                                    <td>{{ "%06d" | format(entity.id)}} </td>
+                                    <td>{{ entity.jira}} </td>
+                                    <td>{{ entity.tipoSoporte }}</td>
+                                    <td>{% if entity.estado=='SIN ASIGNAR' and entity.deletedAt is empty %} <a href="javascript:void(0)" data-url="{{ path('render_asignar_requerimiento',{'id':entity.id}) }}" data-nro="{{ "%06d" | format(entity.id)}}" class="btn btn-info btn-xs asignar-req" data-toggle="tooltip" title="Asignar requerimiento" >SIN ASIGNAR</a> {%else%} {{ entity.estado}} {% endif %}</td>                                   
+                                    <td>{{ entity.tiempo }}</td>                                   
+                                    <td class="link-actions"> 
+                                        {% if app.user.access('requerimiento_edit') and entity.estado in ['SIN ASIGNAR','ASIGNADO'] %}
+                                        <a href="{{ path('soporte_requerimiento_edit', { 'id': entity.id }) }}" data-toggle="tooltip" title="Editar" class="editar"><i class="fa fa-edit"></i></a>&nbsp;                                        
+                                        {% endif %}
+                                        <a href="javascript:void(0)" class="view-req" data-nro="{{ "%06d" | format(entity.id)}}" data-url="{{ path('soporte_requerimiento_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver Requerimiento"><i class="fa fa-folder-open"></i></a>&nbsp;
+                                        <a href="{{ path('soporte_requerimiento_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver" style="display:none"><i class="fa fa-folder-open"></i></a>&nbsp;
+                                        {% if entity.deletedAt is empty %}
+                                        <a href="{{path('print_requerimiento', { 'id': entity.id })}}" data-toggle="tooltip" title="Imprimir informe completo" target="_blank" ><i class="fa fa-print"></i></a>&nbsp;                                        
+                                        <a href="{{path('print_requerimiento_recepcion_equipo', { 'id': entity.id })}}" data-toggle="tooltip" title="Acta Recepción de Equipos" target="_blank" ><i class="fa  fa-file-text-o"></i></a>&nbsp;                                                                                                                       
+                                        {% endif %}
+                                        {% if app.user.access('requerimiento_delete') and entity.estado=='SIN ASIGNAR'%}
+                                        <form action="{{ path('soporte_requerimiento_delete', { 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                                            <input type="hidden" name="_method" value="DELETE" />
+                                            {{ form_widget(deleteForms[entity.id]) }}
+                                            <a href="javascript:void(0)" title="Cancelar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click(); "><i class="fa fa-trash-o"></i></a>
+                                            <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                                        </form> 
+                                        {% endif %}
+                                        {% if entity.estado=='FINALIZADO' %}
+                                         <a href="{{path('print_requerimiento_acta_finalizacion', { 'id': entity.id })}}" data-toggle="tooltip" title="Acta de Finalización" target="_blank" ><i class="fa  fa-file-text"></i></a>&nbsp;
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {        
+    $('.select2').select2();
+    var oTable = $('#tablelist').dataTable();
+        oTable.fnSort( [ [0,'desc'] ] );
+        
+    $('#limpiar-filtros').on('click',function(){
+        $('#searchform').find('.select2').val(0);
+        $('#searchform').find('.datepicker').val('');
+        $('#searchform').submit();
+    });      
+    
+    $('#pdf').on('click',function(){   
+        if( ( parseInt('{{entities|length}}')>500 )  ){
+           if (!confirm('Muchos registros podrían hacer demasiado lenta la generación del PDF. Desea Continuar?')){
+               return false;
+           }
+        }
+        $('#searchterm').val( $('#tablelist_filter input').val() );
+        var datos = [];        
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) { 
+            var i = value[0].indexOf('</span>');
+            if( i >-1 ){
+                var fecha = value[0].substr(i+7);
+                value[0]=fecha;
+            }
+            var j = value[5].indexOf('javascript:void(0)');
+            if( j >-1 ){
+                value[5]='SIN ASIGNAR';
+            }
+            value.splice(6);
+            datos[index] = value;
+        });                 
+        $('#datalist').val(JSON.stringify(datos)); 
+        $('#printform').submit();
+    });   
+        
+  $('.asignar-req').on('click',function(){
+      cel = $(this).parent();
+      actions = cel.siblings('.link-actions');
+      var options = {
+           url: $(this).data('url'),
+           title:'Requerimiento',
+           subtitle: ' N°'+$(this).data('nro'),
+           size: eModal.size.sm,
+           buttons: [
+               {text: 'Asignar', style: 'success', close: true, 
+                   click: function(){    
+                       data = { req:$('#reqId').val(), tec:$('#tecId').val() };
+                       $.post("{{path('ajax_asignar_requerimiento')}}", data, function(data){
+                            if(data==='ERROR'){
+                                alert('No puedo realizarse la acción.');
+                            }else{
+                                cel.html('ASIGNADO');
+                                //actions.find('.editar').remove();
+                                actions.find('form').remove();
+                                alert('Se ha generado la OT N°'+data);
+                            }
+                        });
+                   } },
+               {text: 'Cancelar', style: 'danger', close: true }
+           ]
+       };
+       eModal.ajax(options);
+  });      
+  
+    $('body').on('click','.view-req',function(){
+        var options = {
+           url: $(this).data('url'),
+           title:'Requerimiento N° '+$(this).data('nro'),
+           size: eModal.size.xl,
+           buttons: [               
+               {text: 'Cerrar', style: 'success', close: true }
+           ]
+       };
+       eModal.ajax(options);
+    });
+});
+</script>    
+{% endblock %}

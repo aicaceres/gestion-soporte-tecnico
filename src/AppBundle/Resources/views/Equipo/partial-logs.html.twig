@@ -1,0 +1,98 @@
+<div class="table-responsive" style="overflow-x: auto !important;font-size: 11px;" >
+    <table id="tablelog" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th rowspan="2">ID</th>
+                <th rowspan="2">Acción</th>
+                <th rowspan="2">Fecha y hora</th>
+                <th rowspan="2">Usuario</th>
+                <th colspan="14">DATOS</th>
+            </tr>
+            <tr>
+                <th>Descripción</th>
+                <th>Código</th>
+                <th>Código de Barra</th>
+                <th>Tipo</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Nro Serie</th>
+                <th>Estado</th>
+                <th>Fecha Compra</th>
+                <th>N° OC</th>
+                <th>Proveedor</th>
+                <th>N° Remito</th>
+                <th>N° Factura</th>
+                <th>Verificado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs|reverse %}
+                <tr>                                
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.action }}</td>
+                    <td><span class="hidden">{{ log.loggedAt|date('YmdHis') }}</span>{{ log.loggedAt|date('d-m-Y H:i:s') }}</td>
+                    <td>{{ log.username }}</td>
+                    {% if log.data %}                                
+                        <td>{{ log.data.nombre }}</td>
+                        <td>{{ log.data.codigo }}</td>
+                        <td>{{ log.data.barcode }}</td>
+                        <td>{{ log.data.tipo }}</td>
+                        <td>{{ log.data.marca }}</td>
+                        <td>{{ log.data.modelo }}</td>
+                        <td>{{ log.data.nroserie }}</td>
+                        <td>{{ log.data.estado }}</td>
+                        <td>{%if log.data.fechacompra %}
+                            {{ (log.data.fechacompra in ['--' , 'Dato eliminado']) ? log.data.fechacompra : log.data.fechacompra|date('d-m-Y') }}                                  
+                        {%endif%}</td>
+                        <td>{{ log.data.nrocompra }}</td>
+                        <td>{{ log.data.proveedor }}</td>
+                        <td>{{ log.data.nroremito }}</td>
+                        <td>{{ log.data.nrofactura }}</td>
+                        <td>{%if log.data.verificado==1 %} Sí {%else%}{{ log.data.verificado }}{%endif%}</td>
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>    
+</div>    
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tablelog').dataTable({
+            "bAutoWidth": false,
+            "order": [[2, 'desc']],
+            "columnDefs": [{
+                    "targets": 'no-sort',
+                    "orderable": false
+                }],
+            "oLanguage": {
+                "oPaginate": {
+                    "sFirst": "<<",
+                    "sNext": ">",
+                    "sLast": ">>",
+                    "sPrevious": "<"
+                },
+                "sLengthMenu": "Mostrar _MENU_ registros ",
+                "sZeroRecords": "Sin datos",
+                "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+                "sInfoEmpty": "Sin coincidencias",
+                "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                "sSearch": "Buscar:"
+            }
+        });
+    });
+</script>     

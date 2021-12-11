@@ -1,0 +1,68 @@
+{% extends "dataTableList.html.twig" %}
+
+{% set table = app.request.attributes.get('table') %}
+
+{% block page_content %}
+<div class='row'>
+    <div class='col-md-12'>
+        <div class="box box-solid">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-2 col-sm-4">
+                        <div class="box-header">
+                            <i class="fa fa-globe"></i>
+                            <h3 class="box-title">Región</h3>
+                        </div>
+                        <!-- Navigation - folders-->
+                        <div style="margin-top: 15px;">
+                            <ul class="nav nav-pills nav-stacked" id="tab-parametro">
+                                <li class="header">Seleccionar</li>
+                                <li><a href="{{ path('configuracion_region',{ 'table': 'Localidad' }) }}"> Localidad </a></li>
+                                <li><a href="{{ path('configuracion_region',{ 'table': 'Provincia' }) }}"> Provincia</a></li>
+                                <li><a href="{{ path('configuracion_region',{ 'table': 'Pais' }) }}"> País</a></li>
+                            </ul>
+                        </div>
+                    </div><!-- /.col (LEFT) -->
+                    <div class="col-md-10 col-sm-8">
+
+                        <div class='box box-solid {{box_color}}'>
+                            <div class='box-header'>
+                                <h3 class='box-title'><i class="fa fa-globe"></i> &nbsp; {% if title == 'Pais'%}País{% else %}{{title}}{% endif %}</h3>
+                            </div><!-- /.box-header -->
+                            <div class='box-body pad'>
+                                {% include "notification.html.twig" %}
+                                <div class="box-body table-responsive pad">
+                                        <!-- content -->
+                                </div>
+                            </div>
+                        </div><!-- /.box -->
+                    </div><!-- /.col (RIGHT) -->
+                </div><!-- /.row -->
+            </div><!-- /.box-body -->
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script type="text/javascript">
+$(document).ready(function() {
+    $('.table-responsive').html({{ html|raw }});
+    $('.nav-pills a[href$="' + "{{ table }}" + '"]').parent('li').addClass('active');
+    $('.new,.edit').on('click',function(){
+        var loading = '<div class="overlay"><i class="fa fa-spinner fa-spin"></i></div>';
+         $('.table-responsive').html(loading);
+        var url = $(this).data('url');
+        $.ajax({
+            type: 'get',
+            url: url,
+            success: function(data) {
+                $('.table-responsive').html(data);
+                $('#configbundle_parametro_nombre').focus();
+            }
+        });        
+    });
+});
+</script>
+{% endblock %}

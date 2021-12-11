@@ -1,0 +1,119 @@
+<div class="col-md-12">    
+    <!-- Custom Tabs (Pulled to the right) -->
+    <div id="tab-ubicaciones" class="nav-tabs-custom">
+        <ul class="nav nav-tabs pull-right">            
+            {% if reubicacion %}
+                <li class="pull-right"><a href="javascript:void(0)" class="text-blue {{ entity.deletedAt is empty ? "" : "hidden" }}" id="reubicar" title="Reubicar el equipo a otra Ubicación"><i class="glyphicon glyphicon-random"></i> &nbsp;Reubicar</a></li>
+            {% endif %}
+            <li class="active" id="li-actual"><a href="#tab_actual" data-toggle="tab">Actual</a></li>
+            {% if entity.id and form.ubicaciones|length >1 %}
+            <li><a href="#tab_historico" data-toggle="tab">Histórico</a></li>              
+            {% endif %}
+            <li class="pull-left header"><i class="fa fa-building"></i> Ubicación del Equipo</li>
+        </ul>
+        <div class="tab-content">
+            {% if not reubicacion %} 
+            <h4 class="text-danger" style="text-align:center; margin-top:-10px; background-color:lavender; padding: 0px 0px 4px;">Equipo sin ubicación</h4>
+            {% endif %}
+            <div data-index="{{form.ubicaciones | length }}" class="collectionHolder tab-pane active" id="tab_actual"
+                 data-prototype="{% filter escape %}{% include 'AppBundle:Equipo:prototypeUbicacion.html.twig' with {'item':form.ubicaciones.vars.prototype} %}{% endfilter %}">                               
+                {% if entity.ubicaciones|length>0 %}                
+                    {% set ubicacionActual = form.ubicaciones[ form.ubicaciones|length -1 ] %}                                            
+                    <div id="ubicacion-actual">                                                        
+                        <fieldset>
+                            <div class="col-md-2">
+                                {{ form_row(ubicacionActual.fechaEntrega) }}   
+                            </div>
+                            <div class="col-md-3">
+                                {{ form_row(ubicacionActual.conceptoEntrega) }}   
+                            </div>
+                            <div class="col-md-7">
+                                {{ form_row(ubicacionActual.observaciones, {'attr':{'rows':'1'}}) }}   
+                            </div>
+                        </fieldset>   
+                        <fieldset>
+                            <div class="col-md-2">
+                                {{ form_row(ubicacionActual.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'), 'class' : 'ubicacion_selector' } }) }}   
+                            </div>
+                            <div class="col-md-4">
+                                {{ form_row(ubicacionActual.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+                            </div>
+                            <div class="col-md-4">
+                                {{ form_row(ubicacionActual.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+                            </div>
+                            <div class="col-md-2">
+                                {{ form_row(ubicacionActual.piso, { 'attr': {'class' : 'piso_selector' } }) }}   
+                            </div>
+                        </fieldset>  
+                        <fieldset>    
+                        <div class="col-md-10 datos-departamento">
+                            {% include "ConfigBundle:Ubicacion:partial-datos-departamento.html.twig" with {'datos':ubicacionActual.vars.data.departamento} %}                            
+                        </div>                         
+                         <div class="col-md-2">
+                                {{ form_row(ubicacionActual.redIp) }}   
+                            </div>       
+                            {{ form_row(ubicacionActual.actual) }}
+                            
+                        <!-- Detalle para admin -->                                
+                        {% include "admin-form-data.html.twig" with {'table':ubicacionActual.vars.data} %}
+                        </fieldset>
+                    </div>
+                {% else %}
+                    <div id="ubicacion-actual"> <h4 class="text-danger" style="text-align:center">Equipo sin ubicar</h4> </div>
+                {% endif %}
+                <div id="nueva-ubicacion"></div>
+                
+            </div>
+            <!-- /.tab-pane -->
+            {% if entity.id and form.ubicaciones|length >1 %}
+                <div class="tab-pane" id="tab_historico">
+                    {% for ubicacion in form.ubicaciones %}   
+                        {% if not loop.last %}  
+                            {% if not loop.first %} <hr class="historico"> {% endif %}                        
+                            {% set ubic = ubicacion.vars.data %}
+                            <div class="row">
+                                <!-- cargar historico -->                                                                                           
+                                <fieldset>
+                                    <div class="col-md-2">
+                                        <b>Entrega:</b>{% if ubic.fechaEntrega %} {{ ubic.fechaEntrega|date('d-m-Y')}}  {% endif %}
+                                    </div>
+                                    <div class="col-md-3">
+                                        <b>Concepto:</b> {{ ubic.conceptoEntrega}}
+                                    </div>
+                                    <div class="col-md-7">
+                                       <b>Obs:</b> {{ ubic.observaciones}} 
+                                    </div>
+                                </fieldset> 
+                                <fieldset>
+                                    <div class="col-md-2">
+                                        <b>Ubicación:</b> {{ ubic.ubicacion}}
+                                    </div>
+                                    <div class="col-md-4">
+                                       <b>Edificio:</b> {{ ubic.edificio}}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <b>Departamento:</b> {{ ubic.departamento}}
+                                    </div>
+                                    <div class="col-md-2">
+                                        <b>Piso:</b> {{ ubic.piso}}  
+                                    </div>
+                                </fieldset>     
+                                <fieldset>
+                                    <div class="col-md-4">
+                                        <b>Red IP:</b> {{ ubic.redIp}}
+                                    </div>
+                                </fieldset>     
+                            </div>
+
+                            <div style="display:none;">{{ form_row(ubicacion) }}</div>   
+                        {% endif %}
+                    {% endfor %}    
+                </div>
+            {% endif %}
+            <!-- /.tab-pane -->              
+        </div>
+            
+        <!-- /.tab-content -->
+    </div>
+    <!-- nav-tabs-custom -->
+</div>

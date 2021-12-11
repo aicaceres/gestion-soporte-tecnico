@@ -1,0 +1,140 @@
+    <div class="row">                        
+        <div class="col-md-12">
+            <div class="col-md-2">
+                {{ form_row(form.fechaRequerimiento) }}
+            </div>
+            <div class="col-md-1">
+                {{ form_row(form.hora) }}
+            </div>
+            <div class="col-md-3">
+                {{ form_label(form.tipoSoporte) }}
+                <div class="input-group">
+                    {{ form_widget(form.tipoSoporte, { 'attr': {'class' : 'select2' } }) }}                                
+                    {% if app.user.access('configuracion_parametro') %}
+                        <span class="input-group-btn" style="padding-left: 5px;">
+                            <button data-toggle="tooltip" title="Agregar Tipo Soporte" type="button" data-tabla="TipoSoporte" data-url="{{path('render_add_parametro')}}"
+                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                        </span>
+                    {% endif %}
+                </div>
+                {{ form_errors(form.tipoSoporte) }}
+            </div>
+            <div class="col-md-2">
+                <div class="form-group ">
+                    <label for="appbundle_requerimiento_nroIncidencia">N° Incidencia:</label>
+                    <input type="text" id="appbundle_requerimiento_nroIncidencia" class="form-control" style="text-align:center"
+                           readonly="readonly" value="{{ "%06d" | format(requerimiento.id)}}">
+                </div>
+            </div>                                
+            <div class="col-md-2">
+                {{ form_row(form.jira) }}                                  
+            </div>
+            <div class="col-md-2">
+                <div class="form-group ">
+                    <label for="appbundle_requerimiento_estado">Estado:</label>
+                    <input type="text" id="appbundle_requerimiento_estado" class="form-control"
+                           readonly="readonly" value="{{ requerimiento.estado}}">
+                </div>
+            </div>
+        </div> 
+        <div class="col-md-12">
+            <div class="col-md-2">
+                <div class="form-group ">
+                    <label>Ubicación:</label>
+                    <input type="text" class="form-control" readonly="readonly" value="{{ requerimiento.solicitante.edificio.ubicacion.abreviatura }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group ">
+                    <label>Edificio:</label>
+                    <input type="text" class="form-control" readonly="readonly" value="{{ requerimiento.solicitante.edificio.nombre }}">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group ">
+                    <label>Departamento:</label>
+                    <input type="text" class="form-control" readonly="readonly" value="{{ requerimiento.solicitante.nombre }}">
+                </div>
+            </div>                   
+            <div class="col-md-3">
+                {{ form_row(form.responsable) }}                                        
+            </div>                   
+        </div>                   
+        <div class="col-md-12">                            
+            <div class="col-md-9">
+                {{ form_row(form.descripcion) }}
+            </div>                                      
+            <div class="col-md-2">
+                <div class="form-group ">
+                    {{ form_widget(form.altaPrioridad) }}
+                </div>
+            </div>
+            {% if requerimiento.ordentrabajoAsociadas|length ==0 %}    
+                <div class="col-md-3" {% if not app.user.access('requerimiento_asign') %}hidden{% endif %}>
+                    {{ form_row(form.tecnico, { 'attr': { 'class' : 'select2' } }) }}   
+                </div>
+            {% endif %}
+
+        </div>   
+        <div class="col-md-12">    
+            <h5 class="text-yellow" style="margin:0 20px 4px;">EQUIPOS ASOCIADOS</h5>
+            <hr style="margin:0 15px 10px;border:2px solid #f39c12;">
+            <div class="col-md-12">                                
+                <table id="reqdetalles" class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:3%">#</th>
+                            <th style="width:15%">Código de Barra</th>
+                            <th style="width:42%">Tipo - Descripción - N° de Serie - Marca - Modelo</th>
+                            <th style="width:35%">Obs. Adicionales</th>
+                            <th class="nosort aligncenter" style="width: 5%">
+                                {% if requerimiento.estado=='SIN ASIGNAR' %}
+                                <a href="javascript:void(0)" class="btn btn-danger btn-xs addEquipoDetalle" data-url="{{ path('render_add_equipo_detalle',{'id':requerimiento.id,'op':'req'}) }}"><i class="fa fa-plus"></i> Agregar Equipo</a>
+                                {% endif %}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in requerimiento.detalles %} 
+                            <tr class="item" divdata="item_items">   
+                                <td class="ordTd">{{ loop.index }}</td>
+                                <td class="bcTd">{{ item.equipo.barcode }}</td>
+                                <td class="eqTd">{{ item.equipo.textoOT }}</td>           
+                                <td>{{ item.descripcion }}</td>    
+                                <td class="link-actions" style="text-align:right">
+                                    {% if requerimiento.estado=='SIN ASIGNAR' %}
+                                    <a href="javascript:void(0)" title="Quitar" class="delReqDetalle" data-id="{{ item.id }}" tabIndex="-1"><i class="fa fa-trash-o"></i></a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="col-md-12">    
+                    <div class="col-md-12">
+                    {{ form_row(form.textoActaRecepcion) }}
+                    </div>    
+                </div>       
+                <div style="text-align:center;margin-bottom: 20px;">
+                {% if requerimiento.id %}
+                    <a href="{{ path('print_requerimiento_recepcion_equipo',{'id':requerimiento.id})}}" class="btn btn-default" target="_blank" ><i class="fa fa-print"></i>&nbsp; Acta de Recepción</a>
+                {% endif %}                    
+                </div>
+            </div>    
+            <div class="col-md-12" style="padding-bottom:20px">    
+                {% include "admin-form-data.html.twig" with {'table':requerimiento} %}  
+                {% include "admin-form-deleted-data.html.twig" with {'entity':requerimiento} %}                                 
+            </div>    
+        </div>    
+        <div class="col-md-12">
+            {% if  app.user.access('requerimiento_delete') %}
+            <a type="button" class="btn btn-app delete pull-left" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Cancelar</a>
+            {% endif %}
+            <div class="btn-group pull-right">
+                <a href="{{path('print_requerimiento',{'id':requerimiento.id})}}" data-toggle="tooltip" title="Imprimir informe completo" target="_blank" class="btn btn-app printRequerimiento"> <i class="fa fa-print"></i>Imprimir</a>
+                <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                <a type="button" class="btn btn-app volver" href="{{ path('soporte_requerimiento')}}"><i class="fa fa-reply"></i>Volver</a>
+            </div>
+        </div>   
+
+    </div>             

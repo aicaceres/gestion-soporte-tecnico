@@ -1,0 +1,263 @@
+{{ form_start(form) }}    
+<div class='box-body no-padding'>
+    {% include "form-notification.html.twig" %}
+    <div class="col-md-12">
+        <div class="col-md-2">
+            {{ form_row(form.fecha) }}
+        </div>
+        <div class="col-md-2">
+            {{ form_row(form.hora) }}
+        </div>
+        <div class="col-md-4">
+            {{ form_row(form.tipoTarea) }}
+            
+        </div>
+        <div class="col-md-4 entrega">
+            {{ form_row(form.terminarSoporte) }}
+        </div>
+    </div>        
+    <div class="col-md-12 tecnicos">
+        <div class="col-md-12">
+            <div class="form-group ">
+                <label>Técnico:&nbsp;</label>
+                <select id="tecnicoId" name="tecnicoId" class="form-control select2" style="display:inline-block;width:40%;">
+                    {% for tec in tecnicos if tec.id!=ot.tecnico.id %}
+                        <option value="{{ tec.id }}" >{{ tec.nombre }}</option>
+                    {% endfor %}    
+                </select> 
+            </div>            
+        </div>
+    </div>     
+    <div class="col-md-12 equipos">
+        <div class="col-md-12" {% if entity.ordenTrabajoDetalles|length==0 %} style="display:none" {% endif %}>
+            {{ form_row(form.ordenTrabajoDetalles) }}
+        </div>
+    </div>     
+    <div class="col-md-12 insumos">        
+        <div class="form-group ">
+            <label>Insumos:&nbsp;</label>
+            <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover tablaInsumos">
+                <thead>
+                    <tr>
+                        <th style="width:3%;">#</th>
+                        <th style="width:25%;">Código</th>                            
+                        <th>Detalle [Tipo - Descripción - Marca - Modelo]</th>
+                        <th style="width:10%;">Cantidad</th>
+                        <th style="width:5%;text-align:center;" class="no-sort thactions">
+                            &nbsp;<a href="javascript:void(0);" data-toggle="tooltip" id="addInsumo" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody data-index="{{form.insumos | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Soporte:prototype-insumo-tarea.html.twig' with {'item':form.insumos.vars.prototype} %}{% endfilter %}">                              
+                </tbody>                
+            </table>             
+            <div  class="col-md-12">                                                        
+                <div class='box box-default box-solid insumosDatatable'>
+                    <div class='box-header'>                                    
+                        <h6 class="text-primary" style="margin:0;font-weight:bold;">Buscar Insumos</h6> 
+                        <div class="pull-right box-tools">
+                            <button type="button" class="btn btn-box-tool closesearch" ><i class="fa fa-close"></i></button>
+                        </div>
+                    </div><!-- /.box-header -->
+                    <div id="datatableslist" class='box-body'></div>       
+                </div>                             
+            </div>                
+        </div> 
+    </div>     
+    <div class="col-md-12 descripcion">
+        <div class="col-md-12">
+            {{ form_row(form.descripcion) }}
+        </div>
+    </div>     
+                
+    <div class="col-md-12 entrega">        
+        <div class="form-group ">
+            <label>Equipos a entregar:&nbsp;</label>
+            <table id="equipos" class="table table-hover table-bordered">
+                <thead>
+                    <tr>
+                        <th style="width:3%">#</th>
+                        <th style="width:15%">Código</th>
+                        <th style="width:42%">Nombre</th>
+                        <th style="width:42%">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in entity.ordenTrabajoDetalles  %}                                             
+                        <tr class="item">
+                            <td class="ordTd">{{ loop.index }}</td>
+                            <td>{{ item.equipo.barcode }}</td>
+                            <td>{{ item.equipo.textoOT }}</td> 
+                            <td><select class="select2 selectEstados" name="estados[]">
+                                    {% for est in estados %}
+                                    <option value="{{ est.id }}" {% if est.abreviatura=='OP'%}selected="selected"{% endif %}>{{est.nombre}}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="hidden" name="ids[]" value="{{ item.id }}"/>
+                            </td>                             
+                        </tr>                           
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4">
+                            {% include "ConfigBundle:Ubicacion:partial-select-ubicacion.html.twig" with {'ubicform':ubicform } %}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>                                       
+        </div> 
+    </div>     
+</div>
+    <div style='display:none;'>
+        {{ form_end(form) }}
+    </div>
+</form>   
+<script type="text/javascript">
+    var $insumosHolder;
+$(document).ready(function() {        
+    date = $('#appbundle_tarea_fecha').datepicker();
+    date.css('z-index', 'auto');    
+    $('#appbundle_tarea_hora').timepicker({ 'timeFormat': 'G:i' });    
+    {% if entity.ordenTrabajoDetalles|length==0 %}
+        $("#appbundle_tarea_tipoTarea option[value='4']").remove();                 
+    {%endif%}           
+    $("#appbundle_tarea_tipoTarea option[value='5']").remove();      
+    $('#appbundle_tarea_tipoTarea').select2();    
+    $('#appbundle_tarea_terminarSoporte').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+          });    
+    $('.selectEstados').select2();    
+    $('#ubicacion-nueva').find('select').css('font-size','12px');
+    $('#tecnicoId').select2();
+    $('#appbundle_tarea_ordenTrabajoDetalles').select2();    
+
+    $('#appbundle_tarea_tipoTarea').on('select2:select',function(){
+        changeTipoTarea($(this));                
+    });
+    changeTipoTarea($('#appbundle_tarea_tipoTarea'));  
+    
+    $('.insumosDatatable').find('.closesearch').on('click',function(){
+        $('.insumosDatatable').hide();
+    });
+    
+});
+function agregarInsumo(list,idx){
+    $btn =  $("#"+idx); 
+    $.getJSON("{{path('find_data_insumo')}}",{list:list}, function(data){ 
+        first=true;
+        $.each(data, function(i,item){
+            if(first){
+                // cargar el primero en el tr ya agregado.    
+                first=false;
+                insumo = $btn.closest('td.bcTd').find('[name$="[insumo]"]');
+                codigo = $btn.closest('td.bcTd').find('[name$="[codigo]"]');
+                texto = $btn.closest('.item').find('[name$="[descripcion]"]');
+            }else{
+                addNewInsumo();
+                insumo = $insumosHolder.find('[name$="[insumo]"]').last();
+                codigo = $insumosHolder.find('[name$="[codigo]"]').last();
+                texto = $insumosHolder.find('[name$="[descripcion]"]').last();
+            }            
+            insumo.val( item.id ); 
+            codigo.val( item.codigo );
+            texto.val( item.nombre );
+        });
+    });
+         
+    
+  //  insumo = $btn.closest('td.bcTd').find('[name$="[insumo]"]');
+    //insumo.val(item);
+    //cargar los demás si hubiere
+  /*  for(var i in list){
+        addNewInsumo( list[i] ); 
+    }*/   
+}
+function changeTipoTarea(obj){    
+    $('.equipos, .insumos, .descripcion, .tecnicos, .insumosDatatable, .entrega').hide();
+    var $val = parseInt(obj.val()) ;         
+    switch($val) {
+        case 1:
+            // Mensaje
+            {% if entity.ordenTrabajoDetalles|length>0 %}
+               $('.equipos').show();                 
+            {%endif%} 
+            $('.descripcion').show();
+            $('.descripcion').find('textarea').focus();
+            break;
+        case 2:
+            // Registro de Insumos
+            {% if entity.ordenTrabajoDetalles|length>0 %}
+               $('.equipos').show();                 
+            {%endif%}                    
+            $('.insumos').show();
+            $insumosHolder = $('.tablaInsumos tbody');  
+            $insumosHolder.find('.delTd').each(function() {                    
+                addInsumoDeleteLink($(this));
+            });
+            $insumosHolder.find('.ordTd').each(function(i) {
+                $(this).html(i + 1);
+            });  
+            $('#addInsumo').on('click', function(e) {
+                e.preventDefault();
+                addNewInsumo();
+                e.stopPropagation();
+            });  
+            addNewInsumo();
+          break;
+        case 3:
+            // Derivar soporte
+          $('#appbundle_tarea_ordenTrabajoDetalles').val('').trigger('change');
+          $('.tecnicos').show();              
+          $('.descripcion').show();
+          $('.tecnicos').find('#tecnicoId').select2('open');              
+          break;
+        case 4:
+            // Entrega de equipo             
+          $('.entrega').show();              
+          $('.descripcion').show();
+          break;
+        case 6:
+            // Terminar Soporte
+          $('#appbundle_tarea_ordenTrabajoDetalles').val('').trigger('change');
+          $('.descripcion').show();
+          $('.descripcion').find('textarea').focus();
+          break;
+      }
+}
+function addNewInsumo() {
+    var prototype = $insumosHolder.data('prototype');
+    var index = $insumosHolder.data('index');    
+    var newForm = prototype.replace(/insitems/g, index);
+    $insumosHolder.append(newForm);
+    $insumosHolder.data('index', index + 1);
+    addInsumoDeleteLink($insumosHolder.find('.delTd').last());
+    $insumosHolder.find('.ordTd').last().html($insumosHolder.data('index'));
+    var btnsearch = $insumosHolder.find('.searchInsumo').last();
+    btnsearch.attr('id', $insumosHolder.data('index'));
+    if( !$('.insumosDatatable').is(':visible') ){
+       btnsearch.click(); 
+    }    
+    $insumosHolder.find('.bcTd input').last().focus();
+}
+function addInsumoDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            var index = $insumosHolder.data('index');
+            $insumosHolder.data('index', index - 1);
+            $insumosHolder.find('.ordTd').each(function(i) {
+               jQuery(this).html(i + 1);
+            });
+        }
+    });
+}
+</script>

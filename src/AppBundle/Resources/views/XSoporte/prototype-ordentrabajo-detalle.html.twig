@@ -1,0 +1,29 @@
+<tr class="item" divdata="item_items">
+    <td class="ordTd"></td>
+    <td class="bcTd">
+        {% set band = false %}
+        {% if item.vars.data %}
+            {% if item.vars.data.requerimientoDetalle %}
+                {% set band = true %}                
+            {% endif %}    
+        {% endif %}    
+        {% if band %}
+         <div class="input-group">
+            {{ form_widget(item.barcode, { 'attr': {'class' : 'form-control', 'disabled':'disabled' } }) }}               
+        </div>   
+        {% else %}        
+        <div class="input-group">
+            {{ form_widget(item.barcode, { 'attr': {'class' : 'form-control' } }) }}
+                <span class="input-group-btn" style="padding-left: 5px;">
+                    <button data-toggle="tooltip" title="Buscar equipo" type="button" data-url="{{path('render_search_equipo')}}" id=""
+                        class="btn btn-default btn-flat btn-xs searchEquipo " data-function="agregarEquipos" data-param="barcode"><i class="fa fa-search"></i></button>
+                </span>
+        </div>
+        {% endif %}
+    </td>
+    <td class="eqTd"><span class="eqNombre">{% if item.vars.data %}{{ item.vars.data.equipo.textoOT }} {% endif %}</span>
+        {{ form_widget(item.equipoId) }}
+        {{ form_widget(item.reqdetalleId) }}</td>    
+    <td>{{ form_widget(item.descripcion, { 'attr': {'class' : 'form-control' } }) }}</td>    
+    <td class="link-actions"></td>
+</tr>

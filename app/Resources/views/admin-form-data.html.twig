@@ -1,0 +1,14 @@
+{% if app.user.rol.admin and table.id %}    
+        <div class="row admindata">
+            <div class="col-md-6">
+            <small>Creado {% if table.created %} el {{table.created|date('d-m-Y H:i')}} {%endif%} por {{table.createdBy}}</small>
+            </div>
+            {% if table.updatedBy is defined %}
+                {% if table.updatedBy %}
+                <div class="col-md-6">
+                <small>Última actualización {% if table.updated %}el {{table.updated|date('d-m-Y H:i')}}{%endif%} por {{table.updatedBy}}</small>
+                </div>
+                {% endif %}
+            {% endif %}
+        </div>    
+{% endif %}  

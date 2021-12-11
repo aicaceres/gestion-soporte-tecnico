@@ -1,0 +1,16 @@
+<fieldset>
+   <div class="col-md-6">
+            {{ form_row(form.pais, { 'attr': {'urlProvincia' : path('select_provincias') } }) }}
+    </div>
+   <div class="col-md-6">
+            {{ form_row(form.provincia, { 'attr': {'urlLocalidad' : path('select_localidades') } }) }}
+    </div>
+</fieldset>    
+<fieldset>
+   <div class="col-md-6">
+            {{ form_row(form.localidad, { 'attr': {'urlCpa' : path('get_codpostal') } }) }}
+    </div>
+   <div class="col-md-3">
+            {{ form_row(form.codpostal, { 'attr': {'class' : 'cpa form-control' } }) }}
+    </div>
+</fieldset>    

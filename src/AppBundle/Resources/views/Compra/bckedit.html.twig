@@ -1,0 +1,388 @@
+{% extends "base.html.twig" %}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Registro de Compras  </h3>
+                </div><!-- /.box-header -->
+                {{ form_start(form) }}
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-2">
+                                {{ form_row(form.fechaCompra) }}
+                            </div>  
+                            <div class="col-md-2">
+                                {{ form_row(form.razonSocial) }}
+                            </div>                                        
+                            <div class="col-md-2">
+                                {{ form_row(form.ordenCompra) }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form_row(form.solicitante) }}
+                            </div>
+                                                                    
+                        </div>  
+                        <div class="col-md-12">
+                            <div class="col-md-4">
+                                {{ form_label(form.proveedor) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.proveedor, { 'attr': {'class' : 'select2' } }) }}                                
+                                    {% if app.user.access('proveedor') %}
+                                        <span class="input-group-btn" style="padding-left: 5px;">
+                                            <button data-toggle="tooltip" title="Agregar Proveedor" type="button" data-tabla="Proveedor" data-url="{{path('render_add_proveedor')}}"
+                                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {{ form_errors(form.proveedor) }}
+                            </div> 
+                                                                   
+                            <div class="col-md-2">
+                                {{ form_row(form.nroRemito) }}
+                            </div>                                        
+                            <div class="col-md-3">
+                                {{ form_row(form.nroFactura) }}
+                            </div> 
+                            <div class="col-md-3">
+                                {{ form_row(form.enviado,{'label': 'Registrar envío ','label_attr':{'class':'infoicon' ,'title':'Marcar para indicar que ya fue enviado al Proveedor'},'attr': {'title':'Marcar para indicar que ya fue enviado al Proveedor'}  }) }}
+                            </div> 
+                            
+                        </div>                          
+                        <div class="col-md-12">
+                            <div class="col-md-12">
+                                {{ form_row(form.descripcion) }}    
+                            </div>
+                        </div>                          
+                    </div>
+                            {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                             <h4>Detalle</h4>  
+                <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover tablacompras">
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">#</th>
+                            <th>Detalle</th>
+                            <th style="width:8%;">Cantidad</th>
+                            <th style="width:10%;">Precio Unit.</th>
+                            <th style="width:5%;text-align:center;" class="no-sort thactions">
+                                &nbsp;<a href="javascript:void(0);" data-toggle="tooltip" id="linkAdd" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Compra:itemPrototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                    {% for item in form.detalles %}                        
+                        {% if item.vars.data.insumo %}
+                            {% set clase = item.vars.data.insumo.tipo.clase  %}
+                        {% else %}
+                            {% set clase = item.vars.data.tipo.clase  %}    
+                        {% endif %}
+                        <tr class="item" divdata="item_items">
+<td class="ordTd" style="vertical-align:middle;padding-left:10px;font-weight:bold"></td>
+    <td class="insumoTd" {% if not item.vars.data.insumo %} style="display:none"{% endif %} >
+        <div class="col-md-12">
+            <div class="input-group"> 
+                <span class="input-group-addon"><i class="fa fa-puzzle-piece"></i></span>  
+                    {{ form_widget(item.insumo) }}
+                <span class="input-group-btn" style="padding-left: 10px;">
+                    <button data-toggle="tooltip" title="Agregar Nuevo" type="button" 
+                            class="btn btn-default btn-flat btn-xs addItem"><i class="fa fa-plus"></i></button>
+                </span>
+            </div>             
+        </div>             
+    </td>    
+    <td class="newItemTd" {% if item.vars.data.insumo %} style="display:none"{% endif %} >
+        <div class="col-md-12" style="padding:0">
+            <div class="col-md-6">                    
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa {% if clase=='I' %} fa-puzzle-piece {%else%}  fa-desktop {%endif%}"></i></span>                        
+                    {{ form_widget(item.tipo) }}                                
+                    {% if app.user.access('configuracion_parametro') %}
+                        <span class="input-group-btn" style="padding-left: 5px;">
+                            <button data-toggle="tooltip" title="Agregar Tipo Insumo/Equipo" type="button" data-tabla="Tipo" data-tipo="E" data-url="{{path('render_add_parametro')}}"
+                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                        </span>
+                    {% endif %}
+                </div>
+                {{ form_errors(item.tipo) }}                                                                        
+            </div>
+            <div class="col-md-6">
+                {{ form_widget(item.nombre) }}
+            </div>                                       
+        </div> 
+        <div class="col-md-12" style="padding  : 6px 0;">
+            <div class="col-md-6">
+                {{ form_widget(item.itemMarca, { 'attr': {'urlModelos' : path('select_modelos') } }) }}
+            </div>                                       
+            <div class="col-md-6">
+                {{ form_widget(item.itemModelo) }}
+            </div>                                       
+        </div>          
+
+    </td>    
+    <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number','min':'0'} }) }} </td>                                
+    <td class="precioTd right">{{ form_widget(item.precio, { 'attr': {'class' : 'number','min':'0'} }) }} </td> 
+    <td class="delTd" style="text-align:center;"></td>
+                        </tr>
+
+
+                    {% endfor %}           
+                    </tbody>
+                    <tfoot>
+                        <th colspan="4" style="text-align:right" >TOTAL</th>
+                        <th id="precTot right" >{{ form_widget(form.total, { 'attr': {'class' : 'number','readonly' : 'true'} }) }}</th>
+                        <th></th>
+                    </tfoot>
+                </table>                                
+                            
+                            
+                </div>                                  
+                <div class="box-footer">
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        <a type="button" class="btn btn-app" href="{{ path('compra_admin')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>     
+                <div style="display:none">    
+                    {{ form_end(form) }}
+                </div>                
+     
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+    var $dataHolder;
+  //  var $tipo='I';
+$(document).ready(function() {             
+   $('[type="submit"]').on('click',function(){
+     if( !$('#appbundle_compra_proveedor').val() ){
+         alert('Debe completar el Proveedor!');
+         $('#appbundle_compra_proveedor').focus();
+         return false;
+     }  
+     if( $('.tablacompras tbody tr').length == 0  ){
+         alert('Debe ingresar items a la compra!');
+         return false;   
+     }     
+     $('#appbundle_compra_savenew').val('N');    
+   });   
+   $('#appbundle_compra_razonSocial').on('change',function(){
+       var data = { ubic_id: $(this).val()  };
+       selector = $('#appbundle_compra_solicitante');
+        $.ajax({
+            type: 'post',
+            url:  "{{path('select_solicitantes')}}",
+            data: data,
+            success: function(data) {                
+                var id = selector.val();
+                selector.html('<option value="">Seleccionar...</option>');
+                for (var i = 0, total = data.length; i < total; i++) {
+                    selector.append('<option value="' + data[i].id + '" >' + data[i].nombre + '</option>');
+                }
+                if(id) selector.val(id);
+            }
+        });
+       $('#appbundle_compra_ordenCompra').focus();
+   });
+   $('#appbundle_compra_razonSocial').change();
+   // Get the container who holds the collection
+    $dataHolder = $('.table tbody');
+    $dataHolder.find('.delTd').each(function() {
+        addItemFormCompraDeleteLink($(this));
+    });
+    $dataHolder.find('.ordTd').each(function(i) {
+        $(this).html(i + 1);
+    });  
+   $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
+        addNewItemCompra();
+        e.stopPropagation();
+        //$collectionHolder.find('.chzn-container').last().trigger('mousedown');
+    });
+   $(document).keypress(function(e) {
+       var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ e.preventDefault(); }
+        if (e.which == 43) { 
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+    });
+    
+    $('.cantTd input, .precioTd input').change(function(){ 
+       if(isNaN( parseFloat($(this).val()) )) $(this).val(0);  actualizaTotales(); });    
+    
+    var codigo = $dataHolder.find('.codTd input').last();
+    codigo.on('keypress',function(e){      
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ 
+            searchItem(codigo.val().toUpperCase(),$(this) );        
+        }
+    });
+    var addItem = $dataHolder.find('.addItem').last();    
+    addItem.on('click',function(){
+        codigo.trigger(
+            jQuery.Event( 'keypress', { keyCode: $.ui.keyCode.ENTER, which: $.ui.keyCode.ENTER } )
+        );
+    });
+   actualizaTotales(); 
+});
+function addNewItemCompra() {
+    var prototype = $dataHolder.data('prototype');
+    var index = $dataHolder.data('index');    
+    var newForm = prototype.replace(/items/g, index);
+    $dataHolder.append(newForm);
+    $dataHolder.data('index', index + 1);
+    addItemFormCompraDeleteLink($dataHolder.find('.delTd').last());
+    $dataHolder.find('.ordTd').last().html($dataHolder.data('index'));
+    $('.cantTd input, .precioTd input').change(function(){ 
+            if(isNaN( parseFloat($(this).val()) )) $(this).val(0);  
+            actualizaTotales(); 
+    }); 
+    var codigo = $dataHolder.find('.codTd input').last();  
+    codigo.on('keypress',function(e){
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ 
+            searchItem(codigo.val().toUpperCase(),$(this) );        
+        }
+    });   
+    var addItem = $dataHolder.find('.addItem').last(); 
+    addItem.on('click',function(){
+        codigo.trigger(
+            jQuery.Event( 'keypress', { keyCode: $.ui.keyCode.ENTER, which: $.ui.keyCode.ENTER } )
+        );
+    });
+    codigo.focus();
+    var prodrow = $dataHolder.find('.prodTd .producto').last();
+    var marca = prodrow.find('[id$="_itemMarca"]');
+      marca.on('change',function() {
+        var data = { marca_id: $(this).val()  };
+        $.ajax({
+            type: 'post',
+            url: $(this).attr('urlModelos'),
+            data: data,
+            success: function(data) {
+                changeDataSelect( prodrow.find('[id$="_itemModelo"]'), data, false );
+            }
+        });
+    });
+}
+function addItemFormCompraDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            var index = $dataHolder.data('index');
+            $dataHolder.data('index', index - 1);
+            $dataHolder.find('.ordTd').each(function(i) {
+               jQuery(this).html(i + 1);
+            });
+            actualizaTotales();
+        }
+    });
+}
+function searchItem(codigo,obj){       
+    var tr = obj.parent().parent().parent();
+    tr.find('.prodTd .insumo').hide();
+    tr.find('.prodTd .insumo span').html('');
+    tr.find('.prodTd .insumo input').val('');
+    tr.find('.prodTd .producto').hide();     
+    if(codigo){
+        var nuevo = true;
+        $.ajax({
+        type: 'get',
+        url: "{{ path('get_data_producto') }}?cod="+codigo,
+          success: function(data) {                               
+            switch(data['tipo']) {
+                case 'E':                    
+                  // ya existe un equipo o es edición
+                 /* if( tr.find('.prodTd').data('idrow') ){
+                      tr.find('.prodTd .insumo span').html(data['res']['txt']);
+                      tr.find('.prodTd .insumo input').val(data['res']['id']);
+                      tr.find('.codTd [id$="_codigo"]').attr('readonly',true);
+                      tr.find('.cantTd [id$="_cantidad"]').attr('readonly',true);
+                      tr.find('.prodTd .insumo').show();
+                  }else{*/
+                nuevo = false;
+                     alert('Ya existe un equipo con este código!'); 
+                     obj.val('');
+                  //}
+                  break;                
+                case 'I':
+                     nuevo = false;
+                  // insumo existente
+                  tr.find('.prodTd .insumo span').html(data['res']['txt']);
+                  tr.find('.prodTd .insumo input').val(data['res']['id']);
+                  // datos no requeridos
+                    prod = tr.find('.prodTd .producto');         
+                    prod.find('[type="text"]').val('');
+                    prod.find('select').val('');
+                    prod.find('select').trigger('change');
+                    prod.find('[id$="_nombre"]').attr('required',false);
+                    prod.find('[id$="_itemMarca"]').attr('required',false);
+                    prod.find('[id$="_itemModelo"]').attr('required',false);                
+                  tr.find('.prodTd .insumo').show();
+                  //tr.find('.cantTd [id$="_cantidad"]').attr('readonly',false);
+                  tr.find('.cantTd input').focus();                  
+                  break;               
+            } ;  
+            if(nuevo) setNuevoItem(tr);
+          }
+        });     
+    }else{
+        setNuevoItem(tr);
+    }
+}
+function setNuevoItem(tr){
+    prod = tr.find('.prodTd .producto');
+    //El código no existe, desea crear nuevo Insumo/Equipo?') ){                                  
+        // datos requeridos
+        prod.find('[id$="_nombre"]').attr('required',true);
+        prod.find('[id$="_itemMarca"]').attr('required',true);
+        prod.find('[id$="_itemModelo"]').attr('required',true);
+
+        prod.find('[id$="_tipo"]').on('change',function(){                         
+            $.ajax({
+                  type: 'get',
+                  url: "{{ path('get_clase_tipo') }}?id="+$(this).val(),
+                  success: function(data) {
+                      /*if( data === 'E'){
+                          tr.find('.cantTd [id$="_cantidad"]').val(1);
+                          tr.find('.cantTd [id$="_cantidad"]').attr('readonly',true);                     
+                      }else{
+                          tr.find('.cantTd [id$="_cantidad"]').attr('readonly',false);                                      
+                      }*/
+                      prod.find('[id$="_nombre"]').focus();
+                  }
+              }); 
+        });
+        prod.show();
+        prod.find('.select2').select2();       
+        prod.find('[id$="_tipo"]').focus();
+    }
+function actualizaTotales(){
+        var cantTot=0, precTot=0;
+        $("tr.item").each(function(){
+            var item = $(this);
+            var cant =  checknumero( item.find('.cantTd input') ) ;
+            var prec =  checknumero( item.find('.precioTd input') ) ;
+            sbtotItm = prec * cant;
+            // incrementar totales
+            cantTot += cant;
+            precTot += sbtotItm;
+        });
+        $('#appbundle_compra_total').val(precTot.toFixed(2));
+      //  $('#precTot').text(precTot.toFixed(2));
+       // $('#cantTot').text(cantTot.toFixed(2));
+    }
+</script>    
+{% endblock %}

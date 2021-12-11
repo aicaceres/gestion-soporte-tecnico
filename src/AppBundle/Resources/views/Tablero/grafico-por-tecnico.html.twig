@@ -1,0 +1,60 @@
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <i class="fa fa-users"></i>
+
+        <h3 class="box-title">Órdenes de Trabajo por Técnico</h3>
+
+        <div class="box-tools pull-right">
+            <form id="printform_otxtecnico" class="hidden" name="printform" target="_blank" style="display:inline-block;" 
+                  action="{{path('print_reporte')}}" method="POST">                        
+                <input type="hidden" id="grafico_otxTecnico" name="grafico"/>  
+                <input type="hidden" class="tiposalida" name="tiposalida"/>
+                <input type="hidden" name="reporte" value="otxtecnico"/>
+                <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i> </button> 
+            </form>
+            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+            </button>
+        </div>
+    </div>
+    <div class="box-body">  
+        <div class="col-md-12">               
+            <form id="searchform" action="{{ path('homepage') }}" method="get" >                                    
+                <fieldset> 
+                    <div class="col-md-1">
+                        <label class="required">Período:</label>
+                    </div>    
+                    <div class="col-md-2">                        
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{periodo.desde}}">
+                        </div>   
+                    </div>    
+                    <div class="col-md-2">                         
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{periodo.hasta}}">                                            
+                        </div>                                           
+                    </div>       
+                    <div class="col-md-1">                                                                                                
+                        <button type="button" id="refrescargrafico" data-toggle="tooltip" title="Refrescar gráfico" class="form-control btn btn-default btn-sm"><i class="fa fa-bar-chart"></i></button>
+                    </div>         
+                </fieldset>                    
+            </form>  
+        </div> 
+
+
+        <div class="col-md-12">               
+            <canvas height="100px" id="canvas-otxtecnico"></canvas>
+        </div> 
+        <div class="col-md-12"> 
+            <h4 style="border-bottom: 5px solid lightgray;padding-bottom: 10px;	margin: 0;">Resumen Semestral</h4>
+            <canvas height="100px" id="canvas-otxtecnicoanual"></canvas>
+        </div> 
+
+    </div>
+    <!-- /.box-body-->
+</div>

@@ -1,0 +1,49 @@
+<table id="tablelist" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            {% if table in ['ConceptoEntrega','Estado'] %}  <th>Abreviatura</th> {% endif %}
+            {% if table=='Tipo' %}  <th>Clase</th> {% endif %}
+            {% if table=='Marca' %}  <th>Modelos</th> {% endif %}
+            <th class="no-sort thactions">
+                {% if app.user.access('configuracion_parametro') %}
+                    &nbsp;<a href="javascript:void(0);" data-url="{{ path('configuracion_parametro_new', { 'table': table }) }}" class="new" data-toggle="tooltip" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                    {% endif %}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td>{{ entity.id }}</td>
+                <td>{{ entity.nombre }}</td>
+                {% if entity.abreviatura is defined %} <td> {{ entity.abreviatura }}</td> {% endif %}
+                {% if entity.clase is defined %} <td>{% if entity.clase=='E'%} Equipo {%else%} Insumo {%endif%}</td> {% endif %}
+                {% if entity.modelos is defined %} 
+                    <td>
+                        {% if entity.modelos|length>0%}
+                            {% for mod in entity.modelos %}                            
+                                    {{mod}}
+                                    {% if not loop.last%} / {% endif%}
+                                {% endfor %}
+                        {% endif %}
+                    </td> 
+                {% endif %}
+                <td class="link-actions">
+                    {% if app.user.access('configuracion_parametro') %}
+                        <a href="javascript:void(0);" data-url="{{ path('configuracion_parametro_edit', { 'table': table, 'id': entity.id }) }}" class="edit" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
+                        {% endif %}
+                        {% if app.user.access('configuracion_parametro') %}
+                        <form action="{{ path('configuracion_parametro_delete', { 'table': table, 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                            <input type="hidden" name="_method" value="DELETE" />
+                            {{ form_widget(deleteForms[entity.id]) }}
+                            <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click();"><i class="fa fa-trash-o"></i></a>&nbsp;
+                            <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>    

@@ -1,0 +1,13 @@
+{% set id = 'U'~data.ubicacion %}
+<tr class="nivel2 {{id}}" data-nivel="2" data-id="{{ id~'E'~data.id }}">
+    <td><i class="fa fa-plus masdatos" title="Ver Departamentos" data-url="{{ path('get_monitoreo_departamentos',{'edifid':data.id}) }}"></i></td>                                
+    <td>{{ data.nombre|upper}} <button class="btn btn-xs btn-info pull-right testipdptos hidden" data-id="{{ data.id }}"><strong>TEST IP</strong> <i class="fa fa-spinner fa-spin hidden"></i></button></td>                                    
+    <td style="text-align:center">
+        <span class="semaforo hidden">
+            <span class="badge cero bg-green">0</span>
+            <span class="badge cero bg-yellow2">0</span>
+            <span class="badge cero bg-red">0</span>
+        </span>
+    </td>
+    <td></td>                                    
+</tr> 

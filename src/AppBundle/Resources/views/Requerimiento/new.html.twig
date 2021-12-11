@@ -1,0 +1,404 @@
+{% extends "base.html.twig" %}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            {{ form_start(form) }}
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-briefcase"></i> &nbsp; Nuevo Requerimiento </h3>                                      
+                </div><!-- /.box-header -->
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}
+                    <div class="row">                        
+                        <div class="col-md-12">
+                            <div class="col-md-2">
+                                {{ form_row(form.fechaRequerimiento) }}
+                            </div>
+                            <div class="col-md-1">
+                                {{ form_row(form.hora) }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form_label(form.tipoSoporte) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.tipoSoporte, { 'attr': {'class' : 'select2' } }) }}                                
+                                    {% if app.user.access('configuracion_parametro') %}
+                                        <span class="input-group-btn" style="padding-left: 5px;">
+                                            <button data-toggle="tooltip" title="Agregar Tipo Soporte" type="button" data-tabla="TipoSoporte" data-url="{{path('render_add_parametro')}}"
+                                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {{ form_errors(form.tipoSoporte) }}
+                            </div>                          
+                            <div class="col-md-2">
+                                {{ form_row(form.jira) }}                                  
+                            </div>
+                            <div class="col-md-2 hidden">
+                                {% if entity.id %}
+                                    {{ form_row(form.estado) }}  
+                                {% else %}
+                                    {{ form_row(form.estado, { 'attr': { 'disabled' : 'disabled' } }) }}  
+                                {% endif %}  
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    {{ form_widget(form.altaPrioridad) }}
+                                </div>
+                            </div>
+                        </div> 
+                        <div class="col-md-12">
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    <label>Ubicación:</label>                                    
+                                    <select id="selUbicacion" name="idUbicacion" urledificio="{{ path('select_edificios') }}" class="ubicacion_selector form-control select2">
+                                        {%for ubic in ubicaciones %}
+                                            <option value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                                        {% endfor %} 
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group ">
+                                    <label>Edificio:</label>
+                                    <span class="required" title="Dato requerido">*</span>
+                                    <select id="selEdificio" name="idEdificio" urldepartamento="{{ path('select_departamentos') }}" class="edificio_selector form-control select2" required="required">                                        
+                                        <option value="0">Todos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                {{ form_row(form.solicitante, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector select2' } }) }}   
+                            </div>                   
+                            <div class="col-md-3">
+                                {{ form_row(form.responsable) }}                                        
+                            </div>                   
+                        </div>                   
+                        <div class="col-md-12">                            
+                            <div class="col-md-9">
+                                {{ form_row(form.descripcion) }}
+                            </div>                                      
+
+                            <div class="col-md-3" {% if not app.user.access('requerimiento_asign') %}hidden{% endif %}>
+                                {{ form_row(form.tecnico, { 'attr': { 'class' : 'select2' } }) }}   
+                            </div>
+
+
+                        </div>   
+                        <div class="col-md-12">    
+                            <h5 class="text-yellow" style="margin:0 20px 4px;">EQUIPOS ASOCIADOS</h5>
+                            <hr style="margin:0 15px 10px;border:2px solid #f39c12;">
+                            <div class="col-md-4 equiposAsociados {% if (form.detalles|length)==0 %}hidden{% endif %}" >
+                                <input type="checkbox" id="ckEstadoEquipo" name="ckEstadoEquipo" checked="checked" />&nbsp;
+                                <small style="display:inline-block;font-weight:normal;">Cambiar equipo a:&nbsp;</small>
+                                {{ form_widget(form.estadoEquipo) }}  
+                            </div>
+                            <div class="col-md-8 equiposAsociados {% if (form.detalles|length)==0 %}hidden{% endif %}" >    
+                                <input type="checkbox" id="ckubicacionEquipo" name="ckubicacionEquipo" checked="checked" />&nbsp;
+                                <small class="ubicEquipo" style="display:inline-block;font-weight:normal;padding-left:10px">Modificar ubicación a:&nbsp;</small>
+                                <small id="spanUbicacion" class="ckubic"> {{ servTecnico.nombreCompleto }} </small>
+                                <div class="ckubic" style="display:inline-block;">{{ form_widget(form.pisoEquipo, { 'attr': { 'style':'margin-left:10px' } } ) }}</div>                                      
+                                <button type="button" id="newUbicacion" class="btn btn-sm btn-default ckubic" title="Cambiar a otra ubicación" style="margin-left:10px"><i class="fa fa-refresh"></i></button>  
+                                <div class="hidden">   {{ form_widget(form.departamentoEquipo) }}  </div>
+                            </div>  
+
+                            <div class="col-md-12">                                
+                                <table id="equipos" class="table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:3%">#</th>
+                                            <th style="width:15%">Código de Barra</th>
+                                            <th style="width:42%">Tipo - Descripción - N° de Serie - Marca - Modelo</th>
+                                            <th style="width:35%">Obs. Adicionales</th>
+                                            <th class="nosort aligncenter" style="width: 5%">
+                                                <a href="javascript:void(0)" class="btn btn-danger btn-xs linkAdd" title="Agregar Equipo" data-form="detalles" data-toggle="tooltip"><i class="fa fa-plus"></i> Agregar Equipo</a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody data-index="{{form.detalles | length }}" class="collectionHolder"
+                                           data-prototype="{% filter escape %}{% include 'AppBundle:Requerimiento:prototype-detalle.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                                        {% for item in form.detalles %}                                            
+                                                {% include "AppBundle:Requerimiento:prototype-detalle.html.twig" with {'item':item} %}                                              
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>  
+                            <div class="col-md-12">    
+                                <div class="col-md-12">
+                                {{ form_row(form.textoActaRecepcion) }}
+                                </div>    
+                            </div>    
+                        </div>    
+                    </div>                    
+                </div>                                  
+                <div class="box-footer">
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        <a type="button" class="btn btn-app volver" href="{{ path('soporte_requerimiento')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>                                                    
+            </div><!-- /.box -->
+             {{ form_errors(form) }}
+            <div style="display:none">    
+                {{ form_end(form) }}                
+            </div> 
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+    var $dataHolder;
+$(document).ready(function() {     
+    $('#appbundle_requerimiento_altaPrioridad').closest('label').css('font-weight','bold');
+    $('#appbundle_requerimiento_estadoEquipo').val(7);  
+    $('#appbundle_requerimiento_estadoEquipo').removeClass('form-control');
+    $('#appbundle_requerimiento_estadoEquipo').select2();
+    $('#appbundle_requerimiento_pisoEquipo').removeClass('form-control');
+    $('#appbundle_requerimiento_pisoEquipo').select2();
+   $(document).keypress(function(e) {        
+       var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13' && !$(e.target).is("textarea") ){ e.preventDefault(); }
+    }); 
+    $(".ubicacion_selector").change();         
+
+       // Get the container who holds the collection
+    $dataHolder = $('.table tbody');
+    $('#appbundle_requerimiento_solicitante').on('select2:selecting',function(e){
+        if( $dataHolder.data('index')>0 ){        
+            if( confirm('Si cambia el Area solicitante se quitarán los equipos asociados!!!')){
+                $('.table tbody tr').remove();
+                $dataHolder.data('index', 0);
+            }else  e.preventDefault();         
+                $(this).select2('close'); 
+        }
+    });
+    $dataHolder.find('[id$="_equipo"]').on('select2:selecting',function(e){
+      sel = $(e.currentTarget) ;
+      if( checkDuplicado( e.params.args.data.id ) ){
+            alert( 'Este equipo ya fue agregado a la lista!' );
+            sel.val('').trigger("change");
+            return false;
+        }else{
+           $.get("{{path('find_barcode_by_id')}}",{id:e.params.args.data.id}, function(data){
+               var itemTr = sel.closest('.item');
+              itemTr.find('.bcTd input').val(data);
+           }); 
+        }
+    });
+   $('.linkAdd').on('click', function(e) {
+        e.preventDefault();
+        if($('#appbundle_requerimiento_solicitante').val()){
+            addNewEquipo();                                        
+        }else{
+            eModal.alert('Debe indicar el area solicitante del requerimiento!', 'Para asociar equipos');           
+            $('#appbundle_requerimiento_solicitante').focus();
+        }        
+        e.stopPropagation();        
+    });
+      
+    $('#ckEstadoEquipo').on('ifUnchecked', function(){                
+        $(this).closest('.equiposAsociados').find('.select2').hide(); 
+    });
+    $('#ckEstadoEquipo').on('ifChecked', function(){
+        $(this).closest('.equiposAsociados').find('.select2').show();     
+      });
+    $('#ckubicacionEquipo').on('ifUnchecked', function(){              
+        $(this).closest('.equiposAsociados').find('.ckubic').hide();          
+    });
+    $('#ckubicacionEquipo').on('ifChecked', function(){
+        $(this).closest('.equiposAsociados').find('.ckubic').show();     
+      });
+      
+      $('#newUbicacion').on('click',function(){
+         var options = {
+           url: "{{ path('render_select_ubicacion') }}",
+           title:'Seleccionar ubicación',
+           size: eModal.size.lg,
+           buttons: [
+               {text: 'Seleccionar', style: 'success', close: true, 
+                   click: function(){   
+                       if( !$('#ubicacion-nueva').find('.departamento_selector').val() ||
+                           !$('#ubicacion-nueva').find('.piso_selector').val()    ){
+                               alert('Debe ingresar todos los datos para la reubicación');
+                               return false;
+                           }
+                       $('#appbundle_requerimiento_departamentoEquipo').val( $('#ubicacion-nueva').find('.departamento_selector').val());
+                       $('#appbundle_requerimiento_pisoEquipo').val($('#ubicacion-nueva').find('.piso_selector').val());
+                       $('#spanUbicacion').html( 
+                            $('#ubicacion-nueva').find('.ubicacion_selector option:selected').html()+' - '+
+                            $('#ubicacion-nueva').find('.edificio_selector option:selected').html()+' - '+
+                            $('#ubicacion-nueva').find('.departamento_selector option:selected').html()
+                               );
+                       $('#appbundle_requerimiento_pisoEquipo').html('');
+                       $('#ubicacion-nueva').find('.piso_selector option').clone().appendTo($('#appbundle_requerimiento_pisoEquipo'));
+                       $('#appbundle_requerimiento_pisoEquipo').val( $('#ubicacion-nueva').find('.piso_selector').val() );
+                   } },
+               {text: 'Cancelar', style: 'danger', close: true }
+           ]
+       };
+       eModal.ajax(options);  
+      });
+    $('[name="appbundle_requerimiento"]').on('submit',function(e){                     
+        if( !$('#appbundle_requerimiento_solicitante').val()){
+            alert('Debe indicar el area solicitante del requerimiento!');
+            return false;
+        }            
+        $('[id$="_equipo"]').each(function(){ 
+            if( !$(this).val() ){
+                $(this).closest('tr').remove();
+            }            
+        }); 
+        if( $('[id$="_equipo"]').length > 0 ){
+            msg_conf = 'Confirma lo siguiente: \n';
+            if( $('#ckEstadoEquipo').prop('checked')==false ){
+                msg_conf = msg_conf + '-El equipo no cambiará su estado.';
+            }else{
+                msg_conf = msg_conf + '-El equipo cambiará al estado: "'+$("#appbundle_requerimiento_estadoEquipo option:selected").text()+'"';
+            }
+            msg_conf = msg_conf +'\n'
+            if( $('#ckubicacionEquipo').prop('checked')==false ){
+                msg_conf = msg_conf + '-El equipo no cambiará de ubicación.';
+            }else{
+                msg_conf = msg_conf + '-El equipo cambiará su ubicación a: "'+ $('#spanUbicacion').text() +'  '+ $("#appbundle_requerimiento_pisoEquipo option:selected").text()+'"';
+            }
+            
+            if( !confirm(msg_conf)){
+                return false;
+            }
+        }        
+        
+        var msj = ''; 
+        if( $('#appbundle_requerimiento_tecnico').val() ){
+            msj = 'Se asignará el requerimiento al técnico indicado y se generará una orden de trabajo.';
+        }                   
+        
+    });    
+    
+    setTimeout(function(){ 
+        $("#ckEstadoEquipo").iCheck('uncheck');
+        $("#ckubicacionEquipo").iCheck('uncheck');
+    }, 1000);
+});
+
+function addNewEquipo() {
+    var depto = $('#appbundle_requerimiento_solicitante').val();
+    if(!depto){
+        alert('Debe indicar el area solicitante del requerimiento!');
+        $('#appbundle_requerimiento_solicitante').focus();
+        return false;
+    } 
+    var prototype = $dataHolder.data('prototype');
+    var index = $dataHolder.data('index');    
+    var newForm = prototype.replace(/items/g, index);
+    $dataHolder.append(newForm);
+    $dataHolder.data('index', index + 1);
+    var sel = $dataHolder.find('[id$="_equipo"]').last();  
+    sel.html('');
+    $.ajax({
+        type: 'post',
+        url:  "{{ path('get_equipos_x_departamento') }}" ,
+        data: { depto_id: depto },
+            success: function(data) {                
+                changeDataSelect( sel, data );
+                sel.select2();                
+            }
+    });
+    addDeleteLink($dataHolder.find('.link-actions').last());
+        $dataHolder.find('.ordTd').last().html($dataHolder.data('index')); 
+        $dataHolder.find('.searchEquipo').last().attr('id', 'item_'+$dataHolder.data('index') );
+        sel.on('select2:selecting',function(e){
+          if( checkDuplicado( e.params.args.data.id ) ){
+                alert( 'Este equipo ya fue agregado a la lista!' );
+                sel.val('').trigger("change");
+                return false;
+            }else{
+               $.get("{{path('find_barcode_by_id')}}",{id:e.params.args.data.id}, function(data){
+                  var itemTr = sel.closest('.item');
+                  itemTr.find('.bcTd input').val(data);
+               }); 
+            }
+        });
+
+        var barcode = $dataHolder.find('.bcTd input').last();
+        barcode.on('keypress',function(e){      
+            var keycode = (e.keyCode ? e.keyCode : e.which);
+            if(keycode == '13'){ 
+                $.get("{{path('find_equipo_id_by_barcode')}}",{bc:barcode.val().toUpperCase()}, function(data){
+                    if( checkDuplicado( data ) ){
+                        alert( 'Este equipo ya fue agregado a la lista!' );
+                        barcode.val('');
+                        sel.val('').trigger("change");
+                        return false;
+                    }
+                    sel.val(data).trigger("change");
+                    if(!sel.val()){
+                        alert('el código de barra no pertenece a un equipo asignado a este Departamento!!');
+                        barcode.val('');
+                        sel.val('').trigger("change");
+                        return false;
+                    }
+                });
+            }
+        });    
+        barcode.focus();     
+        if ($('.equiposAsociados').hasClass('hidden')){ 
+            $('.equiposAsociados').removeClass('hidden'); 
+        } 
+    
+}
+function addDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".select2").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            var index = $dataHolder.data('index');
+            $dataHolder.data('index', index - 1);
+            $dataHolder.find('.ordTd').each(function(i) {
+               jQuery(this).html(i + 1);
+            });
+        }
+    });
+}
+function checkDuplicado(id){    
+    // revisar que no se haya seleccionado ya ese valor en otra fila.
+    res = false;
+    $dataHolder.find('[id$="_equipo"]').each(function(i) {
+        if( $(this).val() == id )
+            res = true;
+    });
+    return res;
+}
+function agregarEquipos(list,idx){
+    // carga un solo equipo.
+    item = list.shift();        
+    $btn =  $("#"+idx);      
+    barcode = $btn.closest('.item').find('td.bcTd input');
+    sel = $btn.closest('.eqTd').find('[id$="_equipo"]');   
+    sel.val(item).trigger('change');
+    if( !sel.val() ){
+        //buscar datos y agregar item al select
+        $.getJSON("{{path('find_equipo_data_by_id')}}",{id:item}, function(data){
+            if(data.msj=='OK'){
+               barcode.val( data.barcode );
+                var newState = new Option(data.nombre, data.id, true, true);        
+                sel.append(newState).trigger('change');  
+            }else{
+                alert(data.msj);
+                return false;
+            }
+        }); 
+    }   
+    if( checkDuplicado( item ) ){
+        alert( 'Este equipo ya fue agregado a la lista!' );
+        barcode.val('');
+        sel.val('').trigger("change");
+        return false;
+    }        
+}
+</script>    
+{% endblock %}

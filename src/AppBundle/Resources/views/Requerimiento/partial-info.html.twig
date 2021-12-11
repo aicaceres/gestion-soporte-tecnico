@@ -1,0 +1,42 @@
+<div class="col-md-12" style="font-size:90%;color:#444;">                                                        
+    <div class='box box-default box-solid'>
+        <div class='box-header'>                                    
+            <h6 class="text-primary colapsable" style="margin:0;font-weight:bold;">REQUERIMIENTO DE ORIGEN N° {{ "%06d" | format(entity.id)}}</h6>
+            <div class="pull-right box-tools">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>                
+            </div>
+        </div><!-- /.box-header -->
+        <div class='box-body'>                                    
+            <fieldset style="padding-bottom:10px;">
+                <div class="col-md-7">
+                    <span><strong>Area Solicitante:</strong>&nbsp;{{entity.solicitante.nombreCompleto}}</span>                        
+                </div>
+                <div class="col-md-5">
+                    <span><strong>Nombre del Solicitante:</strong>&nbsp;{{entity.responsable}}</span>
+                </div>    
+            </fieldset>    
+            <fieldset style="padding-bottom:10px;">
+                <div class="col-md-2">
+                    <span><strong>N° Incidencia:</strong>&nbsp;{{ "%06d" | format(entity.id)}}</span>
+                </div>    
+                <div class="col-md-3">
+                    <span><strong>Fecha:</strong>&nbsp;{{entity.fechaRequerimiento|date('d-m-Y H:i')}}</span>                        
+                </div>
+                <div class="col-md-5">
+                    <span><strong>Tipo de Incidencia:</strong>&nbsp;{{entity.tipoSoporte}}</span>
+                </div> 
+                <div class="col-md-2">
+                    <span><strong>Estado:</strong>&nbsp;{{entity.estado}}</span>
+                </div> 
+            </fieldset>
+            <fieldset style="padding-bottom:10px;">
+                <div class="col-md-12">
+                    <span><strong>Descripción del requerimiento:</strong>&nbsp;{{entity.descripcion}}</span>                        
+                </div>
+            </fieldset>
+                
+            {% include "admin-form-data.html.twig" with {'table':entity} %}
+
+        </div>      
+    </div>                             
+</div> 

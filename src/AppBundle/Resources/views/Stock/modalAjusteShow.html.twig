@@ -1,0 +1,55 @@
+<div class="row">
+    <div class="col-md-8 col-md-offset-1">
+        <div class="col-md-4">                                
+            <div class="form-group ">
+                <label>Fecha Ajuste:</label>
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                    <input type="text" disabled="disabled" class="form-control" value="{{entity.fecha|date('d/m/Y')}}">
+                </div>
+            </div>                                                                
+        </div>                                        
+        <div class="col-md-6">
+            <div class="form-group ">
+                <label>Depósito:</label>
+                <select disabled="disabled" class="form-control"><option value="">{{entity.deposito}}</option></select>
+            </div>
+        </div>                             
+    </div>  
+    <div class="col-md-8 col-md-offset-1"> 
+        <div class="col-md-12">
+            <div class="form-group ">    
+                <label>Observaciones:</label>
+                <textarea disabled="disabled" class="form-control">{{entity.observaciones}}</textarea>
+            </div>                            
+        </div>                            
+    </div>      
+    <div class="col-md-10 col-md-offset-1"> 
+        <h4>Detalle</h4>            
+        <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th style="width:6%;">#</th>
+                    <th style="width:40%;">Insumo</th>
+                    <th style="width:8%; font-size:1.3em;">+ / -</th>
+                    <th style="width:8%;">Cantidad</th>
+                    <th style="width:30%;">Motivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in entity.detalles %}
+                    <tr>
+                        <td class="ordTd">{{loop.index}}</td>
+                        <td class="prodTd">{{ item.insumo }}</td>
+                        <td class="signoTd">{{ item.signo }}</td>
+                        <td class="cantTd">{{ item.cantidad|number_format(2,'.',',') }} </td>                                
+                        <td class="motTd">{{ item.motivo }}</td>
+                    </tr>
+                {% endfor %}           
+            </tbody>
+        </table>  
+    </div>      
+</div>
+{% include "admin-form-data.html.twig" with {'table':entity} %}

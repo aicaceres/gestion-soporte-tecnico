@@ -1,0 +1,17 @@
+{% if datos %}
+<fieldset>  
+    <div>
+        <b>Dirección:</b>{{ datos.direccion}}
+    </div>
+    <div>
+        <b>Localidad:</b>{%if datos.localidad%}{{ datos.localidad.nombreCompleto}}{%endif%}
+    </div>                                    
+    <div>
+        <b>Teléfono:</b>{{ datos.telefono}}
+    </div>                            
+    <div>
+        <b>Responsable:</b> {{ datos.responsable}}
+    </div>                            
+</fieldset> 
+{% endif %}    
+<br>

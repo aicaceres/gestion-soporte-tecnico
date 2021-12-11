@@ -1,0 +1,45 @@
+<table  class="table table-bordered tareas"> 
+     <thead>
+        <tr>
+            <th style="width:12%">Fecha</th>
+            <th style="width:8%">Usuario</th>
+            <th style="width:15%">Tipo</th>
+            <th>Descripción</th>
+            <th style="width:5%"></th>
+        </tr>
+    </thead>   
+    <tbody>                                    
+        {% for item in tareas if not gr or item.ordenTrabajoDetalles|length==0  %}        
+            <tr>
+                <td class="dateTd">{{ item.fecha|date('d/m/Y H:i') }} </td>
+                <td class="tecTd">{{ item.createdBy.username }} </td>
+                <td class="tipoTd">{{ item.tipoTarea }} </td>
+                <td class="detTd">
+                    {% if item.tipoTarea.abreviatura == 'RI' %}
+                        {% for insxtarea in item.insumos  %}
+                            <span> {{ insxtarea.cantidad }} {{ insxtarea.cantidadAprobadaTxt }} - {{ insxtarea.descripcion }} </span> 
+                            {% if insxtarea.fechaAutorizado %}
+                                {% if insxtarea.cantidadAprobada==0 %}
+                                <i class="fa fa-close" title="Rechazado {{ insxtarea.fechaAutorizado|date('d/m/Y') }} {{ insxtarea.autorizante.username }}"></i>
+                                {% else %}
+                                <i class="fa fa-check" title="Aprobado {{ insxtarea.cantidadAprobada }} - {{ insxtarea.fechaAutorizado|date('d/m/Y') }} {{ insxtarea.autorizante.username }}"></i>    
+                                {% endif %}    
+                            {% else %}    
+                                <i class="fa fa-hourglass-half" title="Aprobación Pendiente"></i>
+                            {% endif %}
+                            &nbsp; {% if not loop.last %}|{% endif %}&nbsp;
+                        {% endfor %}
+                    {% else %}
+                        {{ item.descripcion }} 
+                    {% endif %}
+                </td>
+                <td>{% if item.tipoTarea.abreviatura=='EE' %}<a href="{{ path('print_entrega_equipo')~'?id='~item.id }}" data-toggle="tooltip" title="Imprimir" target="_blank" ><i class="fa fa-print"></i></a>{% endif %} </td>
+            </tr> 
+        {% endfor %}                                  
+    </tbody>    
+</table>    
+
+
+
+
+

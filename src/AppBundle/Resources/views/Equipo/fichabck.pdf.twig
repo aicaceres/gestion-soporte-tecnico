@@ -1,0 +1,285 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="42px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#dd4b39" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+                    
+        <h2 text-align="center" > Ficha del Equipo </h2> 
+        
+        <table font-size="10px">
+            <tr>
+                <td border.type="none" >
+                    <table >
+                        <tr>
+                            <td height="20px" vertical-align="middle" margin-bottom="10px" border.type="none">
+                                Tipo: <strong>{{ eq.tipo }}</strong>
+                            </td>                            
+                            <td width="6 cm" height="20px" font-size="11px" vertical-align="middle" text-align="center" border.color="black" padding-left="10px" >
+                                Serie N° <strong>{{ eq.nroSerie }}</strong> 
+                            </td>
+                        </tr>
+                        <tr>
+                            <td height="10px" vertical-align="middle" margin-bottom="10px" border.type="none">
+                                Descripción: <strong>{{ eq.nombre}}</strong>
+                            </td>
+                            <td id="tdstd" height="10px" vertical-align="middle" margin-bottom="5px" padding-left="10px" border.type="none">
+                                Estado: <strong>{{ eq.estado|upper }}</strong>
+                            </td>                            
+                        </tr>
+                    </table>
+                    <table >                        
+                        <tr>
+                            <td extends="tdstd" padding-left="0px">
+                                Marca: <strong>{{ eq.marca}}</strong>
+                            </td>
+                            <td extends="tdstd">
+                                Modelo: <strong>{{ eq.modelo }}</strong>
+                            </td>                            
+                        </tr>                           
+                    </table>
+                </td>
+                <td width="10%" border.type="none" >
+                    <div id="foto" text-align="center" margin-left="10px">
+                        <img ignore-error="true" keep-ratio="true" src="{{foto}}" width="70px" height="60px" border.color="#CCCCCC" border.size="4px" />
+                    </div>
+                </td>
+            </tr>
+        </table>  
+        <table font-size="10px">
+            <tr>
+                <td width="40%" height="10px" vertical-align="middle" margin-bottom="10px" border.type="none">
+                    Proveedor: <strong>{{ eq.proveedor}}</strong>
+                </td>
+                <td extends="tdstd" width="15%">
+                    Fecha compra: <strong>{% if eq.fechaCompra %} {{ eq.fechaCompra|date('d-m-Y') }} {% endif %}</strong>
+                </td>                            
+                <td extends="tdstd" width="15%">
+                    N° OC: <strong>{{ eq.nroOrdenCompra }}</strong>
+                </td>                            
+                <td extends="tdstd" width="15%">
+                    N° Remito: <strong>{{ eq.nroRemito }}</strong>
+                </td>                            
+                <td extends="tdstd" width="15%">
+                    N° Factura: <strong>{{ eq.nroFactura }}</strong>
+                </td>                            
+            </tr>                           
+        </table>
+        <div font-size="9px">Observaciones: {{ eq.observaciones }}</div>                
+{% if app.user.rol.admin %}    
+    <table id="table_admin_info" font-size="7px" margin-top="10px" color="#666666">
+        {% set table = eq %}
+        <tr>
+            <td id="td_admin_info" height="10px" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                <span>Creado {% if table.created %} el {{table.created|date('d-m-Y H:i')}} {%endif%} por {{table.createdBy}}</span>
+            </td>   
+            {% if table.updatedBy is defined %}
+            {% if table.updatedBy %}
+                <td extends="td_admin_info">
+                <span>Última actualización {% if table.updated %}el {{table.updated|date('d-m-Y H:i')}}{%endif%} por {{table.updatedBy}}</span>                
+                </td>            
+            {% endif %}
+        {% endif %}
+        </tr>                                
+    </table>
+{% endif %}              
+
+{# UBICACIONES DEL EQUIPO #}
+
+<h3 id="subtitle" border.color="#333333" border.type="bottom" padding-bottom="3px" height="1px"> Ubicaciones del Equipo </h3> 
+{% if eq.ubicaciones|length>0 %}
+{% for ubic in eq.ubicaciones %}
+    {% if ubic.actual==1 %}
+    <div padding="5px" font-size="8px" font-style="bold" border.color="#DDDDDD" border.type="bottom" height="1px"> UBICACIÓN ACTUAL</div>
+{% endif %}        
+
+    <table font-size="10px" padding="5px">
+        <tr>
+            <td extends="tdstd" padding-left="0px" width="1.5%" font-style="bold">{{ loop.index }})</td>
+            <td extends="tdstd" width="23.5%">Fecha de entrega:{% if ubic.fechaEntrega %} {{ ubic.fechaEntrega|date('d-m-Y') }} {% endif %} </td>
+            <td extends="tdstd" width="32%">Concepto: {{ ubic.conceptoEntrega }}</td>
+            <td extends="tdstd" width="43%">Obs: {{ ubic.observaciones }}</td>
+        </tr>
+        <tr>
+            <td colspan="4" border.type="none" height="10px" vertical-align="top"  padding-left="0.5 cm">
+                <div width="100%">Ubicación: <b>{{ubic.departamento.edificio.ubicacion.abreviatura}}</b> 
+                                 |  Edificio: <b>{{ubic.departamento.edificio.nombre}}</b>
+                                 |  Departamento: <b>{{ubic.departamento.nombre}}</b>
+                                 |  Piso: <b>{{ubic.piso.nombre}}</b>
+                </div>
+                <div width="100%" font-size="8px" padding-top="5px">Dirección: {{ ubic.departamento.direccion}} | Localidad:{%if ubic.departamento.localidad%}{{ ubic.departamento.localidad.nombreCompleto}}{%endif%} |
+                    Teléfono: {{ ubic.departamento.telefono }} | Responsable: {{ ubic.departamento.responsable }}
+            </div>
+            </td>
+        </tr>
+    </table>
+    <table extends="table_admin_info">
+        {% set table = ubic %}
+        <tr>
+            <td extends="td_admin_info">
+                <span>Creado {% if table.created %} el {{table.created|date('d-m-Y H:i')}} {%endif%} por {{table.createdBy}}</span>
+            </td>   
+            {% if table.updatedBy is defined %}
+                {% if table.updatedBy %}
+                    <td extends="td_admin_info">
+                        <span>Última actualización {% if table.updated %}el {{table.updated|date('d-m-Y H:i')}}{%endif%} por {{table.updatedBy}}</span>                
+                    </td>            
+                {% endif %}
+            {% endif %}
+        </tr>                                
+    </table>              
+{% endfor %}              
+    
+{% else %}
+    <div font-size="10px">Equipo sin ubicación asignada.</div>
+{% endif %}  
+
+{# REQUERIMIENTOS Y ORDENES DE TRABAJO #}
+
+{% if eq.requerimientos|length>0 or eq.ordenesdetrabajo|length>0 %}
+    <h3 extends="subtitle"> Requerimientos de Soporte </h3> 
+    {% for reqdet in eq.requerimientos if reqdet.requerimiento.deletedAt is null %}
+        {% set req = reqdet.requerimiento %}
+
+    <table font-size="10px">
+        <tr>
+            <td extends="tdstd" padding="5px" width="8%" font-style="bold" background.color="#EEEEEE" >#{{ "%06d" | format(req.id) }}</td>
+            <td extends="tdstd" padding="5px" width="20%">Fecha:{% if req.fechaRequerimiento %} {{ req.fechaRequerimiento|date('d-m-Y [H:i]') }} {% endif %} </td>
+            <td extends="tdstd" width="30%">Tipo: {{ req.tipoSoporte }}</td>
+            <td extends="tdstd" width="20%">N° JIRA: <b>{{ req.jira }}</b></td>
+            <td extends="tdstd" width="18%">Estado: <b>{{ req.estado }} </b></td>
+        </tr>      
+    </table>
+    <table font-size="10px" padding="0">    
+        <tr>
+            <td extends="tdstd" width="70%" padding-left="0">Área: {{ req.solicitante.nombreCompleto }}</td>
+            <td extends="tdstd" width="30%">Solicitante: {{ req.responsable }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" extends="tdstd" padding-left="0">Descripción: {{ req.descripcion }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" extends="tdstd" padding-left="0" margin="0">Obs. adicionales: {{ reqdet.descripcion }}</td>
+        </tr>
+    </table>    
+        
+    <table extends="table_admin_info">
+        {% set table = req %}
+        <tr>
+            <td extends="td_admin_info">
+                <span>Creado {% if table.created %} el {{table.created|date('d-m-Y H:i')}} {%endif%} por {{table.createdBy}}</span>
+            </td>   
+            {% if table.updatedBy is defined %}
+                {% if table.updatedBy %}
+                    <td extends="td_admin_info">
+                        <span>Última actualización {% if table.updated %}el {{table.updated|date('d-m-Y H:i')}}{%endif%} por {{table.updatedBy}}</span>                
+                    </td>            
+                {% endif %}
+            {% endif %}
+        </tr>                                
+    </table> 
+        
+    {# ORDENES DE TRABAJO #}    
+    
+    {% if reqdet.ordenTrabajoDetalle|length>0 %}
+        <h4 font-style="bold" font-size="10px" margin-left="10px" margin-top="5px" border.color="#666666" border.type="bottom" padding-bottom="3px" height="1px"> Órdenes de Trabajo </h4>     
+        {% for otdet in reqdet.ordenTrabajoDetalle %}
+            {% set ot = otdet.ordenTrabajo %}
+            <div margin-left="10px">
+                <table font-size="10px">
+                    <tr>
+                        <td extends="tdstd" padding="5px" width="8%" font-style="bold" background.color="#EEEEEE" >#{{ "%06d" | format(ot.id) }}</td>
+                        <td extends="tdstd" padding="5px" width="20%">Fecha:{% if ot.fechaOrden %} {{ ot.fechaOrden|date('d-m-Y [H:i]') }} {% endif %} </td>
+                        <td extends="tdstd" width="50%">Técnico asigando:<b> {{ ot.tecnico }} </b></td>
+                        <td extends="tdstd" width="18%">Estado: <b>{{ ot.estado }} </b></td>
+                    </tr>
+                </table>    
+                <table font-size="10px">    
+                    <tr>
+                        <td extends="tdstd" padding-left="2px">Descripción de la OT: {{ ot.descripcion }}</td>
+                    </tr>
+                </table>
+                {% if ot.tareas|length>0 %}
+                    <div padding="5px" font-size="8px" font-style="bold" border.color="#DDDDDD" border.type="bottom" height="1px"> TAREAS REALIZADAS</div>    
+                    <table font-size="8px"> 
+                        <tr>
+                            <td width="13%" vertical-align="middle" padding="3px 5px" border.type="bottom" border.color="#888888" font-style="bold">FECHA</td>
+                            <td width="15%" vertical-align="middle" padding="3px 5px" border.type="bottom+left" border.color="#888888" font-style="bold">USUARIO</td>
+                            <td width="17%" vertical-align="middle" padding="3px 5px" border.type="bottom+left" border.color="#888888" font-style="bold">TIPO</td>
+                            <td width="55%" vertical-align="middle" padding="3px 5px" border.type="bottom+left" border.color="#888888" font-style="bold">DESCRIPCIóN</td>
+                        </tr>
+                        {% for item in otdet.tareas %}     
+                            <tr>
+                                <td height="10px" vertical-align="middle" padding="3px 5px" border.type="none">{{ item.fecha|date('d/m/Y H:i') }} </td>
+                                <td height="10px" vertical-align="middle" padding="3px 5px" border.type="left" border.color="#888888">{{ item.createdBy.username }} </td>
+                                <td height="10px" vertical-align="middle" padding="3px 5px" border.type="left" border.color="#888888">{{ item.tipoTarea }} </td>
+                                <td height="10px" vertical-align="middle" padding="3px 5px" border.type="left" border.color="#888888">
+                                    {% if item.tipoTarea.abreviatura == 'RI' %}
+                                        {% for insxtarea in item.insumos  %}
+                                            <span> {{ insxtarea.cantidad }} {{ insxtarea.cantidadAprobadaTxt }} - {{ insxtarea.descripcionTxt }} </span> 
+                                            {% if insxtarea.fechaAutorizado %}
+                                                {% if insxtarea.cantidadAprobada==0 %}
+                                                    [R]
+                                                {% else %}
+                                                    [A]
+                                                {% endif %}    
+                                            {% else %}    
+                                                [P]
+                                            {% endif %}
+                                            {% if not loop.last %}<br></br>{% endif %}&nbsp;
+                                        {% endfor %}
+                                    {% else %}
+                                        {{ item.descripcion|raw }}                         
+                                    {% endif %}
+                                </td>
+                            </tr> 
+                        {% endfor %}                                         
+                    </table>                      
+                {% endif %}
+
+                <table extends="table_admin_info">
+                    {% set table = ot %}
+                    <tr>
+                        <td extends="td_admin_info">
+                            <span>Creado {% if table.created %} el {{table.created|date('d-m-Y H:i')}} {%endif%} por {{table.createdBy}}</span>
+                        </td>   
+                        {% if table.updatedBy is defined %}
+                            {% if table.updatedBy %}
+                                <td extends="td_admin_info">
+                                    <span>Última actualización {% if table.updated %}el {{table.updated|date('d-m-Y H:i')}}{%endif%} por {{table.updatedBy}}</span>                
+                                </td>            
+                            {% endif %}
+                        {% endif %}
+                    </tr>                                
+                </table>
+            </div>
+            
+
+        {% endfor %}
+    {% endif %}    
+        
+    {% endfor %}
+{% endif %}
+
+
+
+
+    </dynamic-page>
+</pdf>

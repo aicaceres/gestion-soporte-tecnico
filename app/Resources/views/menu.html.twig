@@ -1,0 +1,278 @@
+<input type="hidden" value="{{ app.request.attributes.get('_route') }}" id="route"/>
+<style>
+    .menudiv{        
+	margin: 2px 0 0 -5px;
+	border-top: 1px solid lightgray;
+    }
+</style>
+<ul class="sidebar-menu">
+    <li class="header">MENÚ PRINCIPAL</li>
+    <li id="homepage">
+        <a href="{{ path('homepage')}}">
+            <i class="fa fa-home"></i>
+            <span>Inicio</span>
+        </a>
+    </li>    
+    {% if app.user.access('monitoreo') %}
+    <li id="monitoreo" class="treeview">
+        <a href="#">
+            <i class="fa fa-sitemap"></i>
+            <span>Monitoreo</span>
+            <i class="fa fa-angle-left pull-right"></i>
+        </a>
+        <ul class="treeview-menu">
+            {% if app.user.access('monitoreo_estadored') %}
+                <li id="estadored">
+                    <a href="{{path('monitoreo_estadored')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Estado de Red
+                    </a>
+                </li>
+            {% endif %}
+            {% if app.user.access('monitoreo_reclamo') %}
+                <li id="reclamo">
+                    <a href="{{path('monitoreo_reclamo')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Reclamos
+                    </a>
+                </li>
+            {% endif %}
+            {% if app.user.access('monitoreo_vencimiento') %}
+                <li id="vencimiento">
+                    <a href="{{path('monitoreo_vencimiento')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Vencimientos
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>        
+    </li>
+    {% endif %}          
+    {% if app.user.access('soporte') %}
+    <li id="soporte" class="treeview">
+        <a href="#">
+            <i class="fa fa-briefcase"></i>
+            <span>Soporte Técnico</span>
+            <i class="fa fa-angle-left pull-right"></i>
+        </a>
+        <ul class="treeview-menu">
+            {% if app.user.access('requerimiento')  %}
+                <li id="requerimiento">
+                    <a href="{{path('soporte_requerimiento')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Requerimientos
+                        <span class="hidden pull-right-container">
+                            <small class="label pull-right bg-blue" title="Requerimientos Abiertos">5</small>
+                        </span>
+                    </a>
+                </li>
+            {% endif %}
+            {% if (app.user.rol.tecnico and app.user.access('ordentrabajo')) or app.user.rol.admin %}
+                <li id="ordentrabajo">
+                    <a href="{{path('soporte_ordentrabajo')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Orden de Trabajo
+                        <span class="pull-right-container">                            
+                            <small class=" hidden label pull-right bg-red" title="Pendientes de Verificación">5</small>
+                            {% if app.user.rol.tecnico and app.user.ordenesAbiertas>0 %}
+                            <small class="label pull-right bg-red" title="Órdenes Abiertas">{{ app.user.ordenesAbiertas }}</small>
+                            {% endif %}
+                        </span>
+                    </a>
+                </li>
+            {% endif %}
+            {% if app.user.access('reportes_soporte') or app.user.rol.admin %}
+                <li id="reportes">
+                    <a href="#"><i class="fa fa-circle-o"></i> Reportes
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="resumen"><a href="{{path('soporte_reportes_resumen')}}"><i class="fa fa-circle-o"></i> Resumen</a></li>                        
+                        <li id="anual"><a href="{{path('soporte_reportes_anual')}}"><i class="fa fa-circle-o"></i> Anual</a></li>                        
+                        <li id="detallado"><a href="{{path('soporte_reportes_detallado')}}"><i class="fa fa-circle-o"></i> Detallado</a></li>                        
+                    </ul>
+                </li>
+                                                          
+            {% endif %}
+        </ul>        
+    </li>
+    {% endif %}    
+    {% if app.user.access('equipo') %}
+    <li id="equipo">
+        <a href="{{path('equipo')}}">
+            <i class="fa fa-desktop"></i>
+            <span>Equipos</span>
+        </a>
+    </li>
+    {% endif %}
+    {% if app.user.access('insumo') %}
+    <li id="insumo" class="treeview">
+            <a href="#">
+                <i class="fa fa-puzzle-piece"></i>
+                <span>Insumos</span>
+                <i class="fa fa-angle-left pull-right"></i>
+            </a>
+            <ul class="treeview-menu">
+                {% if app.user.access('insumo_solicitud') %}
+                <li id="solicitud">
+                    <a href="{{path('insumo_solicitud')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Solicitudes de Insumo <small class="label pull-right bg-red solPendientes" title="Solicitudes Pendientes">0</small>
+                    </a>
+                </li>
+                {% endif %}
+                {% if app.user.access('reportes_insumo') %}
+                <li id="reporteinsumo">
+                    <a href="{{path('insumo_reportes')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Reportes
+                    </a>
+                </li>
+                {% endif %}
+                <hr class="menudiv">
+                {% if app.user.access('insumo') %}
+                <li id="adm">
+                    <a href="{{path('insumo_adm')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Administración
+                    </a>
+                </li>
+                {% endif %}
+                {% if app.user.access('insumo_inventario') %}
+                <li id="inventario">
+                    <a href="{{path('insumo_inventario')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Inventario
+                    </a>
+                </li>
+                {% endif %}
+                {% if app.user.access('insumo_movimiento') %}
+                <li id="movimiento">
+                    <a href="{{path('insumo_movimiento')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Movimiento Interdepósito
+                    </a>
+                </li>
+                {% endif %}
+                {% if app.user.access('insumo_ajuste') %}
+                <li id="ajuste">
+                    <a href="{{path('insumo_ajuste')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Ajuste de Stock
+                    </a>
+                </li>
+                {% endif %}                
+                {% if app.user.access('insumo_historico') %}
+                <li id="historico">
+                    <a href="{{path('insumo_historico')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Historico de Stock
+                    </a>
+                </li>
+                {% endif %}                
+            </ul>
+        </li>                                     
+    {% endif %}
+    {% if app.user.access('compra') %}
+    <li id="compra" class="treeview">
+        <a href="#">
+            <i class="fa fa-shopping-cart"></i>
+            <span>Compras</span>
+            <i class="fa fa-angle-left pull-right"></i>
+        </a>
+        <ul class="treeview-menu">
+            {% if app.user.access('compra') %}
+                <li id="admin">
+                    <a href="{{path('compra_admin')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Órdenes de compra
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>        
+    </li>
+    {% endif %}
+    {% if app.user.access('proveedor') %}
+    <li id="proveedor">
+        <a href="{{path('proveedor')}}">
+            <i class="fa fa-user"></i>
+            <span>Proveedores</span>
+        </a>
+    </li>
+    {% endif %}
+ 
+    {% if app.user.access('configuracion') %}
+    <li id="configuracion" class="treeview">
+            <a href="#">
+                <i class="fa fa-cogs"></i>
+                <span>Configuración</span>
+                <i class="fa fa-angle-left pull-right"></i>
+            </a>
+            <ul class="treeview-menu">
+                {% if app.user.access('configuracion_ubicacion') %}
+                <li id="ubicacion">
+                    <a href="{{path('configuracion_ubicacion', { 'table': 'Departamento' })}}">
+                        <i class="fa fa-circle-o"></i>
+                        Ubicaciones
+                    </a>
+                </li>
+                {% endif %}
+                {% if app.user.access('configuracion_parametro') %}
+                <li id="parametro">
+                    <a href="{{path('configuracion_parametro', { 'table': 'Tipo' })}}">
+                        <i class="fa fa-circle-o"></i>
+                        Parámetros
+                    </a>
+                </li>
+                {% endif %}
+                {% if app.user.access('configuracion_region') %}
+                <li id="region">
+                    <a href="{{path('configuracion_region', { 'table': 'Pais' })}}">
+                        <i class="fa fa-circle-o"></i>
+                        Región
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </li>
+        {% endif %}
+        {% if app.user.access('seguridad') %}
+        <li id="seguridad" class="treeview">
+            <a href="#">
+                <i class="fa fa-lock"></i>
+                <span>Seguridad</span>
+                <i class="fa fa-angle-left pull-right"></i>
+            </a>
+            <ul class="treeview-menu">
+                {% if app.user.access('seguridad_empresa') %}
+                    <li id="empresa">
+                        <a href="{{path('seguridad_empresa')}}">
+                            <i class="fa fa-circle-o"></i>
+                            Empresa
+                        </a>
+                    </li>
+                {% endif %}
+                {% if app.user.access('seguridad_usuario') %}
+                    <li id="usuario">
+                        <a href="{{path('seguridad_usuario')}}">
+                            <i class="fa fa-circle-o"></i>
+                            Usuario
+                        </a>
+                    </li>
+                {% endif %}
+                {% if app.user.access('seguridad_perfil') %}
+                    <li id="perfil">
+                        <a href="{{path('seguridad_perfil')}}">
+                            <i class="fa fa-circle-o"></i>
+                            Perfiles
+                        </a>
+                    </li>
+                {% endif %}                
+            </ul>
+        </li>
+        {% endif %}
+</ul>

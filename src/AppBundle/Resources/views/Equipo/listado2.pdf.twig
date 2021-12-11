@@ -1,0 +1,66 @@
+<pdf>
+    <dynamic-page page-size="A4-landscape" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#dd4b39" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 text-align="center"> Listado de Equipos</h2>              
+        <h4><strong>Tipo:</strong> {{ filtro[0] }} - <strong>Marca:</strong> {{ filtro[1] }} - <strong>Modelo:</strong> {{ filtro[2] }}  </h4>
+        <h4><strong>Estado:</strong> {{ filtro[3] }} - <strong>Verificado:</strong> {{ filtro[7] }} </h4>
+        <h4><strong>Ubicación:</strong> {{ filtro[4] }} - <strong>Edificio:</strong> {{ filtro[5] }} - <strong>Departamento:</strong> {{ filtro[6] }}  </h4>
+        
+        <div height="10px"></div>
+        {% if search %}
+            <h4> Término de Búsqueda: "{{search}}" </h4>
+            <div height="10px"></div>
+        {%endif%}
+        <table font-size="9px">
+            <tr>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1 cm"><strong>#</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>Tipo</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm" ><strong>Marca</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="4 cm"><strong>Modelo</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>N° Serie</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Estado</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Ubicación</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.5 cm"><strong>Verificado</strong></td>
+            </tr>        
+            {% if items|length>0   %}
+                {% for item in items %}
+                    <tr>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[1]}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[2]}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[3]}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[4]}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[5]}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[6]}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[7]}}</td>
+                    </tr>                
+                {% endfor %}  
+            {% else %}  
+                <tr>
+                    <td colspan="7" height="30px" vertical-align="middle" padding-left="10px">
+                        <strong>No hay equipos coincidentes con el criterio de búsqueda</strong></td>
+                </tr>
+            {% endif %}            
+        </table>         
+    </dynamic-page>
+</pdf>

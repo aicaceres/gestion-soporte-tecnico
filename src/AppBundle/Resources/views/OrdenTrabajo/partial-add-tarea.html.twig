@@ -1,0 +1,174 @@
+{{ form_start(form) }}    
+<div class='box-body no-padding'>
+    <div class="col-md-12">
+        <div class="col-md-2">
+            {{ form_row(form.fecha) }}
+        </div>
+        <div class="col-md-2">
+            {{ form_row(form.hora) }}
+        </div>
+        {% if entity.tipoTarea.abreviatura == 'DS' %}
+            <div class="col-md-8">
+                <div class="form-group ">
+                    <label>Derivar soporte al técnico:&nbsp;</label>
+                    <select id="tecnicoId" name="tecnicoId" class="form-control select2">
+                        {% for tec in tecnicos if tec.id!=ot.tecnico.id %}
+                            <option value="{{ tec.id }}" >{{ tec.nombre }}</option>
+                        {% endfor %}    
+                    </select> 
+                </div>            
+            </div>    
+        {% endif %} 
+        {% if entity.tipoTarea.abreviatura == 'RE' %}
+            <div class="col-md-4">
+                <div class="form-group ">
+                    <label>Cambiar estado a:&nbsp;</label>
+                    <select id="estado" name="estado" required="required" class="form-control select2">
+                        <option selected="selected" value="">Seleccionar</option>
+                        {% for est in estados %}
+                            <option value="{{ est.id }}" >{{ est.nombre }}</option>
+                        {% endfor %}    
+                    </select> 
+                    {{ form_row(form.estadoId) }}
+                </div>            
+            </div>    
+        {% endif %}         
+    </div> 
+    {% if entity.tipoTarea.abreviatura in ['NT','DS'] %}
+        {% if entity.ordentrabajo.detalles|length>0 %}
+            <div class="col-md-12">
+                <div class="col-md-12">
+                    {{ form_row(form.ordenTrabajoDetalles) }}
+                </div>
+            </div>  
+        {% endif %}   
+    {% endif %}      
+
+    {% if entity.tipoTarea.abreviatura == 'RE' %}
+        <div class="col-md-12 descripcion">
+            <div class="col-md-12">
+                {{ form_row(form.textoAdicional) }}
+            </div>
+        </div>
+        <div class="col-md-12">
+        <table class="table table-hover table-bordered">
+            <tr>
+                <th style="width:3%">#</th>
+                <th style="width:60%" >Equipo <small style="font-weight:normal">[Tipo | Descripción | N° serie | Marca | Modelo ]</small></th>
+                <th>Descripción</th>
+            </tr>
+            {% for det in entity.ordenTrabajoDetalles %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ det.equipo.textoOT }}</td>
+                    <td><input class="form-control desc_equipo" type="text" name="descripcion[]" value="" data-id="{{ det.equipo.id }}"/></td>
+                </tr>
+            {% endfor %}
+        </table>
+        </div> 
+        
+        {% set ubicacionActual = form.ubicacion %}
+        <div class="col-md-12">
+            <div id="ubicacion-actual">                                                        
+                <fieldset>
+                    <div class="col-md-2">
+                        {{ form_row(ubicacionActual.fechaEntrega,{'label':'Entrega:'}) }}   
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_row(ubicacionActual.conceptoEntrega) }}   
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_row(ubicacionActual.observaciones,{'attr':{'rows':1}}) }}   
+                    </div>
+                </fieldset>   
+                <fieldset>
+                    <div class="col-md-2">
+                        {{ form_row(ubicacionActual.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'), 'class' : 'ubicacion_selector' } }) }}   
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_row(ubicacionActual.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_row(ubicacionActual.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+                    </div>
+                    <div class="col-md-2">
+                        {{ form_row(ubicacionActual.piso, { 'attr': {'class' : 'piso_selector' } }) }}   
+                    </div>
+                </fieldset>  
+            </div>
+        </div>
+    {% endif %}
+
+    {% if form.descripcion is defined %}
+        <div class="col-md-12 descripcion">
+            <div class="col-md-12">
+                {{ form_row(form.descripcion) }}
+            </div>
+        </div>
+    {% endif %}   
+     {% if entity.tipoTarea.abreviatura == 'TS' %}
+    <div class="col-md-12 descripcion">
+        <div class="col-md-12">
+            {{ form_row(form.textoAdicional) }}
+        </div>
+    </div>         
+         {% set xreubicar = 0 %}
+         {% for det in entity.ordenTrabajo.detalles %}
+             {% if not det.entregado %}
+                 {% set xreubicar = 1 %}
+            {% endif %}
+         {% endfor %}  
+         {% if xreubicar %}
+         <div class="col-md-12">
+            <div class="col-md-12">
+                <small style="color:#777777">*Los equipos sin reubicar se registrarán como reubicados en su lugar de origen.</small>
+            </div>
+        </div>     
+         {% endif %}
+    {% endif %}   
+    
+</div>
+<div style='display:none;'>
+    {{ form_end(form) }}
+</div>
+  
+<script type="text/javascript">    
+$(document).ready(function() {        
+    date = $('#appbundle_tarea_fecha').datepicker();
+    date.css('z-index', 'auto');    
+    $('#appbundle_tarea_hora').timepicker({ 'timeFormat': 'G:i' });    
+    $('#appbundle_tarea_ordenTrabajoDetalles').select2();
+    {% if entity.tipoTarea.abreviatura == 'DS' %}
+        lbleq = $('#appbundle_tarea_ordenTrabajoDetalles').siblings('label').html();
+        txtinfo = ' &nbsp;<small style="font-weight:normal;color:#666" > <i class="fa fa-info-circle"></i> Únicamente los equipos seleccionados serán derivados. Dejar en blanco para derivar el soporte completo!</small>  ';
+        $('#appbundle_tarea_ordenTrabajoDetalles').siblings('label').html( lbleq + txtinfo  );    
+    {% endif %} 
+    {% if entity.tipoTarea.abreviatura == 'RE' %}                
+        $('#estado').select2({
+            dropdownParent: $('.modal')
+        });
+        $('#estado').on('select2:select',function(){
+            $('#appbundle_tarea_estadoId').val( $(this).val() );
+        });
+        $('#appbundle_tarea_estadoId').val( $('#estado').val() );                        
+        
+        date2 = $('#appbundle_tarea_ubicacion_fechaEntrega').datepicker();
+        date2.css('z-index', 'auto');
+        $('#appbundle_tarea_ubicacion_fechaEntrega').val( $('#appbundle_tarea_fecha').val());
+        $('.desc_equipo').on('blur',function(){
+            var obj = $(this); 
+            var url = "{{path('check_unique_nombre')}}";
+            var datos = {txt:obj.val(),id:obj.data('id')};
+            $.get(url,datos, function(data){            
+                if(data){
+                    alert('Ya existe un equipo con esta descripción');
+                    obj.val('');
+                    return false;
+                }   
+            });              
+        });                
+        $('.ubicacion_selector').val(0).trigger('change'); 
+    {% endif %}         
+    
+});
+</script>

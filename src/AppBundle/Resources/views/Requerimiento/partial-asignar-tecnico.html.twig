@@ -1,0 +1,25 @@
+<form>
+    {% if requerimiento.jira %}
+    <div style="padding-bottom:5px;">
+        <strong>N° JIRA:</strong> {{ requerimiento.jira }}        
+    </div>
+    {% endif %}
+    <div style="padding-bottom:5px;">
+        <strong>Tipo de Incidencia:</strong> {{ requerimiento.tipoSoporte }}        
+    </div>
+    <div style="padding-bottom:5px;">
+        <strong>Solicitante:</strong> {{ requerimiento.solicitante.nombreCompleto }}        
+    </div>
+    <div style="padding-bottom:5px;">
+        <strong>Descripicón:</strong> {{ requerimiento.descripcion}}        
+    </div>
+    <div class="form-group">
+        <label>ASIGNAR AL TÉCNICO:</label>
+        <input type="hidden" id="reqId" name="requerimiento_id" value="{{ requerimiento.id }}">
+        <select class="form-control" id="tecId" name="tecnico_id" >
+            {% for tec in tecnicos %}
+                <option value="{{ tec.id }}" >{{ tec.nombre }}</option>
+            {% endfor %}    
+        </select>
+    </div>      
+</form>       

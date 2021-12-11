@@ -1,0 +1,78 @@
+{% set id = 'U'~departamento.edificio.ubicacion.id~'E'~departamento.edificio.id %}
+
+    <tr class="nivel3 {{id}}" data-nivel="3" data-id="{{ id~'D'~departamento.id }}" style="border-top: 4px solid lightgray;">
+        <td style="text-align:center;">{% if departamento.cantidadEquiposParaMonitoreo>0 %}
+            <i class="fa fa-plus masdatos" style="font-size:14px" title="Ver Equipos"  data-url="{{ path('get_monitoreo_equipos',{'dptoid':departamento.id}) }}"></i>
+            <span class="badge bg-aqua"> {{ departamento.cantidadEquiposParaMonitoreo }}</span>
+            {% endif %}
+        </td>                                
+        <td class="{{bg}}">
+            <table class="departamentos" style="width:100%;">
+                <tr>
+                    <td><div> 
+                        <button type="button" title="Ver datos Proveedor de Conexión" class="btn btn-xs btn-default verDatosProveedor pull-right"><i class="fa fa-book"></i></button>
+                        <strong style="font-size:12px!important;">{{ departamento.nombre}}</strong> &nbsp; 
+                        {% if departamento.direccion %} &nbsp; <i class="fa fa-map-marker"></i>&nbsp; {{ departamento.direccion}} &nbsp;{% endif %} {%if departamento.localidad%} - {{ departamento.localidad.name}} &nbsp;{%endif%} 
+                        {% if departamento.email %}&nbsp; <i class="fa fa-envelope"></i>&nbsp; {{ departamento.email}}</div> {% endif %}                                   
+                        <div>{% if departamento.telefono %} &nbsp; <i class="fa fa-phone"></i>&nbsp; {{ departamento.telefono}}&nbsp;{% endif %} 
+                            {% if departamento.responsable %} &nbsp;<i class="fa fa-user"></i>&nbsp; {{ departamento.responsable}}{% endif %}</div> 
+                    </td>                    
+                </tr>
+                <tr style="border-top:1px solid lightgrey" class="datosproveedor hidden">
+                    {% set proveedor = departamento.proveedor %}
+                    <td>
+                        {% if proveedor.enlaceProveedor %}
+                        <div> 
+                        <i class="glyphicon glyphicon-link" ></i>&nbsp;<strong>{{ proveedor.enlaceProveedor|upper}} </strong> - {{ proveedor.enlaceTipoConexion }}&nbsp;&nbsp;&nbsp;
+                        <i class="fa fa-phone"></i>&nbsp; {{ proveedor.enlaceTelefonoReclamo}} &nbsp;&nbsp;&nbsp; 
+                        <i class="fa fa-envelope"></i>&nbsp; {{ proveedor.enlaceEmailReclamo}} &nbsp;&nbsp;&nbsp; 
+                        <i class="fa fa-user"></i>&nbsp; {{ proveedor.enlaceReferenciaCliente}}
+                        </div>     
+                        {% endif %}
+                        {% if proveedor.internetProveedor %}
+                        <div> 
+                        <i class="fa fa-internet-explorer"></i>&nbsp;<strong> {{ proveedor.internetProveedor|upper}}</strong> - {{ proveedor.internetTipoConexion }}&nbsp;&nbsp;&nbsp;
+                        <i class="fa fa-phone"></i>&nbsp; {{ proveedor.internetTelefonoReclamo}} &nbsp;&nbsp;&nbsp;
+                        <i class="fa fa-envelope"></i>&nbsp; {{ proveedor.internetEmailReclamo}} &nbsp;&nbsp;&nbsp;
+                        <i class="fa fa-user"></i>&nbsp; {{ proveedor.internetReferenciaCliente}} &nbsp;&nbsp;&nbsp;
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+
+        </td>                                    
+        <td class="{{ bg }}">
+            <table class="departamentos">
+                <tr><td>{% if departamento.ipPrincipal %} 
+                        <div style="width: 120px;">
+                            <span style="font-size:12px;font-weight: bold;">{{ departamento.ipPrincipal }} </span>
+                            <span data-ip="{{ departamento.ipPrincipal }}" class="badge pull-right btn btn-default testip" title="Test IP">
+                                <i class="fa fa-times"></i>    
+                            </span> 
+                        </div> 
+                        {% endif %}    
+                    </td>
+                </tr>
+                <tr><td>{% if departamento.ipRespaldo %} 
+                        <div style="width: 120px;margin-top: 5px;">
+                            <span style="font-size:12px;">{{ departamento.ipRespaldo }} </span>
+                            <span data-ip="{{ departamento.ipRespaldo }}" class="badge pull-right btn btn-default testip"  title="Test IP">
+                                <i class="fa fa-times"></i> 
+                            </span>
+                            
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td style="text-align:center">
+            {% if app.user.access('monitoreo_reclamo') %}
+            <button type="button" title="Ver Reclamos" class="btn btn-sm reclamos" data-provid="{{ departamento.proveedor.id}}">                
+                <i class="fa fa-exclamation-triangle" style="font-size: 14px;vertical-align: middle;"></i>                
+                <span id="recab-{{departamento.proveedor.id}}" class="badge bg-purple">{% if departamento.proveedor.reclamosAbiertos>0 %}{{ departamento.proveedor.reclamosAbiertos }} {% endif %}</span>               
+            </button>
+             {% endif %}
+        </td>                                    
+    </tr>

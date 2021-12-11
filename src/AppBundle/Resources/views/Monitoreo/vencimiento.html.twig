@@ -1,0 +1,186 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+<style>
+   /* .ui-datepicker-calendar {
+    display: none;
+    }*/
+</style>    
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-bell"></i> &nbsp; Vencimientos</h3>
+                       
+            </div><!-- /.box-header -->
+            <div class='box-body' >
+                <form id="searchform" action="{{ path('monitoreo_vencimiento') }}" method="get" >                    
+                    <div class="col-md-12">                
+                        <fieldset>         
+                            <div class="col-md-3">
+                                <div class="form-group ">
+                                    <label class="required">Tipo:</label>
+                                    <select class="select2 form-control" name="tipoId" id="selectTipo">
+                                        <option value="0">Todos</option>
+                                        {%for tipo in tipos %}
+                                            <option {% if tipo.id==data.tipoId %} selected {% endif %}  value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label class="required">Proveedor:</label>
+                                    <select class="select2 form-control" name="proveedorId" id="selectProveedor">
+                                        <option value="0">Todos</option>
+                                        {%for prov in proveedores %}
+                                            <option {% if prov.id==data.proveedorId %} selected {% endif %} value="{{prov.id}}">{{prov.nombre}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>
+                        </fieldset>            
+                        <fieldset>            
+                            <div class="col-md-2">
+                                <label class="required">Periodo:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{ data.desde }}" >
+                                </div>   
+                            </div>    
+                            <div class="col-md-2"> 
+                                <label>&nbsp;</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{ data.hasta }}" >                                            
+                                </div>                                           
+                            </div>  
+                            <div class="col-md-3">
+                                <label class="required">Estado:</label>
+                                <div class="form-group">
+                                    <select class="select2 form-control" name="estado" id="estado" >
+                                        <option value="0">Todos</option>                                        
+                                        <option {% if data.estado=='1' %} selected {% endif %} value="1">En término</option>
+                                        <option {% if data.estado=='2' %} selected {% endif %} value="2">Por Vencer</option>
+                                        <option {% if data.estado=='3' %} selected {% endif %} value="3">Vencidos</option>
+                                    </select>
+                                </div>   
+                            </div>  
+                            <div class="col-md-3"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label style="width:100%;">&nbsp;</label>
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                            </div>                                 
+
+                        </fieldset>
+                    </div> 
+                </form>                      
+
+                <div class="table-responsive" style="padding: 15px">
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                {% if not data.tipoId %}
+                                <th>Tipo</th>
+                                {% endif %}
+                                {% if not data.proveedorId %}
+                                <th>Proveedor</th>
+                                {% endif %}                                
+                                <th>N° OC</th>
+                                <th>Detalle</th>
+                                <th>Periodo</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Abono</th>                                
+                                <th class="no-sort thactions">
+                                    {% if app.user.access('monitoreo_vencimiento_new') %}
+                                    &nbsp;<a href="{{ path('monitoreo_vencimiento_new') }}" data-toggle="tooltip" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                                    {% endif %}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in entities %}
+                                <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }} bg-{{entity.estado}}">
+                                    {% if not data.tipoId %}
+                                    <td>{{ entity.tipo}}</td>
+                                    {% endif %}
+                                    {% if not data.proveedorId %}
+                                    <td>{{ entity.proveedor}}</td>
+                                    {% endif %}                                    
+                                    <td>{{ entity.ordenCompra}}</td>
+                                    <td>{{ entity.detalle}}</td>
+                                    <td>{{ entity.periodo}}</td>
+                                    <td><span class="hidden">{{ entity.fechaInicio|date('Ymd') }}</span>{{ entity.fechaInicio|date('d-m-Y') }}</td>                                
+                                    <td><span class="hidden">{{ entity.fechaFin|date('Ymd') }}</span>{{ entity.fechaFin|date('d-m-Y') }}</td>                                
+                                    <td>{{ entity.moneda }} {{ entity.abono}}</td>                                                                       
+                                    <td class="link-actions"> 
+                                        <a href="javascript:void(0)" class="view-vto" data-tit1="{{ entity.detalle }}" data-url="{{ path('monitoreo_vencimiento_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver"><i class="fa fa-folder-open"></i></a>&nbsp;
+                                        {% if app.user.access('monitoreo_vencimiento_edit') %}
+                                        <a href="{{ path('monitoreo_vencimiento_edit', { 'id': entity.id }) }}" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
+                                        {% endif %}
+                                        {% if app.user.access('monitoreo_vencimiento_delete') %}
+                                        <form action="{{ path('monitoreo_vencimiento_delete', { 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                                            <input type="hidden" name="_method" value="DELETE" />
+                                            {{ form_widget(deleteForms[entity.id]) }}
+                                            <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click(); "><i class="fa fa-trash-o"></i></a>
+                                            <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                                        </form> 
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {    
+    $('#limpiar-filtros').on('click',function(){                
+        $('#searchform').find('.select2').val('0');
+        $('#searchform').find('.datepicker').val('');
+        $('#searchform').submit();
+    });    
+    $('body').on('click','.view-vto',function(){
+        var options = {
+           url: $(this).data('url'),
+           title:$(this).data('tit1'),
+           size: eModal.size.lg,
+           buttons: [               
+               {text: 'Cerrar', style: 'success', close: true }
+           ]
+       };
+       eModal.ajax(options);
+    });
+  /* var monthpicker = $('.monthpicker').datepicker({
+        dateFormat: "M yy"
+    }) // format to show                
+        .datepicker("option", "changeMonth", true)
+        .datepicker("option", "changeYear", true)
+        .datepicker("option", "showButtonPanel", true)
+        .datepicker("option", "onClose", function(e){
+             var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+             var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+             $(this).datepicker("setDate",new Date(year,month,1));
+    })  
+    $('#desde').val( $('#desde').data('value') ).trigger('change')
+    $('#hasta').val( $('#hasta').data('value') ).trigger('change') */   
+   
+    var oTable = $('#tablelist').dataTable();
+        oTable.fnSort( [ [0,'desc'] ] );                          
+});
+</script>    
+{% endblock %}

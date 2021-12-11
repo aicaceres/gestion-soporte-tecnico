@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=UTF-8" />
+   </head>
+   <body  >  
+<style>
+.align-center{text-align: center}
+table{ font-family:'Arial';font-size: 12px; }
+table tr th{
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+    background: #CCCCCC;
+    font-size: 13px;
+    }
+/*table tr th:last-of-type, table tr.master td:last-of-type { 
+    border-right: 1px solid gray;  
+    
+}
+table tr.master:last-of-type td{    border-bottom: 1px solid gray;  }
+table tr.master:first-of-type td{    border-top: 1px solid gray;  }
+table tr.master td{
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+}*/
+table tr td{
+    border: 1px solid black;
+}
+</style>       
+      <h2 text-align="center"> Listado de Compras</h2>              
+        <h4><strong>Razón Social:</strong> {{ filtro[0] }} - <strong>Area Req:</strong> {{ filtro[1] }} - <strong>Estado:</strong> {{ filtro[2] }} - <strong>Proveedor:</strong> {{ filtro[3] }}  </h4>
+        <h4><strong>Periodo:</strong> {{ filtro[4] }} al {{ filtro[5] }}</h4>
+        <div height="10px"></div>
+        {% if search %}
+            <h4> Término de Búsqueda: "{{search}}" </h4>
+            <div height="10px"></div>
+        {%endif%}       
+        <table cellspacing="0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Razón Social</th>                
+                    <th>Area Req.</th>                
+                    <th>N° OC</th>                
+                    <th>Fecha</th>                
+                    <th>Proveedor</th>
+                    <th>Estado</th>                
+                    <th>Insumos/Equipos</th>                
+                    <th>Cantidad</th>    
+                    <th>Pendiente</th>                
+                </tr>                        
+            </thead>
+            <tbody>
+
+                {% for item in items %}
+                    {% set rows = (item.detalles|length>1) ? (item.detalles|length )+1 : 1 %}
+                    {% set rowspan = (rows>1) ? 'rowspan='~rows  : '' %}
+                    <tr {% if item.deletedAt %} style="color:red" {% endif %}>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.razonSocial}}</td>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{% if item.solicitante%} {{item.solicitante.edificioDepartamento}} {% endif %}</td>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.ordenCompra}}</td>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.fechaCompra|date('d-m-Y')}}</td>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.proveedor}}</td>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.estado}}</td>
+                        {% if rows==1 %}
+                            <td height="20px" vertical-align="middle" padding-left="5px">{{item.detalles[0]}}</td>
+                            <td height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{item.detalles[0].cantidad|number_format(0,'.',',')}}</td>                                        
+                            <td height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.detalles[0].cantidadPendiente|number_format(0,'.',',') }}</td>  
+                        {% endif %}              
+                    </tr>        
+                    {% if rows>1 %}
+                        {% for det in item.detalles %}
+                            <tr {% if item.deletedAt %} style="color:red" {% endif %}>
+                                <td height="20px" vertical-align="middle" padding-left="5px">{{det}}</td>
+                                <td height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.cantidad|number_format(0,'.',',')}}</td>                                            
+                                <td height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ det.cantidadPendiente|number_format(0,'.',',') }}</td>            
+                            </tr>
+                        {% endfor %}
+                    {% endif %}    
+                {% endfor %}
+            </tbody>              
+        </table>    
+
+   </body>
+</html>

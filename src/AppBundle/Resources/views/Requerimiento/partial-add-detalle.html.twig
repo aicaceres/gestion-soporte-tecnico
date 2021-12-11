@@ -1,0 +1,112 @@
+<div id="addEquipoCreate">
+{{ form_start(form) }}
+<fieldset style="padding-bottom:10px;">
+    <div class="col-md-2">
+        {{ form_row(form.barcode) }}
+    </div>     
+    <div class="col-md-5">
+        <div class="input-group">
+            {{ form_row(form.equipo, { 'attr': {'class' : 'form-control select2' } }) }}
+                <span class="input-group-btn" style="padding-left: 5px;">
+                    <button data-toggle="tooltip" title="Buscar equipo" type="button" data-url="{{path('render_search_equipo')}}" id=""
+                        class="btn btn-default btn-flat btn-xs searchAddEquipo " data-function="addEquipo" data-param="id"><i class="fa fa-search"></i></button>
+                </span>
+        </div>
+        {{ form_errors(form.equipo) }} 
+    </div>     
+    <div class="col-md-5">
+        {{ form_row(form.descripcion) }}
+    </div>     
+</fieldset>     
+<div id="datatableslist"></div>             
+<input type="hidden" value="{{ op }}" name="op" />
+{{ form_end(form) }}        
+</div> 
+<script type="text/javascript">
+$(document).ready(function() {      
+   // $('.searchInsumo').click();
+   var div = $('#addEquipoCreate');
+   var sel = div.find('[id$="_equipo"]');
+   var barcode = div.find('[id$="_barcode"]');   
+    var id = '{{dptoId}}';
+    sel.html('');
+    $.ajax({
+        type: 'post',
+        url:  "{{ path('get_equipos_x_departamento') }}" ,
+        data: { depto_id: id },
+            success: function(data) {
+                changeDataSelect( sel, data );
+                sel.select2({
+                    dropdownParent: $('.modal')
+                });                
+            }
+    });
+    sel.on('select2:selecting',function(e){
+      sel = $(e.currentTarget) ;
+      $.get("{{path('find_barcode_by_id')}}",{id:e.params.args.data.id}, function(data){
+               var itemTr = sel.closest('.item');
+               barcode.val(data);
+           }); 
+    });
+    barcode.on('keypress',function(e){    
+        //barcode = $(this);
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ 
+            $.get("{{path('find_equipo_id_by_barcode')}}",{bc:barcode.val().toUpperCase()}, function(data){                
+                sel.val(data).trigger("change");
+                if(!sel.val()){
+                    if( confirm('El código de barra no pertenece a un equipo asignado a este Departamento!!!\n\nDesea agregar este equipo al requerimiento?')){
+                       $.getJSON("{{path('find_equipo_data_by_id')}}",{id:data}, function(data2){
+                            if(data2.msj=='OK'){
+                               barcode.val( data2.barcode );
+                                var newState = new Option(data2.nombre, data2.id, true, true);        
+                                sel.append(newState).trigger('change'); 
+                            }else{
+                                alert(data2.msj);
+                                return false;
+                            }
+                        });  
+                    }else{
+                        barcode.val('');
+                        sel.val('').trigger("change");
+                        return false;
+                    }
+                }
+            });
+        }
+    });
+    
+    $('.searchAddEquipo').on('click',function(){
+        var xmlRequest = $.ajax({
+            url: $(this).data('url'),
+            type: 'GET',
+            success: function(data){
+               $('.insumosDatatable').show();
+               $('#datatableslist').html(data);  
+               $('#datatableslist').find('#ckTodos').hide();
+               $('body').on('click','.ckItem',function(){ 
+                   ck = $(this);
+                   item = $(this).data('id');  
+                   //sel = $('#appbundle_requerimientodetalle_equipo');
+                   sel.val(item).trigger('change');
+                    if( !sel.val() ){
+                        //buscar datos y agregar item al select
+                        $.getJSON("{{path('find_equipo_data_by_id')}}",{id:item}, function(data){
+                            if(data.msj=='OK'){
+                               barcode.val( data.barcode );
+                                var newState = new Option(data.nombre, data.id, true, true);        
+                                sel.append(newState).trigger('change'); 
+                                ck.attr('checked',false);
+                            }else{
+                                alert(data.msj);
+                                return false;
+                            }
+                        }); 
+                    }
+                   
+                });               
+            }            
+        });                    
+    });
+});
+</script>   

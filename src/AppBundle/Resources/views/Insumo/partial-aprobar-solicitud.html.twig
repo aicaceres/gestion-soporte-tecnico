@@ -1,0 +1,42 @@
+<fieldset style="padding-bottom:10px;">
+    <div class="col-md-10">
+        <input type="hidden" id="insumoId" name="insumoId" value="{% if entity.insumo %}{{ entity.insumo.id }}{% endif %}"/>
+        
+        <span><strong>INSUMO:</strong>&nbsp;</span><span id="insumoDescripcion">{% if entity.insumo %} {{entity.insumo.texto}} {% else %} {{entity.descripcion}} {% endif %}</span>    &nbsp;&nbsp;                    
+            <button data-toggle="tooltip" title="{% if entity.insumo %} Seleccionar otro insumo {% else %} Buscar insumo {% endif %}" type="button" data-url="{{path('render_search_insumo')}}" 
+                        class="btn btn-default btn-flat btn-xs searchInsumo " data-function="setInsumoId" data-param="id"><i class="fa fa-search"></i></button>
+                
+        <div style="margin-top:5px" id="datatableslist"></div>         
+    </div> 
+    <div class="col-md-2">
+        <div><strong>CANTIDAD:</strong></div>
+        <div><input class="form-control" id="cantidad" name="cantidad" max="{{entity.cantidad}}" data-original="{{entity.cantidad}}" value="{{entity.cantidad|number_format(0)}}"/> </div>
+        <div id="label-stock" style="font-weight:bold;">
+            {% if entity.insumo %}
+            {% set stock = entity.insumo.stockByDeposito(deposito) %}
+            <small>STOCK: <span {% if stock<0 %} style="color:red" {% endif %}>{{ stock|number_format(0) }}<span> </small>
+            {% endif %}            
+        </div>
+    </div>    
+</fieldset> 
+
+<script type="text/javascript">
+$(document).ready(function() {    
+    {% if not entity.insumo %}
+    $('.searchInsumo').click();
+    {% endif %} 
+    $('body').on('click','.ckItem',function(){ 
+        ck = $(this);
+        item = $(this).data('id');
+        $.getJSON("{{path('find_data_insumo')}}",{item:item, dep:$('#selectDeposito').val()  }, function(data){ 
+            var insumo = data;
+            $('#insumoId').val(insumo.id);
+            $('#insumoDescripcion').html(insumo.nombre);
+            var neg = (insumo.stock<0)?'style="color:red"':'';
+            var lblstock = '<small>STOCK: <span '+ neg +'>'+insumo.stock+'</span> </small>';
+            $('#label-stock').html( lblstock );
+        });
+        $('#datatableslist').html('');    
+    });
+});
+</script>    

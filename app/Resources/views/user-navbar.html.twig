@@ -1,0 +1,120 @@
+<!-- User Account: style can be found in dropdown.less -->
+<li class="dropdown notifications-menu">        
+    <a href="javascript:void(0);" data-function="busquedaRapida" data-param="id"  data-url="{{path('render_search_equipo')}}" class="dropdown-toggle searchEquipo" >
+        <i class="fa fa-search"></i>
+    </a>            
+</li>
+{% if app.user.cantidadMensajesNoLeidos>0 %}
+<li class="dropdown messages-menu">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+        <i class="fa fa-envelope-o"></i>
+        {% if app.user.cantidadMensajesNoLeidos>0 %}
+            <span class="label label-success mensajes-no-leidos"> {{ app.user.cantidadMensajesNoLeidos }}</span>
+        {% endif %}
+    </a>
+    <ul class="dropdown-menu">
+        <li class="header">Tiene <span class="mensajes-no-leidos"> {{ app.user.cantidadMensajesNoLeidos }}</span> mensajes</li>
+        <li>
+            <!-- inner menu: contains the actual data -->
+            <ul class="menu">
+                {% for msj in app.user.mensajes|reverse if msj.fechaLeido is null %}
+                <li><!-- start message -->
+                    <a href="javascript:void(0);" data-url="{{ path('marcar_como_leido', { 'id': msj.id }) }}" class="marcar-como-leido" title="Marcar como leído">                       
+                        <h4 style="font-size:14px;margin:0;">
+                            {{ msj.asunto }}
+                            <small><i class="fa fa-clock-o"></i> {{ msj.created|date('d/m/Y H:i') }}</small>
+                        </h4>
+                        <p style="margin:0;font-size:11px;color:#888888;white-space:normal;">{{ msj.mensaje }}</p>
+                    </a>
+                </li>
+                {% endfor %}                
+                <!-- end message -->                
+            </ul>
+        </li>
+        <li class="footer">
+            <a href="javascript:void(0);" data-url="{{ path('marcar_como_leido', { 'id': 0 }) }}" class="marcar-como-leido">Marcar todos como leídos</a>
+        </li>
+    </ul>
+</li>
+{% endif %}
+
+{% if app.user.access('monitoreo_vencimiento') %}
+    <li class="dropdown notifications-menu hidden">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-bell-o"></i>
+            <span class="label label-danger vencidos"></span>
+        </a>
+        <ul class="dropdown-menu">
+            <li class="header vencidos"></li>                        
+        </ul>
+    </li>    
+{% endif %}
+
+{% if app.user.access('insumo_solicitud') %}
+<li class="dropdown notifications-menu hidden">
+    <a href="{{ path('insumo_solicitud') }}" class="dropdown-toggle" >
+        <i class="fa fa-puzzle-piece"></i>
+        <span class="label label-danger solPendientes"></span>
+    </a>            
+</li>
+{% endif %}
+{% if app.user.rol.tecnico %}
+<li class="dropdown tasks-menu">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <i class="fa fa-briefcase"></i>        
+        {% if app.user.ordenesAbiertas>0 %}
+        <span class="label label-danger">{{ app.user.ordenesAbiertas }}</span>
+        {% endif %}
+    </a>
+    <ul class="dropdown-menu">
+        <li class="header">Ordenes de trabajo abiertas: {{ app.user.ordenesAbiertas }}</li>
+        <li>
+            <!-- inner menu: contains the actual data -->
+            <ul class="menu">
+                {% for ot in app.user.ordenesTrabajo if ot.estado=='ABIERTO' %}
+                <li><!-- Task item -->
+                    <a href="{{ path('soporte_ordentrabajo_tareas', { 'id': ot.id }) }}">
+                        <h3 style="margin:0;">
+                            {% if ot.altaPrioridad %}
+                                <i class="fa fa-exclamation-circle text-red"></i>
+                            {% endif %}
+                            <strong>OT N° {{ ot.nroOT }}</strong>
+                            <small class="pull-right">{{ ot.fechaOrden|date('d/m/Y H:i') }}</small>
+                        </h3>
+                            <p style="font-size:11px;color:#888888;white-space:normal;">{{ ot.descripcionCorta }}</p>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        <li class="footer">
+            <a href="{{path('soporte_ordentrabajo')}}">Ver todas</a>
+        </li>
+    </ul>
+</li>
+{% endif %}
+<li class="dropdown user user-menu">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+         <img src="{{ asset('bundles/avanzuadmintheme/img/avatar2.png') }}" class="user-image" alt="{{ app.user.username }}" />
+        <span class="hidden-xs">{{ app.user.nombre }}</span>
+    </a>
+    <ul class="dropdown-menu">
+        <!-- User image -->
+        <li class="user-header">
+            <img src="{{ asset('bundles/avanzuadmintheme/img/avatar2.png') }}" alt="{{ app.user.username }}" />
+            <p>
+                {{app.user.nombre}}
+                <small>{{ app.user.username }}</small>
+            </p>
+        </li>        
+        <!-- Menu Footer-->
+        <li class="user-footer">
+            <div class="pull-left">
+                <a href="{{ path('usuario_profile') }}" title="Perfil de Usuario" class="btn btn-default btn-flat">Perfil</a>
+            </div>
+            <div class="pull-right">
+                <a href="{{ path('usuario_logout') }}" class="btn btn-default btn-flat">Cerrar Sesión</a>
+            </div>
+        </li>
+    </ul>
+</li>

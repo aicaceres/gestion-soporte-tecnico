@@ -1,0 +1,112 @@
+{{ form_start(form) }}
+    {% if entity.id  %}
+        <input name="_method" value="PUT" type="hidden">
+    {%endif%}
+    <div class='box-body'>
+        {% include "form-notification.html.twig" %}
+            <input type="hidden" value="{{table}}" name="table"/>
+            <input type="hidden" value="{{path('create_parametro')}}" id="create_url"/>
+            {% if form.marca is defined %}
+                <h4 style="text-align:center;margin-top:0">Marca: {{entity.marca}}</h4>
+            {% endif %}            
+            {% if form.clase is defined and form.vars.data.clase=='' %}
+             <style>
+        #configbundle_parametro_clase .radio{ display:inline-block;}
+        #configbundle_parametro_clase .radio label{ font-weight: bold;}    
+        .iradio_square-blue{margin-right: 3px;}
+</style>   
+            <div class="col-sm-12">
+                <fieldset>
+                    {{ form_row(form.clase) }}
+                </fieldset>
+            </div>    
+            {% endif %}    
+            <div class="col-sm-12">
+                <fieldset>
+                    {{ form_row(form.nombre, { 'attr': {'autofocus':'autofocus' } }) }}
+                </fieldset>
+            </div>    
+            {% if form.abreviatura is defined %}
+                <div class="col-sm-6">
+                    <fieldset>
+                        {{ form_row(form.abreviatura) }}
+                    </fieldset>
+                </div>    
+            {% endif %}
+            {% if form.modelos is defined %}
+                <div class="col-md-12">
+                        {{ form_errors(form.modelos) }}
+                        <table id="modelos" class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 80%">Modelos</th>
+                                     <th class="nosort aligncenter" style="width: 5%">
+                                        <a href="javascript:void(0)" class="btn btn-danger btn-xs linkAdd" title="Agregar Modelo" data-form="modelos" data-toggle="tooltip"><i class="fa fa-plus"></i></a>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody data-index="{{form.modelos | length }}" class="collectionHolder"
+                                   data-prototype="{% filter escape %}{% include 'ConfigBundle:Parametro:prototypeModeloAjax.html.twig' with {'item':form.modelos.vars.prototype} %}{% endfilter %}">
+                                {% for item in form.modelos %}        
+                                    <tr>  
+                                        <td>{{ form_widget(item.nombre) }}{{ form_errors(item.nombre) }}</td>            
+                                        <td class="link-actions">
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>                             
+                </div>                                 
+            {% endif %}    
+       
+    </div>
+    <div style='display:none;'>
+        {{ form_end(form) }}
+    </div>
+</form>   
+<script src="{{ asset('bundles/app/bootstrap.file-input.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function() {    
+    var tabla =  "{{ table }}";
+    if( tabla=='Tipo'){
+        $('#configbundle_parametro_clase').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+          });
+        }
+    if(tabla=='Marca'){
+        // logica para modelos
+        $('table tbody').find('.link-actions').each(function() {
+            addItemFormDeleteLink($(this));
+        });   
+        $('.linkAdd').on('click', function(e) {
+            e.preventDefault();
+            tableId = $(this).data('form');
+            addNewItem($('#'+tableId+' tbody'));
+        });
+    } 
+    $('#configbundle_parametro_nombre').focus();
+});
+{% if table == 'Marca' %}
+function addNewItem($collectionHolder) {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/itemform/g, index);
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    addItemFormDeleteLink($collectionHolder.find('.link-actions').last());    
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = $('<a href="#" title="Eliminar" data-toggle="tooltip"><i class="fa fa-trash-o"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $("[data-toggle='tooltip']").tooltip();
+    $removeFormA.on('click', function(e) {
+        if ( confirm('Desea eliminar este item?') ) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+        }
+    });
+} 
+{% endif %}
+</script>

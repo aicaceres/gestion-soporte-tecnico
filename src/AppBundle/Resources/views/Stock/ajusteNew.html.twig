@@ -1,0 +1,156 @@
+{% extends "base.html.twig" %}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; Nuevo Ajuste de Stock  </h3>
+                </div><!-- /.box-header -->
+                {{ form_start(form) }}
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-2">
+                                {{ form_row(form.fecha) }}
+                            </div>                                        
+                            <div class="col-md-5">
+                                {{ form_row(form.deposito) }}
+                            </div>
+                            <div div class="col-md-5">
+                                {{ form_label(form.tipo) }}
+                                {{ form_widget(form.tipo, { 'attr': {'class' : 'radionumerac' } }) }}
+                            </div>                             
+                        </div>  
+                        <div class="col-md-12"> 
+                            <div class="col-md-8 col-md-offset-1">
+                                {{ form_row(form.observaciones) }}    
+                            </div>
+                        </div>                          
+                    </div>
+                <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width:6%;"></th>
+                            <th style="width:40%;">Insumo <span style="font-weight:normal">[ Tipo | Marca | Modelo ]</span></th>
+                            <th style="width:8%; font-size:1.3em;">+ / -</th>
+                            <th style="width:8%;">Cantidad</th>
+                            <th style="width:30%;">Motivo</th>
+                            <th style="width:8%;text-align:center;" class="no-sort thactions">
+                                &nbsp;<a href="javascript:void(0);" data-toggle="tooltip" id="linkAdd" title="Agregar Nuevo"><i class="fa fa-plus-square"></i></a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Stock:ajustePrototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                    {% for item in form.detalles %}
+                        <tr class="item" divdata="item_{{loop.index-1}}">
+                            <td class="ordTd"></td>
+                            <td class="prodTd">{{ form_widget(item.insumo) }}</td>
+                            <td class="signoTd">{{ form_widget(item.signo, { 'attr': {'class' : 'selectsigno'} }) }}</td>
+                            <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number floatleft','min':'0'} }) }} </td>                                
+                            <td class="motTd">{{ form_widget(item.motivo, { 'attr': {'rows' : '1'} }) }}</td>
+                            <td class="delTd" style="text-align:center;"></td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>
+                </table>                                
+                            
+                            
+                </div>                                  
+                <div class="box-footer">
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        <a type="button" class="btn btn-app" href="{{ path('insumo_ajuste')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>     
+                <div style="display:none">    
+                    {{ form_end(form) }}
+                </div>                
+     
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+    var $collectionHolder;
+    var $tipoajuste='+';
+$(document).ready(function() {      
+      // Setear tipo de ajuste segun radio
+    var tipo = $('#appbundle_stockajuste_tipo');     
+    tipo.on('ifClicked', function (event) {
+        if( $(this).val()==='+' ){
+            $tipoajuste='+';
+        }else{
+            $tipoajuste='-';
+        }
+    });    
+    tipo.change();
+    
+   $('[type="submit"]').on('click',function(){
+        if( $('.table tbody tr').length == 0  ){
+             alert('Debe ingresar items!');
+             return false;   
+         }     
+   });
+   
+   // Get the container who holds the collection
+    $collectionHolder = $('.table tbody');
+    $collectionHolder.find('.delTd').each(function() {
+        addItemFormDeleteLink($(this));
+    });
+    $collectionHolder.find('.ordTd').each(function(i) {
+        $(this).html(i + 1);
+    });  
+   $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
+        addNewItem();
+        e.stopPropagation();
+        //$collectionHolder.find('.chzn-container').last().trigger('mousedown');
+    });
+   $(document).keypress(function(e) {
+        if (e.which == 43) { 
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+    });
+});
+function addNewItem() {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    addItemFormDeleteLink($collectionHolder.find('.delTd').last());
+    var insumo = $collectionHolder.find('.select2').last().select2();    
+    $collectionHolder.find('.ordTd').last().html($collectionHolder.data('index'));
+    $collectionHolder.find('[id$="_signo"]').last().val($tipoajuste);
+    $collectionHolder.find('textarea').last().css('height','34px');
+    insumo.on('select2:select',function(e){        
+        cantTd = $collectionHolder.find('.cantTd input').last();
+        if( !cantTd.val() ) cantTd.val(1);        
+        cantTd.focus();   
+    });
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            var index = $collectionHolder.data('index');
+            $collectionHolder.data('index', index - 1);
+            $collectionHolder.find('.ordTd').each(function(i) {
+               jQuery(this).html(i + 1);
+            });
+        }
+    });
+}
+</script>    
+{% endblock %}

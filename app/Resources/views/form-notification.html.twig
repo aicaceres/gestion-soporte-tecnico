@@ -1,0 +1,14 @@
+{% if form.vars.errors|length %}
+    <div class="callout dismissable callout-danger" style="color:white">
+        {{form.vars.errors}}
+    </div>                  
+{% endif %}  
+
+{% for type, messages in app.session.flashbag.all() %}
+    {% for message in messages %}
+        {# type = danger, info, warning #}  
+    <div class="callout dismissable callout-{{ type }} ">
+        <p>{{ message }}</p>
+    </div>
+    {% endfor %}
+{% endfor %}

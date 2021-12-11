@@ -1,0 +1,18 @@
+<div id="ubicacion-nueva">                                                          
+    <fieldset>
+        <div class="col-md-2">
+            {{ form_row(ubicacionActual.ubicacion, { 'attr': {'urlEdificio' : path('select_edificios'), 'class' : 'ubicacion_selector' } }) }}   
+        </div>
+        <div class="col-md-4">
+            {{ form_row(ubicacionActual.edificio, { 'attr': {'urlDepartamento' : path('select_departamentos'),'class' : 'edificio_selector' } }) }}   
+        </div>
+        <div class="col-md-4">
+            {{ form_row(ubicacionActual.departamento, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector' } }) }}   
+        </div>
+        <div class="col-md-2">
+            {{ form_row(ubicacionActual.piso, { 'attr': {'class' : 'piso_selector' } }) }}   
+        </div>
+    </fieldset>      
+</div>
+
+         

@@ -1,0 +1,132 @@
+{% extends "dataTableList.html.twig" %}
+{% block page_content %}
+{% include "notification.html.twig" %}    
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-briefcase"></i> &nbsp; Órdenes de Trabajo</h3>
+                {% if app.user.access('view_logs') and entities|length>0 and false%}
+                    <div class="pull-right box-tools">
+                        <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                                data-id="" data-url="{{path('get_insumo_logs')}}"  >   <i class="fa fa-history"></i></button>  
+                    </div>
+                {% endif %}   
+            </div><!-- /.box-header -->
+            <div class='box-body' >
+                <form id="searchform" action="{{ path('soporte_ordentrabajo') }}" method="get" >                    
+                    <div class="col-md-12">                
+                       <fieldset>  
+                           <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label>Técnico:</label>                                    
+                                    <select id="selTecnico" name="idTecnico" class="form-control select2">
+                                        {% if not app.user.rol.permiso('ordentrabajo_own') %} <option value="0">Todos</option> {% endif %}
+                                        {%for tec in tecnicos %}
+                                            <option {%if tec.id == app.session.get('filtro_ordentrabajo')['idTecnico'] %} selected="selected" {%endif%} value="{{tec.id}}">{{tec.nombre}}</option>
+                                        {% endfor %} 
+                                    </select>
+                                </div>
+                            </div>
+                           <div class="col-md-2">
+                                <div class="form-group ">
+                                    {% set estado = app.session.get('filtro_ordentrabajo')['estado'] %}
+                                    <label>Estado:</label>
+                                    <select id="selEstado" name="estado" class="form-control select2">
+                                        <option value="0">Todos</option>
+                                        <option value="ABIERTO" {%if estado=='ABIERTO' %} selected="selected" {%endif%}>Abierto</option>
+                                        <option value="CERRADO" {%if estado=='CERRADO' %} selected="selected" {%endif%}>Cerrado</option>
+                                        <option value="CANCELADO" {%if estado=='CANCELADO' %} selected="selected" {%endif%}>Cancelado</option>
+                                    </select>
+                                </div>
+                            </div>                           
+                            <div class="col-md-2">
+                                <label class="required">Período:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{filtro.desde}}">
+                                </div>   
+                            </div>    
+                            <div class="col-md-2"> 
+                                <label>&nbsp;</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{filtro.hasta}}">                                            
+                                </div>                                           
+                            </div>  
+                            <div class="col-md-2"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label>&nbsp;</label>
+                                <button type="submit" class="form-control btn btn-default btn-sm"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                        
+                            </div>  
+                        </fieldset>
+                    </div> 
+                </form>                      
+
+                <div class="table-responsive" style="padding: 15px">
+                    <table id="tablelist" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style='width:8%'>Fecha/Hora</th>
+                                <th style='width:10%'>N° OT</th>
+                                <th style='width:10%'>N° JIRA</th>
+                                <th>Técnico</th>
+                                <th>Descripción</th>
+                                <th style='width:10%'>Equipos</th>
+                                <th style='width:10%'>Estado</th>
+                                <th style='width:10%' class="no-sort thactions">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in entities %}
+                                <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }} 
+                                    {{ (entity.estado in ['ABIERTO','ASIGNADO'] and entity.altaPrioridad) ? "altaPrioridad" : ""  }}">
+                                    <td><span class="hidden">{{ entity.fechaOrden|date('YmdH:i') }}</span>{{ entity.fechaOrden|date('d-m-Y H:i') }}</td>                                
+                                    <td style='text-align:center'>{{ "%06d" | format(entity.nroOrden)}}</td>
+                                    <td style='text-align:center'>{{ entity.jira}}</td>
+                                    <td>{{ entity.tecnico.nombre}}</td>
+                                    <td>{{ entity.descripcionCorta}}</td>                                   
+                                    <td style='text-align:center'>{{ entity.detalles|length}}</td>                                   
+                                    <td>{{ entity.estado}}</td>                                   
+                                    <td class="link-actions"> 
+                                        <a href="{{ path('soporte_ordentrabajo_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver"><i class="fa fa-folder-open"></i></a>&nbsp;
+                                        {% if entity.tecnico.id == app.user.id and entity.estado=='ABIERTO' %}
+                                        <a href="{{ path('soporte_ordentrabajo_tareas', { 'id': entity.id }) }}" data-toggle="tooltip" title="Tareas de Soporte"><i class="fa fa-briefcase"></i></a>&nbsp;
+                                        {% endif %}
+                                        {% if app.user.access('ordentrabajo_edit') and entity.estado=='ABIERTO'%}
+                                        <a href="{{ path('soporte_ordentrabajo_edit', { 'id': entity.id }) }}" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;                                        
+                                        {% endif %}
+                                        {% if app.user.access('ordentrabajo_delete') and entity.estado=='ABIERTO'%}
+                                        <form action="{{ path('soporte_ordentrabajo_delete', { 'id': entity.id }) }}" method="post" style="display:inline-block" >
+                                            <input type="hidden" name="_method" value="DELETE" />
+                                            {{ form_widget(deleteForms[entity.id]) }}
+                                            <a href="javascript:void(0)" title="Eliminar" data-toggle="tooltip" onclick=" $('#del{{entity.id}}').click(); "><i class="fa fa-trash-o"></i></a>
+                                            <button type="submit" id="del{{entity.id}}" class="hidden hideDelete">delete</button>
+                                        </form> 
+                                    {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {    
+  $('.select2').select2();
+    var oTable = $('#tablelist').dataTable();
+        oTable.fnSort( [ [0,'desc'] ] );
+});
+</script>    
+{% endblock %}

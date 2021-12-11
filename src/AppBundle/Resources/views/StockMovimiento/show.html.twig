@@ -1,0 +1,76 @@
+{% extends "base.html.twig" %}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; Movimiento de Stock  </h3>
+                </div><!-- /.box-header -->                
+                <div class='box-body'>                    
+                    <div class="row">
+                        <div class="col-md-8 col-md-offset-1">
+                            <div class="col-md-9">
+                                <div class="form-group ">
+                                    <label>Depósito Origen:</label>
+                                    <select disabled="disabled" class="form-control"><option value="">{{entity.depositoOrigen.nombreCompleto}}</option></select>
+                                </div>
+                            </div>                             
+                            <div class="col-md-3">                                
+                                <div class="form-group ">
+                                    <label>Fecha:</label>
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" disabled="disabled" class="form-control" value="{{entity.fecha|date('d/m/Y')}}">
+                                    </div>
+                                </div>                                                                
+                            </div>                                        
+                            <div class="col-md-9">
+                                <div class="form-group ">
+                                    <label>Depósito Destino:</label>
+                                    <select disabled="disabled" class="form-control"><option value="">{{entity.depositoDestino.nombreCompleto}}</option></select>
+                                </div>
+                            </div>                             
+                        </div>  
+                        <div class="col-md-8 col-md-offset-1"> 
+                            <div class="col-md-12">
+                                <div class="form-group ">    
+                                    <label>Observaciones:</label>
+                                    <textarea disabled="disabled" class="form-control">{{entity.observaciones}}</textarea>
+                                </div>                            
+                            </div>                            
+                        </div>      
+                        <div class="col-md-10 col-md-offset-1"> 
+                            <h4>Detalle</h4>            
+                            <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width:6%;">#</th>
+                                        <th style="width:40%;">Insumo</th>
+                                        <th style="width:8%;">Cantidad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in entity.detalles %}
+                                        <tr>
+                                            <td class="ordTd">{{loop.index}}</td>
+                                            <td class="prodTd">{{ item.insumo }}</td>
+                                            <td class="cantTd">{{ item.cantidad|number_format(2,'.',',') }} </td> 
+                                        </tr>
+                                    {% endfor %}           
+                                </tbody>
+                            </table>  
+                        </div>      
+                    </div>
+                    {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                </div>                                  
+                <div class="box-footer">
+                    <div class="btn-group pull-right">                        
+                        <a type="button" class="btn btn-app" href="{{ path('insumo_movimiento')}}"><i class="fa fa-reply"></i> Volver</a>
+                    </div>
+                </div>                         
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}

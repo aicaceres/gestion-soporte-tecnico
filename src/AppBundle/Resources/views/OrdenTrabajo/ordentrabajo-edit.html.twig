@@ -1,0 +1,205 @@
+{% set otdata = otform.vars.data %}
+<div class="row"> 
+    {% if otdata.estado=='ABIERTO' %}
+    <div class="col-md-12">
+        <div class="col-md-2">
+            {{ form_row(otform.fechaOrden) }}
+        </div>
+        <div class="col-md-1">
+            {{ form_row(otform.hora) }}
+        </div>
+        <div class="col-md-2">
+            <div class="form-group ">
+                <label for="appbundle_ordentrabajo_nroOrden">N° OT :</label>
+                <input type="text" id="appbundle_ordentrabajo_nroOrden" class="form-control" style="text-align:center"
+                       readonly="readonly" value="{{ otdata.nroOT}}">
+            </div>
+        </div>                                
+        <div class="col-md-3">
+            {{ form_row(otform.tecnico, { 'attr': {'class' : 'select2' } }) }}   
+        </div>
+        <div class="col-md-2">
+            {{ form_row(otform.jira) }}                                  
+        </div>
+        <div class="col-md-2">
+            <div class="form-group ">
+                <label for="appbundle_ordentrabajo_estado">Estado:</label>
+                <input type="text" id="appbundle_ordentrabajo_estado" class="form-control"
+                       readonly="readonly" value="{{ otdata.estado}}">
+            </div>
+        </div>
+    </div>   
+    <div class="col-md-12">
+        <div class="col-md-10">
+            {{ form_row(otform.descripcion) }}
+        </div>    
+        <div class="col-md-2">                                
+            <div class="form-group ">  
+                 <label>&nbsp;</label>  
+                {{ form_widget(otform.altaPrioridad) }}
+            </div>                               
+        </div>                             
+    </div>  
+    {% else %}
+    <div class="col-md-12">    
+        <fieldset style="padding-bottom:10px;">
+            <div class="col-md-3">
+                <span><strong>Fecha/hora:</strong>&nbsp;{{otdata.fechaOrden|date('d-m-Y H:i')}}</span>                        
+            </div>
+            <div class="col-md-2">
+                <span><strong>N° OT :</strong>&nbsp;{{ "%06d" | format(otdata.id)}}</span>
+            </div>    
+            <div class="col-md-3">
+                <span><strong>Técnico:</strong>&nbsp;{{otdata.tecnico.nombre}}</span>
+            </div> 
+            <div class="col-md-2">
+                <span><strong>N° JIRA:</strong>&nbsp;{{otdata.jira}}</span>
+            </div> 
+            <div class="col-md-2">
+                <span><strong>Estado:</strong>&nbsp;{{otdata.estado}}</span>
+            </div> 
+        </fieldset>                                    
+        <fieldset style="padding-bottom:10px;">
+            <div class="col-md-10">
+                <span><strong>Descripcion de la Orden de Trabajo:</strong>&nbsp;{% if otdata.descripcion %} {{otdata.descripcion}} {% else %} -- {% endif %} </span>                        
+            </div>                                       
+        </fieldset>  
+    </div>        
+    {% endif %}        
+    {% if otdata.tecnico.id == app.user.id and otdata.estado=='ABIERTO'  %}            
+    <div class="col-md-12" style="text-align:center">
+        <a href="{{ path('soporte_ordentrabajo_tareas', { 'id': otdata.id }) }}" style="margin-bottom:10px" class="btn btn-warning btn-sm" ><i class="fa fa-briefcase"></i> &nbsp; IR A REGISTRAR TAREAS</a>       
+    </div>               
+    {% endif %}
+            
+    <div class="col-md-12"> 
+        <div class="col-md-12"> 
+            <div class='box  box-default box-solid '>
+                <div class='box-header' style="background-color:white;">                                    
+                    <h6 id="otdocs" class="text-blue colapsable" style="margin:0;font-weight:bold;">DOCUMENTACIÓN ANEXA &nbsp;&nbsp; </h6>
+                    <div class="pull-right box-tools">                                                
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                    </div>
+                </div><!-- /.box-header -->
+                <div class='box-body no-padding'>  
+                    
+                    
+                    {% if otdata.estado == 'ABIERTO' %}                                     
+                       {% include "AppBundle:OrdenTrabajo:partial-documentos.html.twig" with {'otform': otform, 'otdata': otdata } %}                     
+                    {% elseif otdata.estado == 'CERRADO' %}                        
+                        {% include "AppBundle:OrdenTrabajo:partial-documentos-ajax.html.twig" with {'entity': otdata } %} 
+                    {% else %}
+                        {% if otdata.getDocumentos %}                          
+                            {% include "AppBundle:OrdenTrabajo:show-documentos.html.twig" with {'documentos':otdata.documentos } %}                             
+                        {% endif %}
+                    {% endif %}
+                       <br>
+                </div>      
+            </div> 
+        </div>
+    </div>
+    
+    
+    <div class="col-md-12">                                                        
+        <div class="col-md-12">                                                        
+            <div class='box  box-default box-solid {% if not otdata.getTareasGenerales %}hidden{%endif%}'>
+                <div class='box-header' style="background-color:white;">                                    
+                    <h6 id="hgrales" class="text-red colapsable" style="margin:0;font-weight:bold;">TAREAS GENERALES &nbsp;&nbsp; 
+                        <span class="badge bg-gray">{{ otdata.getCountTareasGenerales }}</span> </h6>
+                    <div class="pull-right box-tools">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                        </button>
+                    </div>
+                </div><!-- /.box-header -->
+                <div class='box-body no-padding'>                                    
+                    {% if otdata.getTareasGenerales %}                          
+                        {% include "AppBundle:OrdenTrabajo:prototype-ordentrabajo-tarea.html.twig" with {'tareas':otdata.tareas,'gr': 1 } %}                             
+                    {% endif %}
+                </div>      
+            </div>                             
+        </div>              
+    </div>              
+    <div class="col-md-12">       
+        <div class="col-md-12"> 
+            <h6 class="text-yellow" style="padding:9px 10px;background:#eee;font-weight:bold;margin:2px 0 0 0;">EQUIPOS ASOCIADOS
+                {% if otdata.estado=='ABIERTO' %}
+                    <a href="javascript:void(0)" style="margin:-5px;" class="btn btn-warning btn-xs addEquipoDetalle pull-right" data-url="{{ path('render_add_equipo_detalle',{'id':otdata.id,'op':'ot'}) }}"><i class="fa fa-plus"></i> Agregar Equipo</a>
+                {% endif %}
+            </h6>       
+                <table id="equipos" class="table table-hover table-bordered">                    
+                    <thead>
+                        <tr>
+                            <th style="width:3%">#</th>
+                            <th style="width:20%">Código de Barra</th>
+                            <th>Tipo - Descripción - N° de Serie - Marca - Modelo</th>
+                            <th style="width:35%">Obs. Adicionales</th>
+                            <th class="nosort aligncenter" style="width:5%">Tareas</th>
+                            <th class="nosort aligncenter" style="width:3%">&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in otdata.detalles  %}                                             
+                            <tr class="item" style='background-color:gainsboro'>
+                                <td class="ordTd">{{ loop.index }}</td>
+                                <td>{{ item.equipo.barcode }}</td>
+                                <td class="textoOT">{{ item.equipo.textoOT }}</td>    
+                                <td>{{ item.descripcion }}</td> 
+                                <td style='background-color:white'>
+                                    <button type="button" class=" btn btn-xs {% if not item.entregado %}btn-danger{%else%}btn-default{%endif%} viewTareas" style="width:100%"  title="Ver/Ocultar tareas asociadas">{{ item.tareas|length }} </button>                                                
+                                </td>  
+                                <td style='background-color:white'>
+                                    {% if not item.entregado and item.tareas|length==0 and otdata.estado=='ABIERTO' %}
+                                        {% if item.estadoOriginal and item.equipoUbicacionOriginal %}
+                                            <a class="delete-link" onclick="if(!confirm('Confirma quitar este equipo de la OT?')){return false;}"  href="{{ path('remove-equipo-asociado',{'id':item.id,'src':'OT'}) }}"><i title="Quitar el equipo" class="fa fa-trash"></i> </a>
+                                        {% else %}
+                                            <a class="modal-delete-link"  href="javascript:void(0)" data-url="{{ path('render-remove-equipo-asociado',{'id':item.id,'src':'OT'}) }}"><i title="Quitar el equipo" class="fa fa-trash"></i> </a>
+                                        {% endif %}                                                                        
+                                    {%endif%}
+                                </td>  
+                                
+                            </tr>
+                            {% if item.tareas|length>0 %}
+                                <tr class='hidden'>
+                                    <td class="no-padding" colspan="6">                         
+                                        {% include "AppBundle:OrdenTrabajo:prototype-ordentrabajo-tarea.html.twig" with {'tareas':item.tareas,'gr':0,'tipo':item.tipoRecambio} %}
+                                    </td>
+                                </tr>
+                            {% endif %}    
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div style="text-align:center;margin-bottom: 20px;">                
+                {% if otdata.reubicacionEquipo >0 %}
+                    <a href="{{ path('print_entrega_equipo',{'id':otdata.id})}}" class="btn btn-default" target="_blank" ><i class="fa fa-print"></i>&nbsp; Acta Reubicación de Equipos</a>                                                    
+                {% endif %}
+                {% if otdata.reemplazoEquipo >0 %}
+                    <a href="{{ path('print_reemplazo_equipo',{'id':otdata.id})}}" class="btn btn-default" target="_blank" ><i class="fa fa-print"></i>&nbsp; Acta Reemplazo de Equipos</a>                                                    
+                {% endif %}
+                
+                    <a href="{{ path('print_ordentrabajo_resumen', { 'id': otdata.id }) }}" target="_blank" class="btn btn-default printOTResumen"> <i class="fa fa-print"></i>&nbsp; Imprimir OT</a>
+                    <a href="{{ path('print_ordentrabajo', { 'id': otdata.id }) }}" target="_blank" class="btn btn-default printOrdentrabajo"> <i class="fa fa-print"></i>&nbsp; OT Detallada</a>
+                </div>
+                
+        </div>        
+    </div> 
+        <div class="col-md-12" style="padding-bottom:20px">                
+            {% include "admin-form-data.html.twig" with {'table':otdata} %}                                         
+        </div>
+
+    <div class="col-md-12">
+        {% if otdata.estado=='ABIERTO' %}
+            {% if app.user.access('ordentrabajo_delete') %}
+            <a href="{{ path('delete_ordentrabajo', { 'id': otdata.id }) }}" class="btn btn-app pull-left cancelar-ot" ><i class="fa fa-trash-o"></i> Cancelar OT</a>
+            {% endif %}
+        {% elseif otdata.estado=='CERRADO' %}
+            <a href="{{path('soporte_ordentrabajo_reabrir', { 'id': otdata.id })}}" class="btn btn-app"> <i class="fa fa-refresh"></i>Reabrir OT</a>
+        {% endif %}
+        <div class="btn-group pull-right">            
+            {% if otdata.estado=='ABIERTO' %}
+            <button type="submit" class="btn btn-app" data-id="{{ otdata.id }}"><i class="fa fa-save"></i> Guardar</button>
+            {% endif %}
+            <a type="button" class="btn btn-app volver" href="{{ path('soporte_requerimiento')}}"><i class="fa fa-reply"></i>Volver</a>
+        </div>
+    </div>     
+
+</div>  

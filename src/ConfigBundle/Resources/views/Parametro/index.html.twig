@@ -1,0 +1,165 @@
+{% extends "dataTableList.html.twig" %}
+{% block stylesheets %}
+    {{parent()}}
+    <link rel="stylesheet" href="{{ asset('bundles/app/jquery-ui/jquery-ui.min.css') }}">   
+    <style>
+        #configbundle_parametro_clase .radio{ display:inline-block;}
+        #configbundle_parametro_clase .radio label{ font-weight: bold;}    
+        .iradio_square-blue{margin-right: 3px;}
+    </style>
+{% endblock %}
+{% set table = app.request.attributes.get('table') %}
+
+{% block page_content %}
+<div class='row'>
+    <div class='col-md-12'>
+        <div class="box box-solid">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-3 col-sm-4">
+                        <div class="box-header">
+                            <i class="fa fa-cogs"></i>
+                            <h3 class="box-title">Parámetros</h3>
+                        </div>
+                        <!-- Navigation - folders-->
+                        <div style="margin-top: 15px;">
+                            <ul class="nav nav-pills nav-stacked" id="tab-parametro">
+                                <li class="header">Seleccionar</li>
+                                <li><a href="{{ path('configuracion_parametro',{ 'table': 'Tipo' }) }}"> Tipos Equipo/Insumo</a></li>
+                                <li><a href="{{ path('configuracion_parametro',{ 'table': 'Marca' }) }}"> Marcas / Modelos</a></li>
+                                <li><a href="{{ path('configuracion_parametro',{ 'table': 'Estado' }) }}"> Estados </a></li>
+                                <li><a href="{{ path('configuracion_parametro',{ 'table': 'ConceptoEntrega' }) }}"> Conceptos de Entrega</a></li>
+                                <li><a href="{{ path('configuracion_parametro',{ 'table': 'TipoSoporte' }) }}"> Tipos Soporte Técnico</a></li>
+                                <li><a href="{{ path('configuracion_parametro',{ 'table': 'TipoVencimiento' }) }}"> Tipos de Vencimiento</a></li>
+                            </ul>
+                        </div>
+                    </div><!-- /.col (LEFT) -->
+                    <div class="col-md-9 col-sm-8">
+
+                        <div class='box box-solid {{box_color}}'>
+                            <div class='box-header'>
+                                <h3 class='box-title'><i class="fa fa-fold"></i> &nbsp;{{title}}</h3>
+                            </div><!-- /.box-header -->
+                            <div class='box-body pad'>
+                                {% include "notification.html.twig" %}
+                                <div class="box-body table-responsive pad">
+                                        <!-- content -->                                        
+                                </div>
+                            </div>
+                        </div><!-- /.box -->
+                    </div><!-- /.col (RIGHT) -->
+                </div><!-- /.row -->
+            </div><!-- /.box-body -->
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="{{ asset('bundles/app/bootstrap.file-input.js') }}" type="text/javascript"></script>
+
+<script type="text/javascript">
+$(document).ready(function() {    
+    $('.table-responsive').html({{ html|raw }});
+    var tabla =  "{{ table }}";
+    $('.nav-pills a[href$="' + tabla + '"]').parent('li').addClass('active');
+    if( $("form[name='configbundle_parametro']").length>0 ){
+        if( tabla=='Tipo'){
+        $('#configbundle_parametro_clase').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+          });
+        }
+        if( tabla in ['Estado','ConceptoEntrega']){
+            $('#configbundle_parametro_inicial').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue',
+                increaseArea: '20%' // optional
+              });
+        }
+        if(tabla=='Marca'){
+            // logica para modelos      
+            $('input[type=file]').bootstrapFileInput();
+            $('.file-input-wrapper').removeClass('form-control');
+            $('.file-input-wrapper').addClass('btn-sm');
+            $('input[type=file]').removeClass('form-control');    
+            $('table tbody').find('.link-actions').each(function() {
+                addItemFormDeleteLink($(this));
+                
+            });   
+            $('.linkAdd').on('click', function(e) {
+                e.preventDefault();
+                tableId = $(this).data('form');
+                addNewItem($('#'+tableId+' tbody'));
+            });
+        }  
+    }    
+    $('.new,.edit').on('click',function(){
+        var loading = '<div class="overlay"><i class="fa fa-spinner fa-spin"></i></div>';
+        var tabla = "{{ table }}";
+         $('.table-responsive').html(loading);
+        var url = $(this).data('url');
+        $.ajax({
+            type: 'get',
+            url: url,
+            success: function(data) {
+                $('.table-responsive').html(data);
+                if(tabla=='Marca'){
+                    // logica para modelos
+                    $('input[type=file]').bootstrapFileInput();
+                    $('.file-input-wrapper').removeClass('form-control');
+                    $('.file-input-wrapper').addClass('btn-sm');
+                    $('input[type=file]').removeClass('form-control');                    
+                    $('table tbody').find('.link-actions').each(function() {
+                        addItemFormDeleteLink($(this));
+                    });   
+                    $('.linkAdd').on('click', function(e) {
+                        e.preventDefault();
+                        tableId = $(this).data('form');
+                        addNewItem($('#'+tableId+' tbody'));
+                    });
+                }
+                $('#configbundle_parametro_clase').iCheck({
+                    checkboxClass: 'icheckbox_square-blue',
+                    radioClass: 'iradio_square-blue',
+                    increaseArea: '20%' // optional
+                  });
+                $('#configbundle_parametro_inicial').iCheck({
+                    checkboxClass: 'icheckbox_square-blue',
+                    radioClass: 'iradio_square-blue',
+                    increaseArea: '20%' // optional
+                  });
+                $('#configbundle_parametro_nombre').focus();
+            }
+        });        
+    });
+    
+});
+function addNewItem($collectionHolder) {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/itemform/g, index);
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    addItemFormDeleteLink($collectionHolder.find('.link-actions').last());
+    $collectionHolder.find('input[type=file]').last().bootstrapFileInput();
+    $collectionHolder.find('.file-input-wrapper').last().removeClass('form-control');
+    $collectionHolder.find('.file-input-wrapper').last().addClass('btn-sm');
+    $collectionHolder.find('input[type=file]').last().removeClass('form-control'); 
+    $collectionHolder.find('input[type=text]').last().focus();
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = $('<a href="#" title="Eliminar" data-toggle="tooltip"><i class="fa fa-trash-o"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $("[data-toggle='tooltip']").tooltip();
+    $removeFormA.on('click', function(e) {
+        if ( confirm('Desea eliminar este item?') ) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+        }
+    });
+} 
+</script>
+{% endblock %}

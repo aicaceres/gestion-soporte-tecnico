@@ -1,0 +1,232 @@
+{% extends "dataTableList.html.twig" %}
+
+{% if entity.id  %}
+    {% set pagetitle= 'Editar datos'%}
+{% else %}
+    {% set pagetitle= 'Alta de Nuevo Insumo' %}
+{%endif%}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; {{pagetitle}}  </h3>
+                    {% if entity.id and app.user.access('view_logs') %}
+                    <div class="pull-right box-tools">
+                        <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
+                            data-id="{{entity.id}}" data-url="{{path('get_insumo_logs')}}"  >      <i class="fa fa-history"></i></button>                      
+                    </div>
+                    {% endif %}
+                </div><!-- /.box-header -->
+                {{ form_start(form) }}
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}
+                    
+                    <div class="row">                      
+                        <div class="col-md-12">
+                            <div class="col-md-4 form-group">
+                                {{ form_label(form.tipo) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.tipo, { 'attr': {'class' : 'select2' } }) }}                                
+                                    {% if app.user.access('configuracion_parametro') %}
+                                        <span class="input-group-btn" style="padding-left: 5px;">
+                                            <button data-toggle="tooltip" title="Agregar Tipo Insumo" type="button" data-tabla="Tipo" data-tipo="I" data-url="{{path('render_add_parametro')}}"
+                                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {{ form_errors(form.tipo) }}
+                            </div>
+                            <div class="col-md-4 form-group">
+                                {{ form_label(form.marca) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.marca, { 'attr': {'urlModelos' : path('select_modelos'),'class' : 'select2' } }) }}
+                                    {% if app.user.access('configuracion_parametro') %}
+                                        <span class="input-group-btn" style="padding-left: 5px;">
+                                            <button data-toggle="tooltip" title="Agregar Marca" type="button" data-tabla="Marca" data-url="{{path('render_add_parametro')}}"
+                                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                {{ form_errors(form.marca) }}
+                            </div>
+                            <div class="col-md-4 form-group">
+                                {{ form_label(form.modelo) }}
+                                <div class="input-group">
+                                    {{ form_widget(form.modelo, { 'attr': {'class' : 'select2' } }) }}                                
+                                    {% if app.user.access('configuracion_parametro') %}
+                                        <span class="input-group-btn" style="padding-left: 5px;">
+                                            <button data-toggle="tooltip" title="Agregar Modelo" type="button" data-tabla="Modelo" data-url="{{path('render_add_parametro')}}"
+                                                    class="btn btn-default btn-flat btn-xs addParametro"><i class="fa fa-plus"></i></button>
+                                        </span>
+                                    {% endif %}                                
+                                </div>
+                                {{ form_errors(form.modelo) }}
+                            </div>
+
+                        </div>                           
+                        <div class="col-md-12">
+                            <div class="col-md-3">
+                                {{ form_row(form.barcode, { 'attr': {'autofocus':'autofocus' } }) }}
+                            </div> 
+                            <div class="col-md-2">
+                                {{ form_row(form.stockMinimo) }}
+                            </div>                                                                                                 
+                        </div>                           
+                    </div>                    
+                    {% include "admin-form-data.html.twig" with {'table':entity} %}  
+                    {% include "admin-form-deleted-data.html.twig" with {'table':entity} %}
+                    {% if entity.id %}
+                    <br> 
+                    <div class="col-md-8">    
+                        <div class="box-group" id="accordion">                               
+                            <div class="panel box box-primary" id="accHistorico">
+                                <div class="box-header with-border">
+                                    <i class="fa fa-history"></i>
+                                    <h3 class="box-title">Histórico de Movimientos</h3>
+                                    <div class="box-tools pull-right">                
+                                        <button type="button" class="btn btn-box-tool bg-default btn-sm" data-toggle="collapse"  href="#achistorico"><i class="fa fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="achistorico" class="panel-collapse collapse in">
+                                    <div class="box-body">
+
+                                        <table style="font-size:12px" id="tablelist" class="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th class="no-sort" style="text-align:center;width:5%">I/E</th>
+                                                    <th class="no-sort">Fecha hora</th>
+                                                    <th class="no-sort">Depósito</th>
+                                                    <th class="no-sort">Movimiento</th>
+                                                    <th class="no-sort">N° Comprob.</th>
+                                                    <th class="no-sort">Cantidad</th>
+                                                    <th class="no-sort">Usuario</th>                               
+                                                </tr>
+                                            </thead>
+                                            <tbody >
+                                                {% for hist in entity.stockHistorico|reverse %}
+                                                    <tr>  
+                                                        <td style="text-align:center;">{% if hist.signo == '+'%}
+                                                            <i class="fa fa-plus"></i>
+                                                        {%else%}
+                                                            <i class="fa fa-minus"></i>
+                                                            {%endif%}
+                                                            </td>
+                                                            <td><span class="hidden">{{ hist.created|date('YmdH:i') }}</span>{{ hist.created|date('d-m-Y H:i') }}</td>                                                                            
+                                                            <td>{{ hist.deposito }}</td>
+                                                            <td>{{hist.tipo|capitalize}} </td>
+                                                            <td>{% if hist.tipo=='SOPORTE' %}
+                                                                    {% if hist.equipo %} {{ hist.equipo.textoCompleto }} {% endif %}
+                                                                    {% endif %}
+                                                                {% if hist.urlMovimiento %} <a href="javascript:void(0)" class="view-historico" data-nro="{{ hist.nroComprobante }}" data-url="{{ hist.urlMovimiento }}" data-toggle="tooltip" title="Ver Movimiento">{{ hist.nroComprobante }}</a> {% endif %}                                                                 
+                                                            </td>
+                                                            <td style="text-align:right;padding-right: 15px;">{{hist.cantidad|number_format(0)}}</td>
+                                                            <td>{{hist.createdBy.username}}</td>                               
+                                                        </tr>
+                                                        {% endfor %}
+                                                        </tbody>
+                                                    </table>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>                            
+                                </div> 
+                    <div class="col-md-4">    
+                        <div class="box-group" id="accordion">                               
+                            <div class="panel box box-warning" id="accStock">
+                                <div class="box-header with-border">
+                                    <i class="fa fa-cubes"></i>
+                                    <h3 class="box-title">Stock Actual por Depósito</h3>
+                                    <div class="box-tools pull-right">                
+                                        <button type="button" class="btn btn-box-tool bg-default btn-sm" data-toggle="collapse"  href="#acstock"><i class="fa fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="acstock" class="panel-collapse collapse in">
+                                    <div class="box-body">
+                                                                                  
+                                            
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Depósito</th>
+                                                            <th style="width: 10%">Cantidad</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>  
+                                                        {% for deposito in depositos %}
+                                                        <tr>
+                                                            <td>{{ deposito.nombreCompleto }}</td>
+                                                            <td class="number" style="padding-right:14px">{{ entity.stockByDeposito(deposito.id)|number_format(0,'','.') }}</td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th style="text-align:right">Stock Total:</th>
+                                                            <th style="text-align:right;padding-right:14px">{{ entity.stockTotal|number_format(0,'','.') }}</th>                                                           
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="color:red">{% if entity.stockMinimo > entity.stockTotal %}<small>Cantidad por debajo del mínimo: {{ (entity.stockMinimo - entity.stockTotal)|number_format(0,'','.') }}</small> {% endif %}</th>                                                            
+                                                            <th> <a target="_blank" href="{{ path('insumo_historico') }}?insumoId={{ entity.id }}&desde=01-01-2018" title="Ver movimientos de stock" ><small>Movimientos </small></a> </th>
+                                                        </tr>    
+                                                    </tfoot>
+                                                </table> 
+
+                                         
+                                                                           
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                            
+                    </div>                                                                
+                    {% endif %}
+                </div>                                  
+                <div class="box-footer">
+                    {% if entity.id  %}
+                        <a type="button" class="btn btn-app delete" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Eliminar</a>
+                    {%endif%}
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        {% if not entity.id  %}
+                            <button type="submit" class="btn btn-app" id="savenew"><i class="fa fa-save"></i> Guardar y Nuevo</button>
+                        {%endif%}
+                        <a type="button" class="btn btn-app" href="{{ path('insumo_adm')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>     
+                <div style="display:none">    
+                    {{ form_end(form) }}
+                </div>                
+                {% if entity.id  %}
+                    {{ form(delete_form) }}
+                {%endif%}
+            </div><!-- /.box -->
+        </div><!-- /.col-->        
+    </div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {   
+   $('#appbundle_insumo_marca').change();
+   $('[type="submit"]').on('click',function(){
+    if( $(this).attr('id') == 'savenew')
+        $('#appbundle_insumo_savenew').val('S');
+    else
+        $('#appbundle_insumo_savenew').val('N');    
+   });
+   
+   $('.panel').on('show.bs.collapse', function () {
+        var icon = $(this).find('button i');
+        icon.removeClass('fa-plus').addClass('fa-minus');
+    });
+    $('.panel').on('hide.bs.collapse', function () {
+        var icon = $(this).find('button i');
+        icon.removeClass('fa-minus').addClass('fa-plus');
+    });    
+     
+});
+</script>    
+{% endblock %}

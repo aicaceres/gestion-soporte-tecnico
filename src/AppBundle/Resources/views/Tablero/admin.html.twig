@@ -1,0 +1,298 @@
+{% extends 'base.html.twig' %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}
+<div class="row">
+    <div class="col-md-12">
+    <!-- Requerimientos sin asignar -->
+    {% include "AppBundle:Tablero:box-reqsinasignar.html.twig" %}
+    </div>
+    <div class="col-md-8">
+    <!-- Tareas de los técnicos -->
+    {% if app.user.rol.admin %}
+        {% include "AppBundle:Tablero:box-tecnicos.html.twig" %}
+    {% else %}
+        {% include "AppBundle:Tablero:ot-abiertas.html.twig" %}
+    {% endif %}
+    </div>
+    <div class="col-md-4">
+    <!-- monitoreo -->
+    {% if app.user.access('monitoreo_estadored') %}
+        {% include "AppBundle:Tablero:box-monitoreo.html.twig" %}                
+    {% endif %}        
+    {% if app.user.access('monitoreo_vencimiento') %}
+        {% include "AppBundle:Tablero:box-vencimiento.html.twig" %}
+    {% endif %}    
+    </div>
+    
+     {% if app.user.access('reportes_soporte') %}
+    <div class="col-md-12">    
+    {% include "AppBundle:Tablero:grafico-por-tecnico.html.twig" %}
+    </div>        
+    {% endif %}
+</div>
+
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script src="{{ asset('bundles/app/chart-js/dist/Chart.min.js') }}" type="text/javascript"></script>         
+<script src="{{ asset('bundles/app/chart-js/dist/chartjs-plugin-labels.js') }}" type="text/javascript"></script>    
+<script type="text/javascript">
+    let xmlAbort = false
+    let test = 0
+$(document).ready(function() {    
+    $('body').on('click','.view-ot',function(){
+        var options = {
+           url: $(this).data('url'),
+           title:'Orden de Trabajo N° '+$(this).data('nro'),
+           size: eModal.size.xl,
+           buttons: [               
+               {text: 'Cerrar', style: 'success', close: true }
+           ]
+       };
+       eModal.ajax(options);
+    });
+    $('body').on('click','.view-req',function(){
+        var options = {
+           url: $(this).data('url'),
+           title:'Requerimiento N° '+$(this).data('nro'),
+           size: eModal.size.xl,
+           buttons: [               
+               {text: 'Cerrar', style: 'success', close: true }
+           ]
+       };
+       eModal.ajax(options);
+    });
+$('.asignar-req').on('click',function(){
+      tr = $(this).parent().parent();            
+      var options = {
+           url: $(this).data('url'),
+           title:'Requerimiento',
+           subtitle: ' N°'+$(this).data('nro'),
+           size: eModal.size.sm,
+           buttons: [
+               {text: 'Asignar', style: 'success', close: true, 
+                   click: function(){    
+                       data = { req:$('#reqId').val(), tec:$('#tecId').val() };
+                       $.post("{{path('ajax_asignar_requerimiento')}}", data, function(data){
+                            if(data==='ERROR'){
+                                alert('No puedo realizarse la acción.');
+                            }else{                                
+                                alert('Se ha generado la OT N°'+data);
+                                tr.remove()
+                            }
+                        });
+                   } },
+               {text: 'Cancelar', style: 'danger', close: true }
+           ]
+       };
+       eModal.ajax(options);
+  });      
+  
+{% if app.user.access('monitoreo') %}  
+    $('body').on('click','.init',function(){ 
+        $('.abort').removeClass('hidden')
+        $(this).addClass('hidden')
+        $('.testipubic').each(function(){ $(this).click() })
+    })
+    $('body').on('click','.testipubic',function(){  
+        xmlAbort = false
+        var spin = $(this)
+        // agregar spinner y cambiar color mientras se testea
+       // btn.removeClass('btn-info').addClass('bg-orange')        
+        spin.removeClass('hidden') 
+        // armar semafono
+        let tr = $(this).closest('tr')
+        let semaforo = tr.find('.semaforo')     
+        semaforo.find('span').addClass('cero')
+        semaforo.find('span').html(0)          
+        $.ajax({
+                url: "testUbicIP",
+                method: "GET",
+                data: { ubic : spin.data('id') },
+                dataType: "json"
+            }).done(function(data){    
+                array = data.map(function(obj){ return obj.ip})
+                test += array.length                
+                recursivelyAjax( array,semaforo,spin )
+            })
+                    
+    });    
+    $('body').on('click','.abort',function(){ 
+        xmlAbort = true           
+        test = 0
+    });
+{% endif %} 
+    {% if app.user.rol.admin %}        
+        //grafico por periodo
+        var otxtecnico = new Chart($('#canvas-otxtecnico'), {
+            type: 'bar',
+            data: {
+                labels: {{ otxtecnico.xtecnico.label|json_encode|raw}},
+                datasets: {{ otxtecnico.xtecnico.dataset|json_encode|raw}}
+            },options: {
+                layout: {
+                    padding: { top: 20, bottom:20 }
+                },    
+                tooltips: {
+                    mode: 'index',
+                    callbacks: {
+                            // Use the footer callback to display the sum of the items showing in the tooltip
+                            title: function(tooltipItems, data) {                                
+                                var sum = 0;
+                                var title = '';
+                                tooltipItems.forEach(function(tooltipItem) {                                    
+                                    title = data.labels[tooltipItem.index]
+                                    sum += parseInt(data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]);
+                                });
+                                return title+ ':  ' + sum;
+                            },
+                    }
+                },
+                legend:{
+                    display:true,
+                    position:'bottom',
+                    fontSize:10
+                },        
+                animation : {
+                    onComplete : function(){    
+                      //  $('#grafico_eqxIncidencia').val(bareqxincidencia.toBase64Image());
+                    }
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true                    
+                        }
+                    }],
+                    xAxes: [{
+                        gridLines: { display:false}
+                    }]
+                },
+                plugins: {
+                  labels: [{ 
+                        precision:2,
+                        fontSize:9,         
+                        fontColor:'#333',         
+                        showActualPercentages: true                
+                    }]
+                }
+            }
+        });
+        // grafico anual
+        var otxtecnicoanual = new Chart($('#canvas-otxtecnicoanual'), {
+            type: 'bar',
+            data: {
+                labels: {{ otxtecnico.anual.label|json_encode|raw}},
+                datasets: {{ otxtecnico.anual.dataset|json_encode|raw}}
+            },options: {
+                layout: {
+                    padding: { top: 20, bottom:20 }
+                },    
+                tooltips: {
+                    mode: 'index',
+                    callbacks: {
+                            // Use the footer callback to display the sum of the items showing in the tooltip
+                            title: function(tooltipItems, data) {                                
+                                var sum = 0;
+                                var title = '';
+                                tooltipItems.forEach(function(tooltipItem) {                                    
+                                    title = data.labels[tooltipItem.index]
+                                    sum += parseInt(data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]);
+                                });
+                                return title+ ':  ' + sum;
+                            },
+                    }					
+                },
+                legend:{
+                    display:true,
+                    position:'bottom',
+                    fontSize:10,
+                    labels:{
+                        usePointStyle:true
+                    }                    
+                },        
+                animation : {
+                    onComplete : function(){    
+                      //  $('#grafico_eqxIncidencia').val(bareqxincidencia.toBase64Image());
+                    }
+                },
+                scales: {
+                    yAxes: [{                            
+                        ticks: {                            
+                            beginAtZero: true                    
+                        }
+                    }],
+                    xAxes: [{
+                        gridLines: { display:false}
+                    }]
+                },
+                plugins: {
+                  labels: [{                          
+                        render: function (args) {                             
+                            var tot = {{ otxtecnico.anual.totales|json_encode|raw}} 
+                            var perc = (args.value*100)/tot[args.index].cantidad                            
+                            return (perc.toFixed(0)>0) ? perc.toFixed(0)+'%' : '0'
+                          },
+                        precision:2,
+                        fontSize:9,         
+                        fontColor:'#333',         
+                        showActualPercentages: false
+                    }]
+                }
+            }
+        });
+        $('#refrescargrafico').on('click',function(){               
+            url = "{{path('get-data-otxtecnico')}}"
+            data = $('#searchform').serialize()
+            $.getJSON(url, data, function(data){
+                   otxtecnico.data.labels = data.xtecnico.label         
+                   otxtecnico.data.datasets = data.xtecnico.dataset         
+                   otxtecnico.update()
+            })
+        })
+{% endif %} 
+
+
+});
+{% if app.user.access('monitoreo') %}  
+function recursivelyAjax(array,semaforo,spin){    
+    if( xmlAbort) return false
+    $.ajax({
+            url:'testIP',
+            method: 'GET',
+            data: {'ip':array.shift(),'intentos':1}                        
+        }).done(function(data){
+            salida = $(data)
+            bg = $(salida[10]).val()
+            semitem = semaforo.find('span.'+bg)
+            semval = parseInt(semitem.html()) + 1
+            if(semval>0){ 
+                semitem.removeClass('cero')
+            }
+            semitem.html( semval  ) 
+            --test            
+            if( array.length==0 || xmlAbort ) {
+                   spin.addClass('hidden')
+                   restaurarEstado()
+                   return false
+            }else{                 
+                recursivelyAjax(array,semaforo,spin)
+            }
+        })    
+}
+
+function restaurarEstado(){
+    if(xmlAbort){
+        $('.semaforo').find('span').addClass('cero')
+        $('.semaforo').find('span').html(0)        
+    }
+    if(test<=0){
+        // volver los controles a su estado original
+        $('.init').removeClass('hidden')        
+        $('.abort').addClass('hidden')        
+    }
+}
+{% endif %}
+</script>    
+{% endblock %}

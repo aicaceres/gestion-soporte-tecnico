@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=UTF-8" />
+   </head>
+   <style>
+       .table-resumen{
+        font-size:13px;
+    }    
+    .table-resumen td:not(:first-child),.table-resumen th:not(:first-child){
+        text-align: right;
+        padding:2px 10px 2px 2px;
+        vertical-align: middle;
+    }
+    .tipoS td,.tipoM td{
+        font-weight: bold;
+    }
+    .tipoS{
+        background-color: antiquewhite;
+    }
+    .tipoM td:first-child{
+        padding-left: 15px;
+    }
+    .tipoM{
+        background-color: aliceblue;
+    }
+    .tipoI td:first-child{
+        padding-left: 25px;
+    }
+    .tipoT,.table-resumen th{
+        font-size: 14px;
+        font-weight: bold;
+        background-color: lightgray;
+    }
+   </style>
+   <body  >     
+      <table>
+          <tr>
+              <th>Reporte de Equipos por Tipo de Incidencia y Sector</th>
+          </tr>
+        </table>  
+        <table>  
+            <tr><td>Ubicaciones: {{ filtro.ubicaciones|trim }}</td></tr>
+            <tr><td>Edificios: {{ filtro.edificios|trim }} </td></tr>
+            <tr><td>Departamentos: {{ filtro.departamentos|trim }} </td></tr>
+            <tr><td>Tipos de Incidencias: {{ filtro.tiposSoporte }}</td></tr>
+            <tr><td>Período: {{ filtro.desde|date('d/m/Y') }} - {{ filtro.hasta|date('d/m/Y') }}</td></tr>
+            </tr>
+        </table>  
+            
+        <table class="table-resumen">
+            <tr>
+                <th> Tipo de Incidencia > Area Solicitante > Tipo de equipo </th>
+                <th> Finalizado </th>
+                <th> Asignado </th>
+                <th> Sin Asignar </th>
+                <th> Total </th>
+            </tr>  
+            {% set totitem=0 %}                    
+            {% for item in datos.tabla %}                         
+                {% set totitem = item['FINALIZADO']+item['ASIGNADO']+item['SIN ASIGNAR'] %}
+                <tr class='tipo{{item.tipo}}'>                          
+                    <td> {{ item.nombre|upper }} </td>
+                    <td> {{ item['FINALIZADO'] }}</td>
+                    <td> {{ item['ASIGNADO'] }}</td>
+                    <td> {{ item['SIN ASIGNAR'] }}</td>
+                    <td>{{ totitem }}</td>
+                </tr>
+            {% endfor %}
+        </table>    
+
+   </body>
+</html>

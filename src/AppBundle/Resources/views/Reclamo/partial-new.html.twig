@@ -1,0 +1,47 @@
+<div class='col-md-12 no-padding'>
+    <div class='box box-solid {{box_color}}'>
+        <div class='box-header'>
+            <h3 class='box-title'><i class="fa fa-exclamation-triangle"></i> &nbsp; Nuevo Reclamo  </h3>                
+        </div><!-- /.box-header -->
+        {{ form_start(form) }}
+        <div class='box-body'>
+            {% include "form-notification.html.twig" %}
+            <div class="row">
+                <div class="col-md-12">
+                    <fieldset>
+                        {% if form.tipoProveedor is defined %}
+                        <div class="col-md-4">
+                            {{ form_row(form.tipoProveedor) }}
+                        </div>
+                        {% endif %}
+                        <div class="col-md-2">
+                            {{ form_row(form.fecha) }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form_row(form.nroReferencia, { 'attr': {'autofocus':'autofocus' } }) }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form_row(form.referente) }}
+                        </div>                                                   
+                    </fieldset>                        
+                </div>  
+                <div class="col-md-12">
+                    <fieldset>                        
+                        <div class="col-md-12">
+                            {{ form_row(form.detalle, { 'label': 'Detalle:' }) }}
+                        </div>                                 
+                    </fieldset>                        
+                </div>  
+            </div>                                  
+            <div class="box-footer">
+                <div class="btn-group pull-right">
+                    <button type="button" class="btn btn-app saveReclamo"><i class="fa fa-save"></i> Guardar</button>
+                    <a type="button" class="btn btn-app cancelReclamo" href="#"><i class="fa fa-reply"></i> Cancelar</a>
+                </div>
+            </div>     
+            <div style="display:none">    
+                {{ form_end(form) }}
+            </div>                
+        </div><!-- /.box -->
+    </div><!-- /.col-->        
+</div>

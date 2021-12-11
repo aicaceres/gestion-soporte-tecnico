@@ -1,0 +1,9 @@
+<tr>
+    <td>{{ form_widget(item.nombre, { 'attr': {'class' : 'form-control' } }) }}
+    {{ form_errors(item.nombre) }}</td>
+    <td  style="width: 5%"></td>
+    <td>    {{ form_widget(item.file) }}
+            {{ form_errors(item.file) }}
+    </td>
+    <td class="link-actions"></td>
+</tr>
