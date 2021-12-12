@@ -12,17 +12,17 @@ class SoporteRepository extends EntityRepository {
      * Listado de orden de trabajo según criterio
      */
 
-    public function findOTByCriteria($data) {
+    public function findOTByCriteria($data, $user) {
         $query = $this->_em->createQueryBuilder();
         $query->select('o')
                 ->from('AppBundle\Entity\OrdenTrabajo', 'o')
                 ->innerJoin('o.requerimiento', 'r')
+                ->innerJoin('r.solicitante', 's')
+                ->innerJoin('s.edificio', 'e')
                 ->where("1=1");
 
         if ($data['idUbicacion']) {
-            $query->innerJoin('r.solicitante', 's')
-                    ->innerJoin('s.edificio', 'e')
-                    ->innerJoin('e.ubicacion', 'u')
+            $query->innerJoin('e.ubicacion', 'u')
                     ->andWhere('u.id=' . $data['idUbicacion']);
             if ($data['idEdificio']) {
                 $query->andWhere('e.id=' . $data['idEdificio']);
@@ -53,6 +53,11 @@ class SoporteRepository extends EntityRepository {
                 $cadena = " o.fechaOrden <= '" . UtilsController::toAnsiDate($data['hasta']) . " 23:59:59'";
                 $query->andWhere($cadena);
             }
+        }
+        if (!$user->getRol()->getAdmin()) {
+            // restringuir segun permiso
+            $query->innerJoin('e.usuarios', 'us')
+                    ->andWhere('us.id=' . $user->getId());
         }
         return $query->getQuery()->getResult();
     }
@@ -101,7 +106,6 @@ class SoporteRepository extends EntityRepository {
             $query->innerJoin('e.usuarios', 'us')
                     ->andWhere('us.id=' . $user->getId());
         }
-
         return $query->getQuery()->getResult();
     }
 

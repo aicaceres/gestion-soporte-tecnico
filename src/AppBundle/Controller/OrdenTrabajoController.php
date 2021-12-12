@@ -87,9 +87,14 @@ class OrdenTrabajoController extends Controller {
             $tecnicos = $em->getRepository('ConfigBundle:Usuario')->findTecnicos();
         }
         $session->set('filtro_ordentrabajo', $filtro);
-        $entities = $em->getRepository('AppBundle:OrdenTrabajo')->findOTByCriteria($filtro);
+        $entities = $em->getRepository('AppBundle:OrdenTrabajo')->findOTByCriteria($filtro, $this->getUser());
 
-        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+        if ($this->getUser()->getRol()->getAdmin()) {
+            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+        }
+        else {
+            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($this->getUser()->getId());
+        }
         $edificios = null;
         $departamentos = null;
         $tipoIncidencias = $em->getRepository('ConfigBundle:TipoSoporte')->findAll();

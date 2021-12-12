@@ -159,7 +159,25 @@ $(document).ready(function() {
        var keycode = (e.keyCode ? e.keyCode : e.which);
         if(keycode == '13' && !$(e.target).is("textarea") ){ e.preventDefault(); }
     }); 
+    
+    $('.edificio_selector').on('change',function(){
+        $('#appbundle_requerimiento_tecnico option').remove();
+        const selector = $('#appbundle_requerimiento_tecnico');        
+        // restringir los tecnicos habilitados
+        $.getJSON("{{path('find_tecnicos_habilitados')}}",{requid: $(this).val()}, function(data){
+               selector.html('<option>Seleccionar...</option>');
+
+                for (var i = 0, total = data.length; i < total; i++) {
+                    selector.append('<option value="' + data[i].id + '" >' + data[i].nombre + '</option>');
+                }
+           });        
+    });
+    $(".ubicacion_selector").on('change',function(){
+        $('#appbundle_requerimiento_tecnico option').remove();
+    });
+    
     $(".ubicacion_selector").change();         
+    $('.edificio_selector').change();         
 
        // Get the container who holds the collection
     $dataHolder = $('.table tbody');

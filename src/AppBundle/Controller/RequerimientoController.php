@@ -674,7 +674,7 @@ class RequerimientoController extends Controller {
     public function renderAsignarRequerimiento(Request $request) {
         $em = $this->getDoctrine()->getManager();
         $requerimiento = $em->getRepository('AppBundle:Requerimiento')->find($request->get('id'));
-        $tecnicos = $em->getRepository('ConfigBundle:Usuario')->findTecnicos();
+        $tecnicos = $em->getRepository('ConfigBundle:Usuario')->findTecnicosHabilitados($requerimiento->getSolicitante()->getEdificio()->getId());
         $html = $this->renderView('AppBundle:Requerimiento:partial-asignar-tecnico.html.twig',
                 array('requerimiento' => $requerimiento, 'tecnicos' => $tecnicos));
         return new Response($html);

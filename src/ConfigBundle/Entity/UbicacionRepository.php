@@ -9,19 +9,18 @@ use Doctrine\ORM\EntityRepository;
 class UbicacionRepository extends EntityRepository {
 
     public function findByUbicacionId($ubicacion_id, $user = null) {
-        $str = '';
+        $query = $this->_em->createQueryBuilder();
+        $query->select('e')
+                ->from('ConfigBundle\Entity\Edificio', 'e')
+                ->innerJoin('e.usuarios', 'us')
+                ->innerJoin('e.ubicacion', 'u')
+                ->where("u.id = :ubicacion_id")
+                ->distinct()
+                ->setParameter('ubicacion_id', $ubicacion_id);
         if (!$user->getRol()->getAdmin()) {
-            $str = 'AND us.id = ' . $user->getId();
+            $query->andWhere('us.id=' . $user->getId());
         }
-        $query = $this->getEntityManager()->createQuery("
-        SELECT edificio
-        FROM ConfigBundle:Edificio edificio
-        INNER JOIN edificio.usuarios us
-        LEFT JOIN edificio.ubicacion ubicacion
-        WHERE ubicacion.id = :ubicacion_id
-        " . $str)->setParameter('ubicacion_id', $ubicacion_id);
-
-        return $query->getArrayResult();
+        return $query->getQuery()->getArrayResult();
     }
 
     public function findByEdificioId($edificio_id) {

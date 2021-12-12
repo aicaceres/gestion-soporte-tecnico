@@ -88,15 +88,16 @@ $(document).ready(function() {
     {% if entity.rol.nombre == 'ROLE_ADMIN' %}            
        $('#configbundle_usuario_activo').iCheck('check'); 
        $('#configbundle_usuario_activo').parent().parent().hide();  
-       // no mostrar el select de edificios al administrador.. puede ver todos.       
-       //$('#configbundle_usuario_edificios').parent().hide();       
+       // cargar todos los edificios.      
+       $('#configbundle_usuario_edificios option').prop('selected','true');       
     {% endif %}
     $('#configbundle_usuario_edificios').select2();   
     $('#configbundle_usuario_rol').on('change', function (e) {
+        console.log( $('#configbundle_usuario_rol').val() )
         if( $('#configbundle_usuario_rol').val()==1 ){
-            $('#configbundle_usuario_edificios').parent().hide();
+            $('#configbundle_usuario_edificios option').prop('selected','true').trigger('change');
         }else{
-            $('#configbundle_usuario_edificios').parent().show(); 
+            $('#configbundle_usuario_edificios').val('').trigger('change');  
         }
     });
     

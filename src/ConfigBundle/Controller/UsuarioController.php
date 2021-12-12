@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use ConfigBundle\Controller\UtilsController;
 use ConfigBundle\Entity\Usuario;
 use ConfigBundle\Form\UsuarioType;
@@ -95,6 +96,17 @@ class UsuarioController extends Controller {
             'entity' => $entity,
             'form' => $form->createView()
         );
+    }
+
+    /**
+     * @Route("/findTecnicosHabilitados", name="find_tecnicos_habilitados")
+     * @Method("GET")
+     */
+    public function findTecnicosHabilitados(Request $request) {
+        $reqId = $request->get('requid');
+        $em = $this->getDoctrine()->getManager();
+        $tecnicos = $em->getRepository('ConfigBundle:Usuario')->findTecnicosHabilitados($reqId);
+        return new JsonResponse($tecnicos);
     }
 
     /**
