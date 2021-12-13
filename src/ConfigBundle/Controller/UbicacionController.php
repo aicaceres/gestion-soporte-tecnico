@@ -308,7 +308,7 @@ class UbicacionController extends Controller {
     public function edificiosAction(Request $request) {
         $ubicacion_id = $request->request->get('ubicacion_id');
         $em = $this->getDoctrine()->getManager();
-        $edificios = $em->getRepository('ConfigBundle:Ubicacion')->findByUbicacionId($ubicacion_id, $this->getUser());
+        $edificios = $em->getRepository('ConfigBundle:Ubicacion')->findByUbicacionId($ubicacion_id, $this->getUser()->getId());
         return new JsonResponse($edificios);
     }
 

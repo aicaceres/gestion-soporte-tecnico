@@ -33,7 +33,7 @@ class EquipoRepository extends EntityRepository {
      * Listado de equipos según criteria
      */
 
-    public function findByCriteria($data, $user = null) {
+    public function findByCriteria($data) {
         $query = $this->_em->createQueryBuilder();
         $query->select('e')
                 ->from('AppBundle\Entity\Equipo', 'e')
@@ -45,10 +45,7 @@ class EquipoRepository extends EntityRepository {
                     ->andWhere(' t.id IN (:tipos)')
                     ->setParameter('tipos', $data['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
-        /* if ($data['idTipo']) {
-          $query->innerJoin('e.tipo', 't')
-          ->andWhere('t.id=' . $data['idTipo']);
-          } */
+
         if ($data['idMarca']) {
             $query->innerJoin('e.marca', 'ma')
                     ->andWhere('ma.id=' . $data['idMarca']);
@@ -110,8 +107,6 @@ class EquipoRepository extends EntityRepository {
                 $query->andWhere($cadena);
             }
         }
-        //var_dump($query->getQuery()->getSQL());
-        //die;
         return $query->getQuery()->getResult();
     }
 
@@ -119,7 +114,7 @@ class EquipoRepository extends EntityRepository {
      * Obtiene los combos filtrados y ordenados
      */
 
-    public function findCombosByCriteria($data, $select, $order, $tabla = '', $user = null) {
+    public function findCombosByCriteria($data, $select, $order, $tabla = '', $userId = null) {
         $query = $this->_em->createQueryBuilder();
         $query->select($select)
                 ->from('AppBundle\Entity\Equipo', 'e')
@@ -133,17 +128,15 @@ class EquipoRepository extends EntityRepository {
                 ->innerJoin('ed.ubicacion', 'u')
                 ->where('eu.actual=1')
                 ->orderBy($order);
-        if (!$user->getRol()->getAdmin()) {
+        if ($userId) {
             $query->innerJoin('ed.usuarios', 'us')
-                    ->andWhere('us.id=' . $user->getId());
+                    ->andWhere('us.id=' . $userId);
         }
 
         if ($tabla != 'tipo') {
             if ($data['selTipos']) {
                 $query->andWhere(' t.id IN (:tipos)')
                         ->setParameter('tipos', $data['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
-
-                // $query->andWhere('t.id=' . $data['idTipo']);
             }
         }
         if ($tabla != 'marca') {
@@ -257,7 +250,7 @@ class EquipoRepository extends EntityRepository {
      * Resumen de equipos por tipo
      */
 
-    public function findSummaryByCriteria($data, $user = null) {
+    public function findSummaryByCriteria($data, $userId = null) {
         $query = $this->_em->createQueryBuilder();
         $query->select('COUNT(e.id) cantidad, t.nombre')
                 ->from('AppBundle\Entity\Equipo', 'e')
@@ -276,9 +269,7 @@ class EquipoRepository extends EntityRepository {
             $query->andWhere(' t.id IN (:tipos)')
                     ->setParameter('tipos', $data['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
-        /* if ($data['idTipo']) {
-          $query->andWhere('t.id=' . $data['idTipo']);
-          } */
+
         if ($data['idMarca']) {
             $query->andWhere('ma.id=' . $data['idMarca']);
             if ($data['idModelo']) {
@@ -333,10 +324,9 @@ class EquipoRepository extends EntityRepository {
                 $query->andWhere($cadena);
             }
         }
-
-        if (!$user->getRol()->getAdmin()) {
+        if ($userId) {
             $query->innerJoin('ed.usuarios', 'us')
-                    ->andWhere('us.id=' . $user->getId());
+                    ->andWhere('us.id=' . $userId);
         }
 
         return $query->getQuery()->getArrayResult();
@@ -346,7 +336,7 @@ class EquipoRepository extends EntityRepository {
      * Listado de equipos según criteria
      */
 
-    public function findSqlByCriteria($data, $salida = 'SQL', $searchItem = null, $user = null) {
+    public function findSqlByCriteria($data, $salida = 'SQL', $searchItem = null, $userId = null) {
         $query = $this->_em->createQueryBuilder();
         if ($salida == 'SQL') {
             $query->select('e.barcode,t.nombre,e.nroSerie,e.nombre, ma.nombre, mo.nombre,es.nombre,u.abreviatura,ed.nombre,d.nombre,p.nombre,e.verificado ');
@@ -443,9 +433,9 @@ class EquipoRepository extends EntityRepository {
             $query->andWhere($searchQuery);
         }
 
-        if (!$user->getRol()->getAdmin()) {
+        if ($userId) {
             $query->innerJoin('ed.usuarios', 'us')
-                    ->andWhere('us.id=' . $user->getId());
+                    ->andWhere('us.id=' . $userId);
         }
 
         if ($salida == 'SQL') {
@@ -554,17 +544,17 @@ class EquipoRepository extends EntityRepository {
      * PARA SEARCH DATATABLES
      */
 
-    public function count($user = null) {
+    public function count($userId = null) {
         $query = $this->_em->createQueryBuilder();
         $query->select("count(e.id)")
                 ->from('AppBundle\Entity\Equipo', 'e');
 
-        if (!$user->getRol()->getAdmin()) {
+        if ($userId) {
             $query->innerJoin('e.ubicaciones', 'eu')
                     ->innerJoin('eu.departamento', 'd')
                     ->innerJoin('d.edificio', 'ed')
                     ->innerJoin('ed.usuarios', 'us')
-                    ->andWhere('us.id=' . $user->getId());
+                    ->andWhere('us.id=' . $userId);
         }
 
         return $query->getQuery()->getSingleScalarResult();
@@ -719,23 +709,23 @@ class EquipoRepository extends EntityRepository {
      * PARA LIST DATATABLES
      */
 
-    public function listcount($user = null) {
+    public function listcount($userId = null) {
         $query = $this->_em->createQueryBuilder();
         $query->select("count(e.id)")
                 ->from('AppBundle\Entity\Equipo', 'e');
-        if (!$user->getRol()->getAdmin()) {
+        if ($userId) {
             $query->innerJoin('e.ubicaciones', 'eu')
                     ->innerJoin('eu.departamento', 'd')
                     ->innerJoin('d.edificio', 'ed')
                     ->innerJoin('ed.usuarios', 'us')
                     ->andWhere('eu.actual=1')
-                    ->andWhere('us.id=' . $user->getId());
+                    ->andWhere('us.id=' . $userId);
         }
 
         return $query->getQuery()->getSingleScalarResult();
     }
 
-    public function getListDTData($start, $length, $orders, $search, $columns, $otherConditions, $filtro, $user = null) {
+    public function getListDTData($start, $length, $orders, $search, $columns, $otherConditions, $filtro, $userId = null) {
         // Create Main Query
         $query = $this->_em->createQueryBuilder();
         $query->select("e")
@@ -926,11 +916,11 @@ class EquipoRepository extends EntityRepository {
                 }
             }
         }
-        if (!$user->getRol()->getAdmin()) {
+        if ($userId) {
             $query->innerJoin('ed.usuarios', 'us')
-                    ->andWhere('us.id=' . $user->getId());
+                    ->andWhere('us.id=' . $userId);
             $countQuery->innerJoin('ed.usuarios', 'us')
-                    ->andWhere('us.id=' . $user->getId());
+                    ->andWhere('us.id=' . $userId);
         }
 
         // Execute

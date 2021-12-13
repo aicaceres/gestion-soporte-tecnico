@@ -201,7 +201,6 @@
 <script type="text/javascript">
 var preguntar = true; 
 const lista = $.parseJSON('{{lista_ubicaciones}}') ;   
-const admin = '{{app.user.rol.admin}}';
 window.onbeforeunload=function(){   
     if(preguntar){
         return false; 
@@ -218,15 +217,13 @@ $(document).ready(function() {
     $('#appbundle_equipo_verificado').parent().parent().css('padding','0');
     $('#appbundle_equipo_verificado').parent().css('margin-right','5px');
     // restringuir las ubicaciones no permitidas        
-    if( !admin ){
-        const lista = $.parseJSON('{{lista_ubicaciones}}') ;     
+        //const lista = $.parseJSON('{{lista_ubicaciones}}') ;     
         $('#ubicacion-actual').find(".ubicacion_selector option").each( function(){
             item = parseInt($(this).val())
             if( $.inArray( item , lista) == -1 ){
                 $(this).remove();
             }        
         });  
-    }
     $('#ubicacion-actual').find(".ubicacion_selector").change(); 
     
     $(document).keypress(function(e) {        
@@ -314,15 +311,14 @@ function addNewUbicacion($collectionHolder) {
     $('#nueva-ubicacion').find('[id$="actual"]').val(1);
     $('#ubicacion-actual').hide();
     $('#nueva-ubicacion').show();
-        // restringuir las ubicaciones no permitidas        
-    if( !admin ){ 
-        $('#nueva-ubicacion').find(".ubicacion_selector option").each( function(){
-            item = parseInt($(this).val())
-            if( $.inArray( item , lista) == -1 ){
-                $(this).remove();
-            }        
-        });  
-    }
+        // restringuir las ubicaciones no permitidas           
+    $('#nueva-ubicacion').find(".ubicacion_selector option").each( function(){
+        item = parseInt($(this).val())
+        if( $.inArray( item , lista) == -1 ){
+            $(this).remove();
+        }        
+    });  
+    
     $('#nueva-ubicacion').find(".ubicacion_selector").change();
 }
 </script>    

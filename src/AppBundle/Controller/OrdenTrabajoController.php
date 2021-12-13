@@ -41,6 +41,7 @@ class OrdenTrabajoController extends Controller {
         if ($this->getUser()->getRol()->getAdmin()) {
             $em->getFilters()->disable('softdeleteable');
         }
+        $userId = $this->getUser()->getId();
         $session = $this->get('session');
         $sessionFiltro = $session->get('filtro_ordentrabajo');
         switch ($request->get('_opFiltro')) {
@@ -80,21 +81,17 @@ class OrdenTrabajoController extends Controller {
                 break;
         }
         if ($this->getUser()->getRol()->getPermiso('ordentrabajo_own')) {
-            $tecnicos[] = array('id' => $this->getUser()->getId(), 'nombre' => $this->getUser()->getNombre());
-            $filtro['idTecnico'] = $this->getUser()->getId();
+            $tecnicos[] = array('id' => $userId, 'nombre' => $this->getUser()->getNombre());
+            $filtro['idTecnico'] = $userId;
         }
         else {
             $tecnicos = $em->getRepository('ConfigBundle:Usuario')->findTecnicos();
         }
         $session->set('filtro_ordentrabajo', $filtro);
-        $entities = $em->getRepository('AppBundle:OrdenTrabajo')->findOTByCriteria($filtro, $this->getUser());
+        $entities = $em->getRepository('AppBundle:OrdenTrabajo')->findOTByCriteria($filtro, $userId);
 
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
-        }
-        else {
-            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($this->getUser()->getId());
-        }
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($userId);
+
         $edificios = null;
         $departamentos = null;
         $tipoIncidencias = $em->getRepository('ConfigBundle:TipoSoporte')->findAll();

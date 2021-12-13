@@ -76,7 +76,7 @@ class EquipoController extends Controller {
         // Returned objects are of type Town
         $objects = $results["results"];
         // Get total number of objects
-        $total_objects_count = $this->repository->count($this->getUser());
+        $total_objects_count = $this->repository->count($this->getUser()->getId());
 
         // Get total number of results
         $selected_objects_count = count($objects);
@@ -261,33 +261,34 @@ class EquipoController extends Controller {
         if ($this->getUser()->getRol()->getAdmin()) {
             $em->getFilters()->disable('softdeleteable');
         }
+        $userId = $this->getUser()->getId();
         $adicionales = array('CÓDIGO DE BARRA', 'PROVEEDOR', 'FECHA DE COMPRA', 'N° ORDEN COMPRA', 'N° FACTURA', 'N° REMITO');
-        $entities = $em->getRepository('AppBundle:Equipo')->findByCriteria($filtro, $this->getUser());
-        $summary = $em->getRepository('AppBundle:Equipo')->findSummaryByCriteria($filtro, $this->getUser());
+        $entities = $em->getRepository('AppBundle:Equipo')->findByCriteria($filtro);
+        $summary = $em->getRepository('AppBundle:Equipo')->findSummaryByCriteria($filtro, $userId);
         $deleteForms = array();
         foreach ($entities as $entity) {
             $deleteForms[$entity->getId()] = $this->createDeleteForm($entity->getId())->createView();
         }
 
-        $tipos = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT t.id,t.nombre', 't.nombre', 'tipo', $this->getUser());
+        $tipos = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT t.id,t.nombre', 't.nombre', 'tipo', $userId);
         //$tipos = $em->getRepository('AppBundle:Equipo')->findComboTipo($filtro);
         //$marcas = $em->getRepository('AppBundle:Equipo')->findComboMarca($filtro);
-        $marcas = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT ma.id,ma.nombre', 'ma.nombre', 'marca', $this->getUser());
+        $marcas = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT ma.id,ma.nombre', 'ma.nombre', 'marca', $userId);
         if ($filtro['idMarca']) {
-            $modelos = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT mo.id,mo.nombre', 'mo.nombre', 'modelo', $this->getUser());
+            $modelos = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT mo.id,mo.nombre', 'mo.nombre', 'modelo', $userId);
             //$modelos = $em->getRepository('AppBundle:Equipo')->findComboModelo($filtro);
         }
         else {
             $modelos = NULL;
         }
-        $estados = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT es.id,es.nombre', 'es.nombre', 'estado', $this->getUser());
+        $estados = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT es.id,es.nombre', 'es.nombre', 'estado', $userId);
         //$estados = $em->getRepository('AppBundle:Equipo')->findComboEstado($filtro);
-        $ubicaciones = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT u.id,u.abreviatura', 'u.abreviatura', 'ubicacion', $this->getUser());
+        $ubicaciones = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT u.id,u.abreviatura', 'u.abreviatura', 'ubicacion', $userId);
         $edificios = $departamentos = NULL;
         if ($filtro['idUbicacion']) {
-            $edificios = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT ed.id,ed.nombre', 'ed.nombre', 'edificio', $this->getUser());
+            $edificios = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT ed.id,ed.nombre', 'ed.nombre', 'edificio', $userId);
             if ($filtro['idEdificio']) {
-                $departamentos = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT d.id,d.nombre', 'd.nombre', 'departamento', $this->getUser());
+                $departamentos = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT d.id,d.nombre', 'd.nombre', 'departamento', $userId);
             }
         }
 
@@ -884,9 +885,10 @@ class EquipoController extends Controller {
             $opAdicional, $filtro['txtAdicional'], $filtro['fechaDesde'], $filtro['fechaHasta']);
 
         $hoy = new \DateTime();
+        $userId = $this->getUser()->getId();
         switch ($op) {
             case 'pdf':
-                $entities = $em->getRepository('AppBundle:Equipo')->findSqlByCriteria($filtro, 'RES', $searchTerm, $this->getUser());
+                $entities = $em->getRepository('AppBundle:Equipo')->findSqlByCriteria($filtro, 'RES', $searchTerm, $userId);
                 $logo1 = __DIR__ . '/../../../web/bundles/app/img/pdf_logo.png';
                 $facade = $this->get('ps_pdf.facade');
                 $response = new Response();
@@ -900,7 +902,7 @@ class EquipoController extends Controller {
                     'Content-Disposition' => 'filename=listado_equipos_' . $hoy->format('dmY_Hi') . '.pdf'));
 
             case 'xls':
-                $entities = $em->getRepository('AppBundle:Equipo')->findSqlByCriteria($filtro, 'RES', $searchTerm, $this->getUser());
+                $entities = $em->getRepository('AppBundle:Equipo')->findSqlByCriteria($filtro, 'RES', $searchTerm, $userId);
                 $partial = $this->renderView('AppBundle:Equipo:listado-xls.html.twig',
                         array('items' => $entities, 'filtro' => $arrayFiltro, 'search' => $searchTerm));
 
@@ -912,7 +914,7 @@ class EquipoController extends Controller {
                 $response->setContent($partial);
                 return $response;
             case 'csv':
-                $sql = $em->getRepository('AppBundle:Equipo')->findSqlByCriteria($filtro, 'SQL', $searchTerm, $this->getUser());
+                $sql = $em->getRepository('AppBundle:Equipo')->findSqlByCriteria($filtro, 'SQL', $searchTerm, $userId);
                 $conn = $this->get('database_connection');
                 // Query data from database
                 $results = $conn->query($sql);
@@ -1153,15 +1155,15 @@ class EquipoController extends Controller {
         // Further filtering can be done in the Repository by passing necessary arguments
         $otherConditions = "array or whatever is needed";
         // usuario para restringir edificios
-        $user = $this->getUser();
+        $userId = $this->getUser()->getId();
 
         // Get results from the Repository
-        $results = $this->repository->getListDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $sessionFiltro, $user);
+        $results = $this->repository->getListDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $sessionFiltro, $userId);
 
         // Returned objects are of type Town
         $objects = $results["results"];
         // Get total number of objects
-        $total_objects_count = $this->repository->listcount($this->getUser());
+        $total_objects_count = $this->repository->listcount($this->getUser()->getId());
 
         // Get total number of results
         $selected_objects_count = count($objects);

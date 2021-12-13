@@ -12,7 +12,7 @@ class SoporteRepository extends EntityRepository {
      * Listado de orden de trabajo según criterio
      */
 
-    public function findOTByCriteria($data, $user) {
+    public function findOTByCriteria($data, $userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select('o')
                 ->from('AppBundle\Entity\OrdenTrabajo', 'o')
@@ -54,10 +54,10 @@ class SoporteRepository extends EntityRepository {
                 $query->andWhere($cadena);
             }
         }
-        if (!$user->getRol()->getAdmin()) {
+        if ($userId) {
             // restringuir segun permiso
             $query->innerJoin('e.usuarios', 'us')
-                    ->andWhere('us.id=' . $user->getId());
+                    ->andWhere('us.id=' . $userId);
         }
         return $query->getQuery()->getResult();
     }
@@ -66,7 +66,7 @@ class SoporteRepository extends EntityRepository {
      * Listado de requerimientos según criterio
      */
 
-    public function findByCriteria($data, $user) {
+    public function findByCriteria($data, $userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select('r')
                 ->from('AppBundle\Entity\Requerimiento', 'r')
@@ -101,10 +101,10 @@ class SoporteRepository extends EntityRepository {
                 $query->andWhere($cadena);
             }
         }
-        if (!$user->getRol()->getAdmin()) {
+        if ($userId) {
             // restringuir segun permiso
             $query->innerJoin('e.usuarios', 'us')
-                    ->andWhere('us.id=' . $user->getId());
+                    ->andWhere('us.id=' . $userId);
         }
         return $query->getQuery()->getResult();
     }

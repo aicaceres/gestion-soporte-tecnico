@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityRepository;
  */
 class UbicacionRepository extends EntityRepository {
 
-    public function findByUbicacionId($ubicacion_id, $user = null) {
+    public function findByUbicacionId($ubicacion_id, $userId = null) {
         $query = $this->_em->createQueryBuilder();
         $query->select('e')
                 ->from('ConfigBundle\Entity\Edificio', 'e')
@@ -17,8 +17,8 @@ class UbicacionRepository extends EntityRepository {
                 ->where("u.id = :ubicacion_id")
                 ->distinct()
                 ->setParameter('ubicacion_id', $ubicacion_id);
-        if (!$user->getRol()->getAdmin()) {
-            $query->andWhere('us.id=' . $user->getId());
+        if ($userId) {
+            $query->andWhere('us.id=' . $userId);
         }
         return $query->getQuery()->getArrayResult();
     }

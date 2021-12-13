@@ -73,12 +73,8 @@ class RequerimientoController extends Controller {
                 break;
         }
         $session->set('filtro_requerimiento', $filtro);
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
-        }
-        else {
-            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($this->getUser()->getId());
-        }
+        $userId = $this->getUser()->getId();
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($userId);
         $edificios = null;
         $departamentos = null;
         if ($filtro['idUbicacion']) {
@@ -88,7 +84,7 @@ class RequerimientoController extends Controller {
             }
         }
         $tipoSoporte = $em->getRepository('ConfigBundle:TipoSoporte')->findAll();
-        $entities = $em->getRepository('AppBundle:Requerimiento')->findByCriteria($filtro, $this->getUser());
+        $entities = $em->getRepository('AppBundle:Requerimiento')->findByCriteria($filtro, $userId);
 
         $deleteForms = array();
         foreach ($entities as $entity) {
@@ -123,12 +119,7 @@ class RequerimientoController extends Controller {
         }
         $form = $this->createNewForm($entity);
         $form->get('hora')->setData($entity->getFechaRequerimiento()->format('H:i'));
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
-        }
-        else {
-            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($this->getUser()->getId());
-        }
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($this->getUser()->getId());
         return array(
             'entity' => $entity,
             'ubicaciones' => $ubicaciones,
@@ -224,12 +215,7 @@ class RequerimientoController extends Controller {
                 //$this->addFlash('danger', UtilsController::errorMessage($ex->getErrorCode()));
             }
         }
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
-        }
-        else {
-            $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($this->getUser()->getId());
-        }
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($this->getUser()->getId());
         $servTecnico = $em->getRepository('ConfigBundle:Departamento')->findOneByServicioTecnico(1);
         return array(
             'entity' => $entity,
