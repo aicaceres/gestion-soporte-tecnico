@@ -73,15 +73,15 @@
         
         {% if ot.detalles|length>0 %}
         
-            <h3 >Equipamiento asociado:</h3>       
+            <h3 >Equipamiento entregado:</h3>       
             <table font-size="9px">
                     <tr font-style="bold">
                         <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="0.5 cm">#</td>
-                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="4 cm">Equipo</td>
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="3 cm">Equipo</td>
                         <td border.color="black" height="20px" vertical-align="middle" text-align="center">Descripción</td>
                         <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="5 cm">Marca/Modelo</td>
                         <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="3 cm">N° Serie</td>
-                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="3 cm">Observaciones</td>
+                        <td border.color="black" height="20px" vertical-align="middle" text-align="center" width="2 cm">Estado</td>
                     </tr>
                     {% for item in ot.detalles  %}        
                         <tr>
@@ -90,7 +90,7 @@
                             <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.nombre }}</td>                             
                             <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.marca~' / '~item.equipo.modelo }}</td>    
                             <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.nroSerie }}</td> 
-                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.descripcion }}</td> 
+                            <td height="20px" background.color="#EEEEEE" vertical-align="middle" padding="3px 0 3px 5px">{{ item.equipo.estado }}</td> 
 
                         </tr>
                         {% if item.tareas|length>0 %}
