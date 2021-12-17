@@ -76,18 +76,20 @@ class UbicacionRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
-    public function getNombreCompleto() {
+    public function getNombreCompleto($userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select('d')
                 ->from('ConfigBundle\Entity\Departamento', 'd')
                 ->innerJoin('d.edificio', 'e')
+                ->innerJoin('e.usuarios', 'us')
                 ->innerJoin('e.ubicacion', 'u')
                 ->where("1=1")
+                ->andWhere('us.id=' . $userId)
                 ->orderBy('u.id, e.id, d.id');
         return $query->getQuery()->getResult();
     }
 
-    public function findEdificiosByUbicaciones($ubic, $salida = null, $user = null) {
+    public function findEdificiosByUbicaciones($ubic, $userId, $salida = null) {
         if ($ubic == '')
             $ubic = [];
         $query = $this->_em->createQueryBuilder();
@@ -96,7 +98,7 @@ class UbicacionRepository extends EntityRepository {
                 ->innerJoin('e.ubicacion', 'u')
                 ->innerJoin('e.usuarios', 'us')
                 ->where(' u.id IN (:ubicaciones)')
-                ->andWhere('us.id=' . $user->getId())
+                ->andWhere('us.id=' . $userId)
                 ->setParameter('ubicaciones', $ubic, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         if ($salida == 'array') {
             return $query->getQuery()->getArrayResult();

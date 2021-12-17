@@ -71,11 +71,13 @@ class SoporteReportesController extends Controller {
                 break;
         }
         $session->set('filtro_reportes_soporte', $filtro);
-        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+        $userId = $this->getUser()->getId();
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($userId);
+
         $edificios = null;
         $departamentos = null;
         if ($filtro['selUbicaciones']) {
-            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones']);
+            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $userId);
             if ($filtro['selEdificios']) {
                 $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
             }
@@ -83,7 +85,7 @@ class SoporteReportesController extends Controller {
         $tiposSoporte = $em->getRepository('ConfigBundle:TipoSoporte')->findAll();
         $tiposEquipos = $em->getRepository('ConfigBundle:Tipo')->findByClase('E');
         // Reporte por Sector, tipo incidencia y tipo de equipos
-        $requerimientos = $em->getRepository('AppBundle:Requerimiento')->getRequerimientosParaReporte($filtro);
+        $requerimientos = $em->getRepository('AppBundle:Requerimiento')->getRequerimientosParaReporte($filtro, $userId);
 
         $dataEqxIncidenciaySector = $this->getDatosDetalladoEqxIncidenciaySector($em, $filtro, $requerimientos, $tiposSoporte, $tiposEquipos);
         $dataEqxTipoIncidencia = $this->getDatosDetalladoEqxTipoIncidencia($em, $filtro, $requerimientos, $tiposSoporte, $tiposEquipos);
@@ -188,11 +190,13 @@ class SoporteReportesController extends Controller {
                 break;
         }
         $session->set('filtro_reportes_soporte_anual', $filtro);
-        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+        $userId = $this->getUser()->getId();
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($userId);
+
         $edificios = null;
         $departamentos = null;
         if ($filtro['selUbicaciones']) {
-            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones']);
+            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $userId);
             if ($filtro['selEdificios']) {
                 $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
             }
@@ -257,11 +261,14 @@ class SoporteReportesController extends Controller {
         }
         $session->set('filtro_reportes_soporte_resumen', $filtro);
 
-        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+        //$ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+        $userId = $this->getUser()->getId();
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($userId);
+
         $edificios = null;
         $departamentos = null;
         if ($filtro['selUbicaciones']) {
-            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones']);
+            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $userId);
             if ($filtro['selEdificios']) {
                 $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
             }
@@ -297,7 +304,10 @@ class SoporteReportesController extends Controller {
         $session = $this->get('session');
         $tipoSalida = $request->get('tiposalida');
         $nombreReporte = $request->get('reporte');
-        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+
+        $userId = $this->getUser()->getId();
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($userId);
+
         $textoFiltro = array('Todos');
         $hoy = new \DateTime();
 
@@ -403,7 +413,7 @@ class SoporteReportesController extends Controller {
                 $tiposSoporte = $em->getRepository('ConfigBundle:TipoSoporte')->findAll();
                 $tiposEquipos = $em->getRepository('ConfigBundle:Tipo')->findByClase('E');
                 // Reporte por Sector, tipo incidencia y tipo de equipos
-                $requerimientos = $em->getRepository('AppBundle:Requerimiento')->getRequerimientosParaReporte($filtro);
+                $requerimientos = $em->getRepository('AppBundle:Requerimiento')->getRequerimientosParaReporte($filtro, $userId);
                 $datos = $this->getDatosDetalladoEqxIncidenciaySector($em, $filtro, $requerimientos, $tiposSoporte, $tiposEquipos);
                 switch ($tipoSalida) {
                     case 'pdf':
@@ -428,7 +438,7 @@ class SoporteReportesController extends Controller {
                 $tiposSoporte = $em->getRepository('ConfigBundle:TipoSoporte')->findAll();
                 $tiposEquipos = $em->getRepository('ConfigBundle:Tipo')->findByClase('E');
                 // Reporte por Sector, tipo incidencia y tipo de equipos
-                $requerimientos = $em->getRepository('AppBundle:Requerimiento')->getRequerimientosParaReporte($filtro);
+                $requerimientos = $em->getRepository('AppBundle:Requerimiento')->getRequerimientosParaReporte($filtro, $userId);
                 $datos = $this->getDatosDetalladoEqxTipoIncidencia($em, $filtro, $requerimientos, $tiposSoporte, $tiposEquipos);
                 switch ($tipoSalida) {
                     case 'pdf':
@@ -480,28 +490,31 @@ class SoporteReportesController extends Controller {
         foreach ($ubicaciones as $i => $ubic) {
             $totubic = array('tipo' => 'S', 'color' => self::COLOR[$i], 'nombre' => $ubic->getAbreviatura(), 'id' => 'S' . $ubic->getId(), 'padre' => null, 'finalizado' => 0, 'asignado' => 0, 'sinasignar' => 0);
             foreach ($ubic->getEdificios() as $edif) {
-                $totEdif = array('tipo' => 'M', 'nombre' => $edif->getNombre(), 'id' => 'M' . $edif->getId(), 'padre' => 'S' . $ubic->getId(), 'finalizado' => 0, 'asignado' => 0, 'sinasignar' => 0);
-                foreach ($edif->getDepartamentos() as $dep) {
-                    foreach ($reqxSolicitante as $item) {
-                        if ($item['id'] == $dep->getId()) {
-                            $itemfinalizado = intval($item['finalizado']);
-                            $itemasignado = intval($item['asignado']);
-                            $itemsinasignar = intval($item['sinasignar']);
-                            if ($itemfinalizado > 0 || $itemasignado > 0 || $itemsinasignar > 0) {
-                                $totDep = array('tipo' => 'I', 'nombre' => $dep->getNombre(), 'id' => 'I' . $dep->getId(), 'padre' => 'M' . $edif->getId(), 'finalizado' => $itemfinalizado, 'asignado' => $itemasignado, 'sinasignar' => $itemsinasignar);
-                                array_unshift($tablereqxSolicitante, $totDep);
-                                $totEdif['finalizado'] = $totEdif['finalizado'] + $itemfinalizado;
-                                $totEdif['asignado'] = $totEdif['asignado'] + $itemasignado;
-                                $totEdif['sinasignar'] = $totEdif['sinasignar'] + $itemsinasignar;
+                if ($this->getUser()->getEdificios()->contains($edif)) {
+
+                    $totEdif = array('tipo' => 'M', 'nombre' => $edif->getNombre(), 'id' => 'M' . $edif->getId(), 'padre' => 'S' . $ubic->getId(), 'finalizado' => 0, 'asignado' => 0, 'sinasignar' => 0);
+                    foreach ($edif->getDepartamentos() as $dep) {
+                        foreach ($reqxSolicitante as $item) {
+                            if ($item['id'] == $dep->getId()) {
+                                $itemfinalizado = intval($item['finalizado']);
+                                $itemasignado = intval($item['asignado']);
+                                $itemsinasignar = intval($item['sinasignar']);
+                                if ($itemfinalizado > 0 || $itemasignado > 0 || $itemsinasignar > 0) {
+                                    $totDep = array('tipo' => 'I', 'nombre' => $dep->getNombre(), 'id' => 'I' . $dep->getId(), 'padre' => 'M' . $edif->getId(), 'finalizado' => $itemfinalizado, 'asignado' => $itemasignado, 'sinasignar' => $itemsinasignar);
+                                    array_unshift($tablereqxSolicitante, $totDep);
+                                    $totEdif['finalizado'] = $totEdif['finalizado'] + $itemfinalizado;
+                                    $totEdif['asignado'] = $totEdif['asignado'] + $itemasignado;
+                                    $totEdif['sinasignar'] = $totEdif['sinasignar'] + $itemsinasignar;
+                                }
                             }
                         }
                     }
-                }
-                if ($totEdif['finalizado'] > 0 || $totEdif['asignado'] > 0 || $totEdif['sinasignar'] > 0) {
-                    array_unshift($tablereqxSolicitante, $totEdif);
-                    $totubic['finalizado'] = $totubic['finalizado'] + $totEdif['finalizado'];
-                    $totubic['asignado'] = $totubic['asignado'] + $totEdif['asignado'];
-                    $totubic['sinasignar'] = $totubic['sinasignar'] + $totEdif['sinasignar'];
+                    if ($totEdif['finalizado'] > 0 || $totEdif['asignado'] > 0 || $totEdif['sinasignar'] > 0) {
+                        array_unshift($tablereqxSolicitante, $totEdif);
+                        $totubic['finalizado'] = $totubic['finalizado'] + $totEdif['finalizado'];
+                        $totubic['asignado'] = $totubic['asignado'] + $totEdif['asignado'];
+                        $totubic['sinasignar'] = $totubic['sinasignar'] + $totEdif['sinasignar'];
+                    }
                 }
             }
             if ($totubic['finalizado'] > 0 || $totubic['asignado'] > 0 || $totubic['sinasignar'] > 0) {
@@ -524,7 +537,7 @@ class SoporteReportesController extends Controller {
     }
 
     private function getDatosResumenReqxIncidencia($em, $filtro) {
-        $reqxIncidencia = $em->getRepository('AppBundle:Requerimiento')->getResumenPorIncidencia($filtro);
+        $reqxIncidencia = $em->getRepository('AppBundle:Requerimiento')->getResumenPorIncidencia($filtro, $this->getUser()->getId());
         $totalizado = '';
         $labelreqxIncidencia = array();
         $tablereqxIncidencia = array();
@@ -546,7 +559,7 @@ class SoporteReportesController extends Controller {
     }
 
     private function getDatosAnualReqxEstado($em, $filtro) {
-        $reqGlobal = $em->getRepository('AppBundle:Requerimiento')->getResumenAnualRequerimientoxEstado($filtro);
+        $reqGlobal = $em->getRepository('AppBundle:Requerimiento')->getResumenAnualRequerimientoxEstado($filtro, $this->getUser()->getId());
         $labelreqGlobal = array();
         //$finalizado = $asignado = $sinasignar = '';
         $anio = $filtro['anio'];
@@ -592,9 +605,10 @@ class SoporteReportesController extends Controller {
     }
 
     private function getDatosAnualReqxIncidencia($em, $filtro) {
-        $dataxTipoIncidencia = $em->getRepository('AppBundle:Requerimiento')->getResumenAnualRequerimientoxEstado($filtro, 'xTS');
-        $totales = $em->getRepository('AppBundle:Requerimiento')->getAnualRequerimientoxIncidencia($filtro);
-        $tipoSoporte = $em->getRepository('AppBundle:Requerimiento')->getResumenAnualTiposSoporte($filtro);
+        $userId = $this->getUser()->getId();
+        $dataxTipoIncidencia = $em->getRepository('AppBundle:Requerimiento')->getResumenAnualRequerimientoxEstado($filtro, $userId, 'xTS');
+        $totales = $em->getRepository('AppBundle:Requerimiento')->getAnualRequerimientoxIncidencia($filtro, $userId);
+        $tipoSoporte = $em->getRepository('AppBundle:Requerimiento')->getResumenAnualTiposSoporte($filtro, $userId);
 
         /* foreach( $tipoSoporte as $i=> $tipo  ){
           $dataset[$tipo['id']] = array( 'label'=> $tipo['nombre'],'maxBarThickness'=> 30,  'backgroundColor'=> $this->fillcolor[$i],'borderColor'=> $this->color[$i],'borderWidth'=> 1 , 'data'=>[] );
@@ -675,7 +689,7 @@ class SoporteReportesController extends Controller {
     }
 
     private function getDatosDetalladoEqxIncidenciaySector($em, $filtro, $requerimientos, $tiposSoporte, $tiposEquipos) {
-        $sectores = $em->getRepository('ConfigBundle:Departamento')->getNombreCompleto();
+        $sectores = $em->getRepository('ConfigBundle:Departamento')->getNombreCompleto($this->getUser()->getId());
 
         // Resumen de tipo de equipo por tipo de incidencia - sector
         $recuento = 0;
