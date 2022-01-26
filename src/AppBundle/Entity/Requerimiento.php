@@ -1,4 +1,5 @@
 <?php
+
 namespace AppBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
@@ -8,109 +9,123 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="requerimiento")
  * @ORM\Entity(repositoryClass="AppBundle\Entity\SoporteRepository")
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
- * @Gedmo\Loggable()  
+ * @Gedmo\Loggable()
  */
-class Requerimiento
-{
+class Requerimiento {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected $id;    
+    protected $id;
+
     /**
      * @var datetime $fechaRequerimiento
      * @ORM\Column(name="fecha_requerimiento", type="datetime", nullable=false)
      * @Gedmo\Versioned()
      */
-    private $fechaRequerimiento;      
+    private $fechaRequerimiento;
+
     /**
      * @var string $nroIncidencia
      * @ORM\Column(name="nro_incidencia", type="string",length=20, nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $nroIncidencia;        
+    protected $nroIncidencia;
+
     /**
      * @var string $jira
      * @ORM\Column(name="jira", type="string",length=20, nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $jira;        
-     /**
+    protected $jira;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\TipoSoporte")
      * @ORM\JoinColumn(name="tipo_soporte_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $tipoSoporte;         
-     /**
+    protected $tipoSoporte;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Departamento")
      * @ORM\JoinColumn(name="solicitante_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $solicitante;     
+    protected $solicitante;
+
     /**
      * @var string $responsable
      * @ORM\Column(name="responsable", type="string", nullable=true)
      * @Gedmo\Versioned()
-     */    
+     */
     protected $responsable;
+
     /**
      * @var text $descripcion
      * @ORM\Column(name="descripcion", type="text", nullable=true)
      * @Gedmo\Versioned()
-     */    
+     */
     protected $descripcion;
+
     /**
      * @var text $textoActaRecepcion
      * @ORM\Column(name="texto_acta_recepcion", type="text", nullable=true)
      * @Gedmo\Versioned()
-     */    
+     */
     protected $textoActaRecepcion;
-    /** 
+
+    /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
      * @Gedmo\Versioned()
      */
     /* SIN ASIGNAR - ASIGNADO - FINALIZADO - CANCELADO */
-    protected $estado='SIN ASIGNAR';   
+    protected $estado = 'SIN ASIGNAR';
+
     /**
      * @ORM\Column(name="alta_prioridad", type="boolean", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $altaPrioridad = false;    
+    protected $altaPrioridad = false;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Estado")
-     * @ORM\JoinColumn(name="estado_equipo_id", referencedColumnName="id")     
+     * @ORM\JoinColumn(name="estado_equipo_id", referencedColumnName="id")
      */
-    protected $estadoEquipo; 
+    protected $estadoEquipo;
+
     /**
-     *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Departamento")
-     *@ORM\JoinColumn(name="departamento_equipo_id", referencedColumnName="id") 
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Departamento")
+     * @ORM\JoinColumn(name="departamento_equipo_id", referencedColumnName="id")
      */
     protected $departamentoEquipo;
+
     /**
-     *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Piso")
-     *@ORM\JoinColumn(name="piso_equipo_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Piso")
+     * @ORM\JoinColumn(name="piso_equipo_id", referencedColumnName="id")
      */
-    protected $pisoEquipo;    
+    protected $pisoEquipo;
+
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\OrdenTrabajo", mappedBy="requerimiento")
      * OT asociadas
-     */    
-    protected $ordentrabajoAsociadas;    
-     /**
+     */
+    protected $ordentrabajoAsociadas;
+
+    /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\RequerimientoDetalle", mappedBy="requerimiento", orphanRemoval=true,cascade={"persist", "remove"})
      */
     protected $detalles;
-    
+
     /**
      * @var text $descripcionFinalizacion
      * @ORM\Column(name="descripcion_finalizacion", type="text", nullable=true)
      * @Gedmo\Versioned()
-     */    
+     */
     protected $descripcionFinalizacion;
-    
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
@@ -124,7 +139,7 @@ class Requerimiento
      * @ORM\Column(type="datetime")
      */
     private $updated;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -139,7 +154,8 @@ class Requerimiento
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;     
+    private $updatedBy;
+
     /**
      * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
      */
@@ -148,73 +164,73 @@ class Requerimiento
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function __toString() {
         return strval($this->getId());
     }
-    
-    public function getOrdentrabajoAsociadasTxt(){
+
+    public function getOrdentrabajoAsociadasTxt() {
         $txt = '';
-        foreach($this->getOrdentrabajoAsociadas() as $ot){
-            if($txt!=''){
-                $txt = $txt.',';
+        foreach ($this->getOrdentrabajoAsociadas() as $ot) {
+            if ($txt != '') {
+                $txt = $txt . ',';
             }
-            $txt = $txt.' '.$ot->getTecnico()->getNombre();
+            $txt = $txt . ' ' . $ot->getTecnico()->getNombre();
         }
         return $txt;
     }
-    public function getOTid(){
-        foreach($this->getOrdentrabajoAsociadas() as $ot){
-            if($ot->getEstado()=='ABIERTO'){
-                return $ot->getId();                
+
+    public function getOTid() {
+        foreach ($this->getOrdentrabajoAsociadas() as $ot) {
+            if ($ot->getEstado() == 'ABIERTO') {
+                return $ot->getId();
             }
         }
         return false;
     }
-    
-        public function getTiempo(){
+
+    public function getTiempo() {
         $inicio = $this->getFechaRequerimiento();
         $hoy = new \DateTime();
-        $fin = ( $this->getEstado()=='SIN ASIGNAR' || $this->getEstado()=='ASIGNADO') ? $hoy : $this->getUpdated();
+        $fin = ( $this->getEstado() == 'SIN ASIGNAR' || $this->getEstado() == 'ASIGNADO') ? $hoy : $this->getUpdated();
         $intervalo = $inicio->diff($fin);
         $diff = strtotime($fin->format('YmdHis')) - strtotime($inicio->format('YmdHis'));
-        $salida = round($diff/84600). ( (round($diff/84600)==1) ? ' día' : ' días' );
-        if( round($diff/84600)==0 ){
-            $salida = round($diff/3600).' Hs';
-            if( round($diff/3600)==0 ){
-               $salida = round($diff/60).' Min';
+        $salida = round($diff / 84600) . ( (round($diff / 84600) == 1) ? ' día' : ' días' );
+        if (round($diff / 84600) == 0) {
+            $salida = round($diff / 3600) . ' Hs';
+            if (round($diff / 3600) == 0) {
+                $salida = round($diff / 60) . ' Min';
             }
         }
-        $salida = ( $this->getEstado()=='CANCELADO') ? '' : $salida;
-        
-        $seg = ($intervalo->format('%s')>50) ? 1 : 0;
-        $minutos = $intervalo->format('%i')+$seg ;
-        if( $minutos>50 ){
+        $salida = ( $this->getEstado() == 'CANCELADO') ? '' : $salida;
+
+        $seg = ($intervalo->format('%s') > 50) ? 1 : 0;
+        $minutos = $intervalo->format('%i') + $seg;
+        if ($minutos > 50) {
             $min = 1;
             $minutos = 0;
-        }else{
+        }
+        else {
             $min = 0;
-        }            
-        $horas = ( ($intervalo->format('%H')+$min) >0) ? ($intervalo->format('%H')+$min).'h ' : '';        
-        $dias = ($intervalo->format('%d') >0) ? $intervalo->format('%dd ') : '';
-        $meses = ($intervalo->format('%m') >0) ? $intervalo->format('%mM ') : '';        
-        $anios = ($intervalo->format('%Y') >0) ? $intervalo->format('%Y A ') : '';        
-        $tiempo = $anios.$meses.$dias.$horas. (($minutos>0)?$minutos.'m ':'') ;
-        return  ( $this->getEstado()=='CANCELADO') ? '' : $tiempo;
-        //$tiempo = $intervalo->format('%Y %m %d %H %i %s');                                    
+        }
+        $horas = ( ($intervalo->format('%H') + $min) > 0) ? ($intervalo->format('%H') + $min) . 'h ' : '';
+        $dias = ($intervalo->format('%d') > 0) ? $intervalo->format('%dd ') : '';
+        $meses = ($intervalo->format('%m') > 0) ? $intervalo->format('%mM ') : '';
+        $anios = ($intervalo->format('%Y') > 0) ? $intervalo->format('%Y A ') : '';
+        $tiempo = $anios . $meses . $dias . $horas . (($minutos > 0) ? $minutos . 'm ' : '');
+        return ( $this->getEstado() == 'CANCELADO') ? '' : $tiempo;
+        //$tiempo = $intervalo->format('%Y %m %d %H %i %s');
     }
-    
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -224,8 +240,7 @@ class Requerimiento
      * @param \DateTime $fechaRequerimiento
      * @return Requerimiento
      */
-    public function setFechaRequerimiento($fechaRequerimiento)
-    {
+    public function setFechaRequerimiento($fechaRequerimiento) {
         $this->fechaRequerimiento = $fechaRequerimiento;
         return $this;
     }
@@ -233,10 +248,9 @@ class Requerimiento
     /**
      * Get fechaRequerimiento
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getFechaRequerimiento()
-    {
+    public function getFechaRequerimiento() {
         return $this->fechaRequerimiento;
     }
 
@@ -246,8 +260,7 @@ class Requerimiento
      * @param string $nroIncidencia
      * @return Requerimiento
      */
-    public function setNroIncidencia($nroIncidencia)
-    {
+    public function setNroIncidencia($nroIncidencia) {
         $this->nroIncidencia = $nroIncidencia;
 
         return $this;
@@ -256,10 +269,9 @@ class Requerimiento
     /**
      * Get nroIncidencia
      *
-     * @return string 
+     * @return string
      */
-    public function getNroIncidencia()
-    {
+    public function getNroIncidencia() {
         return $this->nroIncidencia;
     }
 
@@ -269,8 +281,7 @@ class Requerimiento
      * @param string $responsable
      * @return Requerimiento
      */
-    public function setResponsable($responsable)
-    {
+    public function setResponsable($responsable) {
         $this->responsable = $responsable;
 
         return $this;
@@ -279,10 +290,9 @@ class Requerimiento
     /**
      * Get responsable
      *
-     * @return string 
+     * @return string
      */
-    public function getResponsable()
-    {
+    public function getResponsable() {
         return $this->responsable;
     }
 
@@ -292,8 +302,7 @@ class Requerimiento
      * @param text $descripcion
      * @return Requerimiento
      */
-    public function setDescripcion($descripcion)
-    {
+    public function setDescripcion($descripcion) {
         $this->descripcion = $descripcion;
 
         return $this;
@@ -302,10 +311,9 @@ class Requerimiento
     /**
      * Get descripcion
      *
-     * @return string 
+     * @return string
      */
-    public function getDescripcion()
-    {
+    public function getDescripcion() {
         return $this->descripcion;
     }
 
@@ -315,8 +323,7 @@ class Requerimiento
      * @param string $estado
      * @return Requerimiento
      */
-    public function setEstado($estado)
-    {
+    public function setEstado($estado) {
         $this->estado = $estado;
 
         return $this;
@@ -325,10 +332,9 @@ class Requerimiento
     /**
      * Get estado
      *
-     * @return string 
+     * @return string
      */
-    public function getEstado()
-    {
+    public function getEstado() {
         return $this->estado;
     }
 
@@ -338,8 +344,7 @@ class Requerimiento
      * @param \DateTime $created
      * @return Requerimiento
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -348,10 +353,9 @@ class Requerimiento
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -361,8 +365,7 @@ class Requerimiento
      * @param \DateTime $updated
      * @return Requerimiento
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -371,10 +374,9 @@ class Requerimiento
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -384,8 +386,7 @@ class Requerimiento
      * @param \DateTime $deletedAt
      * @return Requerimiento
      */
-    public function setDeletedAt($deletedAt)
-    {
+    public function setDeletedAt($deletedAt) {
         $this->deletedAt = $deletedAt;
 
         return $this;
@@ -394,10 +395,9 @@ class Requerimiento
     /**
      * Get deletedAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getDeletedAt()
-    {
+    public function getDeletedAt() {
         return $this->deletedAt;
     }
 
@@ -407,8 +407,7 @@ class Requerimiento
      * @param \ConfigBundle\Entity\TipoSoporte $tipoSoporte
      * @return Requerimiento
      */
-    public function setTipoSoporte(\ConfigBundle\Entity\TipoSoporte $tipoSoporte = null)
-    {
+    public function setTipoSoporte(\ConfigBundle\Entity\TipoSoporte $tipoSoporte = null) {
         $this->tipoSoporte = $tipoSoporte;
 
         return $this;
@@ -417,10 +416,9 @@ class Requerimiento
     /**
      * Get tipoSoporte
      *
-     * @return \ConfigBundle\Entity\TipoSoporte 
+     * @return \ConfigBundle\Entity\TipoSoporte
      */
-    public function getTipoSoporte()
-    {
+    public function getTipoSoporte() {
         return $this->tipoSoporte;
     }
 
@@ -430,8 +428,7 @@ class Requerimiento
      * @param \ConfigBundle\Entity\Departamento $solicitante
      * @return Requerimiento
      */
-    public function setSolicitante(\ConfigBundle\Entity\Departamento $solicitante = null)
-    {
+    public function setSolicitante(\ConfigBundle\Entity\Departamento $solicitante = null) {
         $this->solicitante = $solicitante;
 
         return $this;
@@ -440,10 +437,9 @@ class Requerimiento
     /**
      * Get solicitante
      *
-     * @return \ConfigBundle\Entity\Departamento 
+     * @return \ConfigBundle\Entity\Departamento
      */
-    public function getSolicitante()
-    {
+    public function getSolicitante() {
         return $this->solicitante;
     }
 
@@ -453,8 +449,7 @@ class Requerimiento
      * @param \AppBundle\Entity\RequerimientoDetalle $detalles
      * @return Requerimiento
      */
-    public function addDetalle(\AppBundle\Entity\RequerimientoDetalle $detalles)
-    {
+    public function addDetalle(\AppBundle\Entity\RequerimientoDetalle $detalles) {
         $detalles->setRequerimiento($this);
         $this->detalles[] = $detalles;
         return $this;
@@ -465,18 +460,16 @@ class Requerimiento
      *
      * @param \AppBundle\Entity\RequerimientoDetalle $detalles
      */
-    public function removeDetalle(\AppBundle\Entity\RequerimientoDetalle $detalles)
-    {
+    public function removeDetalle(\AppBundle\Entity\RequerimientoDetalle $detalles) {
         $this->detalles->removeElement($detalles);
     }
 
     /**
      * Get detalles
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getDetalles()
-    {
+    public function getDetalles() {
         return $this->detalles;
     }
 
@@ -486,8 +479,7 @@ class Requerimiento
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Requerimiento
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -496,10 +488,9 @@ class Requerimiento
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -509,8 +500,7 @@ class Requerimiento
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Requerimiento
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -519,10 +509,9 @@ class Requerimiento
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -532,8 +521,7 @@ class Requerimiento
      * @param \AppBundle\Entity\OrdenTrabajo $ordentrabajoAsociadas
      * @return Requerimiento
      */
-    public function addOrdentrabajoAsociada(\AppBundle\Entity\OrdenTrabajo $ordentrabajoAsociadas)
-    {
+    public function addOrdentrabajoAsociada(\AppBundle\Entity\OrdenTrabajo $ordentrabajoAsociadas) {
         $this->ordentrabajoAsociadas[] = $ordentrabajoAsociadas;
 
         return $this;
@@ -544,18 +532,16 @@ class Requerimiento
      *
      * @param \AppBundle\Entity\OrdenTrabajo $ordentrabajoAsociadas
      */
-    public function removeOrdentrabajoAsociada(\AppBundle\Entity\OrdenTrabajo $ordentrabajoAsociadas)
-    {
+    public function removeOrdentrabajoAsociada(\AppBundle\Entity\OrdenTrabajo $ordentrabajoAsociadas) {
         $this->ordentrabajoAsociadas->removeElement($ordentrabajoAsociadas);
     }
 
     /**
      * Get ordentrabajoAsociadas
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getOrdentrabajoAsociadas()
-    {
+    public function getOrdentrabajoAsociadas() {
         return $this->ordentrabajoAsociadas;
     }
 
@@ -565,8 +551,7 @@ class Requerimiento
      * @param boolean $altaPrioridad
      * @return Requerimiento
      */
-    public function setAltaPrioridad($altaPrioridad)
-    {
+    public function setAltaPrioridad($altaPrioridad) {
         $this->altaPrioridad = $altaPrioridad;
 
         return $this;
@@ -575,13 +560,11 @@ class Requerimiento
     /**
      * Get altaPrioridad
      *
-     * @return boolean 
+     * @return boolean
      */
-    public function getAltaPrioridad()
-    {
+    public function getAltaPrioridad() {
         return $this->altaPrioridad;
     }
-
 
     /**
      * Set estadoEquipo
@@ -589,8 +572,7 @@ class Requerimiento
      * @param \ConfigBundle\Entity\Estado $estadoEquipo
      * @return Requerimiento
      */
-    public function setEstadoEquipo(\ConfigBundle\Entity\Estado $estadoEquipo = null)
-    {
+    public function setEstadoEquipo(\ConfigBundle\Entity\Estado $estadoEquipo = null) {
         $this->estadoEquipo = $estadoEquipo;
 
         return $this;
@@ -599,10 +581,9 @@ class Requerimiento
     /**
      * Get estadoEquipo
      *
-     * @return \ConfigBundle\Entity\Estado 
+     * @return \ConfigBundle\Entity\Estado
      */
-    public function getEstadoEquipo()
-    {
+    public function getEstadoEquipo() {
         return $this->estadoEquipo;
     }
 
@@ -612,8 +593,7 @@ class Requerimiento
      * @param \ConfigBundle\Entity\Departamento $departamentoEquipo
      * @return Requerimiento
      */
-    public function setDepartamentoEquipo(\ConfigBundle\Entity\Departamento $departamentoEquipo = null)
-    {
+    public function setDepartamentoEquipo(\ConfigBundle\Entity\Departamento $departamentoEquipo = null) {
         $this->departamentoEquipo = $departamentoEquipo;
 
         return $this;
@@ -622,10 +602,9 @@ class Requerimiento
     /**
      * Get departamentoEquipo
      *
-     * @return \ConfigBundle\Entity\Departamento 
+     * @return \ConfigBundle\Entity\Departamento
      */
-    public function getDepartamentoEquipo()
-    {
+    public function getDepartamentoEquipo() {
         return $this->departamentoEquipo;
     }
 
@@ -635,8 +614,7 @@ class Requerimiento
      * @param \ConfigBundle\Entity\Piso $pisoEquipo
      * @return Requerimiento
      */
-    public function setPisoEquipo(\ConfigBundle\Entity\Piso $pisoEquipo = null)
-    {
+    public function setPisoEquipo(\ConfigBundle\Entity\Piso $pisoEquipo = null) {
         $this->pisoEquipo = $pisoEquipo;
 
         return $this;
@@ -645,21 +623,19 @@ class Requerimiento
     /**
      * Get pisoEquipo
      *
-     * @return \ConfigBundle\Entity\Piso 
+     * @return \ConfigBundle\Entity\Piso
      */
-    public function getPisoEquipo()
-    {
+    public function getPisoEquipo() {
         return $this->pisoEquipo;
     }
-    
+
     /**
      * Set jira
      *
      * @param string $jira
      * @return Requerimiento
      */
-    public function setJira($jira)
-    {
+    public function setJira($jira) {
         $this->jira = $jira;
 
         return $this;
@@ -668,13 +644,11 @@ class Requerimiento
     /**
      * Get jira
      *
-     * @return string 
+     * @return string
      */
-    public function getJira()
-    {
+    public function getJira() {
         return $this->jira;
     }
-
 
     /**
      * Set descripcionFinalizacion
@@ -682,8 +656,7 @@ class Requerimiento
      * @param string $descripcionFinalizacion
      * @return Requerimiento
      */
-    public function setDescripcionFinalizacion($descripcionFinalizacion)
-    {
+    public function setDescripcionFinalizacion($descripcionFinalizacion) {
         $this->descripcionFinalizacion = $descripcionFinalizacion;
 
         return $this;
@@ -692,47 +665,53 @@ class Requerimiento
     /**
      * Get descripcionFinalizacion
      *
-     * @return string 
+     * @return string
      */
-    public function getDescripcionFinalizacion()
-    {
+    public function getDescripcionFinalizacion() {
         return $this->descripcionFinalizacion;
     }
-    
-    public function getCuentaDeEquipos($tipo){
+
+    public function getCuentaDeEquipos($tipo) {
         $cantidad = 0;
-        foreach( $this->getDetalles() as $det ){
-            if($det->getEquipo()->getTipo()->getId()==$tipo){
+        foreach ($this->getDetalles() as $det) {
+            if ($det->getEquipo()->getTipo()->getId() == $tipo) {
                 $cantidad += 1;
             }
         }
-        foreach( $this->getOrdentrabajoAsociadas() as $ot){
-            foreach( $ot->getDetalles() as $det ){
-                if( !$det->getRequerimientoDetalle() && $det->getEquipo()->getTipo()->getId()==$tipo && $det->getTipoRecambio()=='OUT'){
-                    $cantidad += 1;
+        foreach ($this->getOrdentrabajoAsociadas() as $ot) {
+            foreach ($ot->getDetalles() as $det) {
+                if (!$det->getRequerimientoDetalle() && $det->getEquipo()->getTipo()->getId() == $tipo) {
+                    $tiporecambio = 'OUT';
+                    foreach ($det->getTareas() as $tar) {
+                        if ($tar->getTipoTarea()->getAbreviatura() == 'CE') {
+                            $tiporecambio = 'IN';
+                        }
+                    }
+                    if ($det->getTipoRecambio() == $tiporecambio) {
+                        $cantidad += 1;
+                    }
                 }
-            }            
+            }
         }
         return $cantidad;
     }
-    
+
     /**
      * Set textoActaRecepcion
      * @param string $textoActaRecepcion
      * @return Requerimiento
      */
-    public function setTextoActaRecepcion($textoActaRecepcion)
-    {
+    public function setTextoActaRecepcion($textoActaRecepcion) {
         $this->textoActaRecepcion = $textoActaRecepcion;
         return $this;
     }
 
     /**
      * Get textoActaRecepcion
-     * @return string 
+     * @return string
      */
-    public function getTextoActaRecepcion()
-    {
+    public function getTextoActaRecepcion() {
         return $this->textoActaRecepcion;
     }
+
 }

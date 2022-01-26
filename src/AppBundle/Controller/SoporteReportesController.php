@@ -19,14 +19,14 @@ class SoporteReportesController extends Controller {
         "Septiembre", "Octubre", "Noviembre", "Diciembre");
 
     const MESCORTO = array("ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC");
-    const COLOR = array('#d70206', '#00a65a', '#f4c63d', '#a748ca', '#0544d3', '#59922b', '#3c8dbc', '#6b0392', '#f05b4f', '#dda458',
-        '#86797d', '#eacf7d', '#b2c326', '#6188e2', '#a748ca', '#3a01df', '#01DFD7', '#848484', '#D7DF01', '#4B610B', '#08088A');
-    const FILLCOLOR = array('rgba(215, 2, 6, 0.5)', 'rgba(0, 166, 90, 0.5)', 'rgba(244, 198, 61, 0.5)',
+    const COLOR = array('#00a65a', '#f4c63d', '#a748ca', '#0544d3', '#59922b', '#3c8dbc', '#6b0392', '#f05b4f', '#dda458', '#86797d',
+        '#eacf7d', '#b2c326', '#6188e2', '#a748ca', '#3a01df', '#01DFD7', '#848484', '#D7DF01', '#4B610B', '#08088A', '#d70206');
+    const FILLCOLOR = array('rgba(0, 166, 90, 0.5)', 'rgba(244, 198, 61, 0.5)',
         'rgba(167, 72, 202, 0.5)', 'rgba(5, 68, 211, 0.5)', 'rgba(89, 146, 43, 0.5)', 'rgba(60, 141, 188, 0.5)',
         'rgba(107, 3, 146, 0.5)', 'rgba(240, 91, 79, 0.5)', 'rgba(221, 164, 88, 0.5)', 'rgba(134, 121, 125, 0.5)',
         'rgba(234, 207, 125, 0.5)', 'rgba(178, 195, 38, 0.5)', 'rgba(97, 136, 226, 0.5)', 'rgba(167, 72, 202, 0.5)',
         'rgba(58, 1, 223, 0.5)', 'rgba(1, 223, 215, 0.5)', 'rgba(132, 132, 132, 0.5)', 'rgba(215, 223, 1, 0.5)',
-        'rgba(75, 97, 11, 0.5)', 'rgba(8, 8, 138, 0.5)');
+        'rgba(75, 97, 11, 0.5)', 'rgba(8, 8, 138, 0.5)', 'rgba(215, 2, 6, 0.5)');
 
     /**
      * @Route("/detallado", name="soporte_reportes_detallado")
