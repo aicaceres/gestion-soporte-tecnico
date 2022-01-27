@@ -673,14 +673,14 @@ class Requerimiento {
 
     public function getCuentaDeEquipos($tipo) {
         $cantidad = 0;
-        foreach ($this->getDetalles() as $det) {
-            if ($det->getEquipo()->getTipo()->getId() == $tipo) {
-                $cantidad += 1;
-            }
-        }
+        /* foreach ($this->getDetalles() as $det) {
+          if ($det->getEquipo()->getTipo()->getId() == $tipo) {
+          //$cantidad += 1;
+          }
+          } */
         foreach ($this->getOrdentrabajoAsociadas() as $ot) {
             foreach ($ot->getDetalles() as $det) {
-                if (!$det->getRequerimientoDetalle() && $det->getEquipo()->getTipo()->getId() == $tipo) {
+                if ($det->getEquipo()->getTipo()->getId() == $tipo) {
                     $tiporecambio = 'OUT';
                     foreach ($det->getTareas() as $tar) {
                         if ($tar->getTipoTarea()->getAbreviatura() == 'CE') {
