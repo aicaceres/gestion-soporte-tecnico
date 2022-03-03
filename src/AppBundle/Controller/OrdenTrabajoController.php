@@ -447,11 +447,14 @@ class OrdenTrabajoController extends Controller {
         switch ($tipo) {
             case 'NT':
             case 'TS':
+                // NT= Nota
+                // TS= Terminar Soporte
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea.html.twig',
                         array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot)
                 );
                 break;
             case 'DS':
+                // DS= Derivacion de OT
                 $tecnicos = $em->getRepository('ConfigBundle:Usuario')->findTecnicos();
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea.html.twig',
                         array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot,
@@ -459,6 +462,7 @@ class OrdenTrabajoController extends Controller {
                 );
                 break;
             case 'RE':
+                // RE= Reubicacion de Equipo
                 $estados = $em->getRepository('ConfigBundle:Estado')->findAll();
                 $form->get('textoAdicional')->setData('Se deja constancia que al momento de recibir el/los equipo/s aquí especificados se realizaron las pruebas de funcionamiento y se encontraba en buen estado.');
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea.html.twig',
@@ -467,19 +471,21 @@ class OrdenTrabajoController extends Controller {
                 );
                 break;
             case 'SI':
+                // SI= Solicitud de Insumo
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea-insumo.html.twig',
                         array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot)
                 );
                 break;
             case 'CE':
+                // CE= Reemplazo de Equipo
                 $estados = $em->getRepository('ConfigBundle:Estado')->findAll();
-                $servTecnico = $em->getRepository('ConfigBundle:Departamento')->findOneByServicioTecnico(1);
-                if ($servTecnico) {
-                    $form->get('ubicacion')->get('ubicacion')->setData($servTecnico->getEdificio()->getUbicacion());
-                    $form->get('ubicacion')->get('edificio')->setData($servTecnico->getEdificio());
-                    $form->get('ubicacion')->get('departamento')->setData($servTecnico);
-                    $form->get('ubicacion')->get('piso')->setData($servTecnico->getPisos()[0]);
-                }
+                /* $servTecnico = $em->getRepository('ConfigBundle:Departamento')->findOneByServicioTecnico(1);
+                  if ($servTecnico) {
+                  $form->get('ubicacion')->get('ubicacion')->setData($servTecnico->getEdificio()->getUbicacion());
+                  $form->get('ubicacion')->get('edificio')->setData($servTecnico->getEdificio());
+                  $form->get('ubicacion')->get('departamento')->setData($servTecnico);
+                  $form->get('ubicacion')->get('piso')->setData($servTecnico->getPisos()[0]);
+                  } */
                 // ubicacion anterior del equipo a retirar.
                 $ubicant = $tarea->getOrdenTrabajoDetalles()[0]->getEquipoUbicacionOriginal();
                 if ($ubicant) {

@@ -22,7 +22,7 @@ class EquipoUbicacionType extends AbstractType {
         $builder->add('fechaEntrega', NULL, array('widget' => 'single_text', 'label' => 'Fecha de Entrega:',
                     'format' => 'dd-MM-yyyy', 'html5' => false, 'required' => FALSE,
                     'attr' => array('class' => 'datepicker')))
-                ->add('ubicacion', 'entity', array('label' => 'Ubicación:', 'required' => true,
+                ->add('ubicacion', 'entity', array('label' => 'Ubicación:', 'required' => false,
                     'class' => 'ConfigBundle:Ubicacion'))
                 ->add('edificio', 'entity', array('label' => 'Edificio:', 'required' => true,
                     'class' => 'ConfigBundle:Edificio'))

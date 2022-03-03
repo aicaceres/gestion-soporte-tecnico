@@ -31,19 +31,23 @@
                     <div id="equipos-salientes" class="panel-collapse collapse in">
                         <div class="box-body">
                             <div class="col-md-12" style="padding:0">
-                                <table class="table table-hover table-bordered" style="font-size:90%">
+                                <table class="table table-hover table-bordered" id="table-equipos-salientes" style="font-size:90%">
+                                    <thead>
                                     <tr>
                                         <th style="width:3%">#</th>
                                         <th style="width:60%" >Equipo <small style="font-weight:normal">[Tipo | Descripción | N° serie | Marca | Modelo ]</small></th>
                                         <th>Descripción</th>
                                     </tr>
+                                    </thead>
+                                    <tbody>    
                                     {% for det in entity.ordenTrabajoDetalles %}
                                         <tr>
                                             <td>{{ loop.index }}</td>
                                             <td>{{ det.equipo.textoOT }}</td>
-                                            <td><input class="form-control desc_equipo" style="font-size:90%" type="text" name="desc_out[]" value="{{ det.equipo.nombre}}" data-id="{{ det.equipo.id }}"/></td>
+                                            <td><input class="form-control desc_equipo" data-nombre="{{ det.equipo.nombre }}" required="required" style="font-size:90%" type="text" name="desc_out[]" value="" data-id="{{ det.equipo.id }}"/></td>
                                         </tr>
                                     {% endfor %}
+                                    </tbody>
                                 </table>
                             </div>                                                        
                             <div class="col-md-12 ubicacion">
@@ -54,13 +58,13 @@
                                             <label>Cambiar estado a:&nbsp;</label>
                                             <select id="estadoAnt" name="estado" class="form-control select2">
                                                 {% for est in estados if est.abreviatura!='OP' %}
-                                                    <option {% if est.inicial %}selected="selected" {% endif %} value="{{ est.id }}" >{{ est.nombre }}</option>
+                                                    <option {% if est.abreviatura=='RP'  %}selected="selected" {% endif %} value="{{ est.id }}" >{{ est.nombre }}</option>
                                                 {% endfor %}    
                                             </select> 
                                             {{ form_row(form.estadoId) }}
                                         </div>            
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 hidden">
                                         {{ form_row(ubicacionActual.conceptoEntrega) }}   
                                     </div>
                                 </fieldset>   
@@ -130,7 +134,7 @@
                                             {{ form_row(form.estadoNuevoId) }}
                                         </div>            
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-6 hidden">
                                         {{ form_row(ubicacionActual.conceptoEntrega) }}   
                                     </div>
                                 </fieldset>   
@@ -250,16 +254,18 @@ $(document).ready(function() {
                  }
              });             
              if( buscar ){
+                 let trEquipoSaliente = $('#table-equipos-salientes tbody tr').eq(i);                       
+                 let nombreEquipoSaliente = (trEquipoSaliente.length) ? trEquipoSaliente.find('.desc_equipo').data('nombre') : '';                 
                 //buscar datos y agregar item al select
                 $.getJSON("{{path('find_equipo_data_by_id')}}",{id:item}, function(data){
                     if(data.msj=='OK'){
                         var tr = $('<tr><td class="ord"></td><td class="eq"></td><td class="desc"></td><td class="del"></td></tr>');
-                        $('#eqNuevos tbody').append(tr);
+                        $('#eqNuevos tbody').prepend(tr);
                         ord = $('#eqNuevos tbody').find('tr').length ;
                         tr.find('.ord').html(ord);
                         tr.find('.eq').html(data.nombre);
-
-                        input = $('<input class="form-control desc_equipo" style="font-size:90%" type="text" name="desc_in[]" value="'+data.descripcion+'"> <input class="id_equipo" type="hidden" name="eqid_in[]" value="'+data.id+'">  ');
+                        
+                        input = $('<input class="form-control desc_equipo" style="font-size:90%" type="text" name="desc_in[]" value="'+nombreEquipoSaliente+'"> <input class="id_equipo" type="hidden" name="eqid_in[]" value="'+data.id+'">  ');
                         tr.find('.desc').html(input);
                         tr.find('.del').html('<a href="javascript:void(0)" class="delEq" data-id="'+data.id+'" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');                        
                     }else{

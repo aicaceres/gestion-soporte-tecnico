@@ -301,6 +301,17 @@ $(document).ready(function() {
                                     alert('Debe ingresar al menos un equipo a reemplazar!');
                                     return false;
                                 }*/
+                                let valido = true;
+                                // verificar las descripciones de los equipos.
+                                $('.desc_equipo').each(function(){
+                                    if( !$(this).val() ){
+                                        alert( 'Debe ingresar la descripción al equipo!' );
+                                        $(this).focus();
+                                        valido = false;
+                                        return false;
+                                    } 
+                                })
+                                if(!valido) return false;
                                 if( !$('#appbundle_tarea_ubicacion_piso').val() ){
                                     alert('Debe ingresar la ubicación donde se reubicarán los equipos a reemplazar!');
                                     return false;
