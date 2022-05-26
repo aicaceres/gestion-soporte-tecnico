@@ -1,0 +1,86 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Informe Valorizado de Equipos</h3>
+                <div class="pull-right box-tools">                
+                    <form id="printform" name="printform" target="_blank" style="display:inline-block;" 
+                          action="#" method="post">                        
+                        <input type="hidden" id="searchterm" name="searchterm"/>
+                        <input type="hidden" id="datalist" name="datalist"/>
+                        <input type="hidden" id="option" name="option"/>
+                        <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i></button> 
+                        <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i></button> 
+                    </form> 
+                </div>        
+            </div><!-- /.box-header -->
+            <div class='box-body' >
+                <form id="searchform" action="{{ path('equipo_valorizado') }}" method="get" >                    
+                    <div class="col-md-12">                
+                        <fieldset>             
+                            
+                            
+                            <div class="col-md-3"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label style="width:100%;">&nbsp;</label>
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                            </div>                                 
+
+                        </fieldset>
+                    </div> 
+                </form>                      
+
+                <div class="table-responsive" style="padding: 15px; overflow: auto;">
+                    <table id="tablelist" class="table table-bordered table-hover" style="font-size:11px;">
+                        <thead>
+                            <tr>
+                                <th class="no-sort">Tipo</th>
+                                <th class="no-sort">Marca</th>
+                                <th class="no-sort">Modelo</th>
+                                <th class="no-sort">Ubicación</th>
+                                <th class="no-sort">Cantidad</th>
+                                <th class="no-sort">Valor Unitario USD</th>
+                                <th class="no-sort">Total USD</th>
+                                <th class="no-sort">Total $</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in entities %}
+                                
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {    
+    $('.sidebar-toggle').click();
+    $('#limpiar-filtros').on('click',function(){
+        $('#searchform').find('.select2').val(0);
+        $('#searchform').find('#periodo').val('');
+        $('#searchform').submit();
+    });    
+  
+       
+   $('#pdf,#xls,#csv').on('click',function(){   
+        $('#option').val( $(this).attr('id') );             
+        $('#searchterm').val( $('#tablelist_filter input').val() );
+        //$('#printform').submit();
+    });       
+        
+});
+</script>    
+{% endblock %}

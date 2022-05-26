@@ -25,7 +25,7 @@
             </div><!-- /.box-header -->
             <div class='box-body' >
                 <form id="searchform" action="{{ path('compra_admin') }}" method="get" >
-                    <div class="col-md-12">
+                    <div class="col-md-12 no-padding">
                         <fieldset>
                             <div class="col-md-2">
                                 <div class="form-group ">
@@ -70,7 +70,7 @@
                             </div>         
                        </fieldset>    
                     </div> 
-                    <div class="col-md-12">                
+                    <div class="col-md-12 no-padding">                
                         <fieldset>             
                             <div class="col-md-4">
                                 <div class="form-group ">
@@ -101,11 +101,15 @@
                                     <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{app.session.get('filtro_compras')['hasta'] }}">                                            
                                 </div>                                           
                             </div>  
-                            <div class="col-md-3"> 
+                            <div class="col-md-2"> 
+                                <label class="required">N° Cuenta:</label>
+                                <input type="text" name="cuenta" id="cuenta" class="form-control" value="{{app.session.get('filtro_compras')['cuenta'] }}">
+                            </div>                                 
+                            <div class="col-md-2"> 
                                 <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
-                                <label style="width:100%;">&nbsp;</label>
-                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
-                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                                
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-xs" style="margin:3px"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-xs"  style="margin:3px"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
                             </div>                                 
 
                         </fieldset>
@@ -120,6 +124,7 @@
                                 <th>Razón Social</th>
                                 <th>N° Orden Compra</th>
                                 <th>Proveedor</th>
+                                <th>N° Cuenta</th>
                                 <th>N° Factura</th>
                                 <th>N° Remito</th>
                                 <th>Estado</th>
@@ -133,6 +138,7 @@
                                     <td>{{ entity.razonSocial}}</td>
                                     <td>{{ entity.ordenCompra}}</td>
                                     <td>{{ entity.proveedor }}</td>
+                                    <td>{{ entity.nroCuenta}}</td>
                                     <td>{{ entity.nroFactura }}</td>                                    
                                     <td>{{ entity.nroRemitoTxt|raw}}</td>
                                     <td>{{ entity.estado }}</td>                                    
@@ -140,7 +146,7 @@
                                         <a href="{{ path('print_compra',{'id':entity.id})}}" target="_blank" data-toggle="tooltip" title="Imprimir"><i class="fa fa-print"></i></a>&nbsp;
                                         <a href="{{ path('compra_admin_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver"><i class="fa fa-folder-open"></i></a>&nbsp;
                                         
-                                        {% if app.user.access('compra_edit') and entity.estado in ['NUEVO','ENVIADO'] %}
+                                        {% if app.user.access('compra_edit') and entity.estado != 'ANULADO' %}
                                         <a href="{{ path('compra_admin_edit', { 'id': entity.id }) }}" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
                                         {% endif %}
                                         {% if app.user.access('compra_recepcion') and entity.estado in ['ENVIADO','RECEPCION PARCIAL'] and entity.deletedAt is null %}

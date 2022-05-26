@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=UTF-8" />
+   </head>
+   <body  >         
+       <h2 text-align="center"> Listado de Bienes en Stock</h2>              
+        <h4>Razón Social: {{ filtro[0] }} - Proveedor: {{ filtro[1] }} - Estado: {{ filtro[2] }}  </h4>
+        <h4>Fecha de Adquisición: {{ filtro[3] }} al {{ filtro[4] }} 
+            {% if filtro[5] %}
+            - Fecha de Movimiento: {{ filtro[5] }} al {{ filtro[6] }}
+            {% endif %}
+        </h4>         
+        <table cellspacing="0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Razón Social</th>                
+                    <th>Proveedor</th>                
+                    <th>Descripción</th>                
+                    <th>N° de Serie</th>                
+                    <th>Ubicación</th>
+                    <th>Cuenta</th>
+                    <th>Factura</th>
+                    <th>Remito</th>
+                    <th>OC</th>                
+                    <th>Fecha Adquisición</th>                
+                    <th>Valor Adquisición USD</th>    
+                    <th>TC</th>
+                    <th>Valor Adquisición ARS</th>
+                    <th>Fecha Movimiento</th>
+                    <th>Orden Trabajo</th>
+                    <th>Nueva Ubicación</th>
+                    <th>Estado</th>                
+                </tr>                        
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.razonSocial}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.proveedor}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.nombre}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.nroSerie}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.ubicInicial}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.cuenta}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.factura}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.remito}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.txtOC}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.fechaAdquisicion}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.precioDolares|number_format(2,'.',',')}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.cotizacionEquipo|number_format(2,'.',',')}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.precioPesos|number_format(2,'.',',')}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.fechaMovimiento}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.nroOT}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.nuevaUbicacion}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.estado}}</td>                                      
+                    </tr>                               
+                {% endfor %}
+            </tbody>              
+        </table>    
+
+   </body>
+</html>

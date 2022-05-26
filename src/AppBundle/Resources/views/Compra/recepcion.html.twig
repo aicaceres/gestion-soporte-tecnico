@@ -25,14 +25,20 @@
                                 </div>
                             </fieldset>    
                             <fieldset style="padding-bottom:10px;">    
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <span><strong>Proveedor:</strong>&nbsp;{{entity.proveedor}}</span>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <span><strong>N° Factura:</strong>&nbsp;{{entity.nroFactura}}</span>                        
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <span><strong>Pedido el:</strong>&nbsp;{{entity.fechaEnvioProveedor|date('d-m-Y')}}</span>                        
+                                </div>
+                                <div class="col-md-2">
+                                    <span><strong>N° Cuenta:</strong>&nbsp;{{entity.nroCuenta}}</span>                        
+                                </div>
+                                <div class="col-md-2">
+                                    <span><strong>Cotización U$S:</strong>&nbsp;{{entity.cotizacionDolar}}</span>                        
                                 </div>
                             </fieldset>
                             {% if entity.descripcion %}

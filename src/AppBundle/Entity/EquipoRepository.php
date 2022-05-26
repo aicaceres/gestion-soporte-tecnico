@@ -29,8 +29,18 @@ class EquipoRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
+    /**
+     * Setear todos los equipos como no verificados
+     */
+    public function setNoVerificado() {
+        $query = $this->_em->createQueryBuilder();
+        $query->update('AppBundle\Entity\Equipo', 'e')
+                ->set('e.verificado', 0)->where('1=1');
+        return $query->getQuery()->getResult();
+    }
+
     /*
-     * Listado de equipos según criteria
+     * Listado de equipos segÃºn criteria
      */
 
     public function findByCriteria($data) {
@@ -333,7 +343,7 @@ class EquipoRepository extends EntityRepository {
     }
 
     /*
-     * Listado de equipos según criteria
+     * Listado de equipos segÃºn criteria
      */
 
     public function findSqlByCriteria($data, $salida = 'SQL', $searchItem = null, $userId = null) {
@@ -437,7 +447,7 @@ class EquipoRepository extends EntityRepository {
             $query->innerJoin('ed.usuarios', 'us')
                     ->andWhere('us.id=' . $userId);
         }
-
+        $query->orderBy('t.nombre,e.nombre,ma.nombre,mo.nombre');
         if ($salida == 'SQL') {
             return $query->getQuery()->getSql();
         }
@@ -505,7 +515,7 @@ class EquipoRepository extends EntityRepository {
                 ->where("o.estado IN ('ABIERTO')");
 
         $query = $this->_em->createQueryBuilder();
-        $query->select("e.id,concat( t.nombre,'  │  ', e.nombre,'  │  ', e.nroSerie,' │  ',m.nombre,'  │  ',mo.nombre) nombre")
+        $query->select("e.id,concat( t.nombre,'  â”‚  ', e.nombre,'  â”‚  ', e.nroSerie,' â”‚  ',m.nombre,'  â”‚  ',mo.nombre) nombre")
                 ->from('AppBundle\Entity\Equipo', 'e')
                 ->innerJoin('e.tipo', 't')
                 ->innerJoin('e.ubicaciones', 'eu')
@@ -524,7 +534,7 @@ class EquipoRepository extends EntityRepository {
     public function findByStockTecnico() {
         // busca equipos que esten en stock tecnico.
         $query = $this->_em->createQueryBuilder();
-        $query->select("e.id,concat( t.nombre,'  │  ', e.nombre,'  │  ', e.nroSerie,' │  ',m.nombre,'  │  ',mo.nombre) nombre")
+        $query->select("e.id,concat( t.nombre,'  â”‚  ', e.nombre,'  â”‚  ', e.nroSerie,' â”‚  ',m.nombre,'  â”‚  ',mo.nombre) nombre")
                 ->from('AppBundle\Entity\Equipo', 'e')
                 ->innerJoin('e.tipo', 't')
                 ->innerJoin('e.marca', 'm')
@@ -594,18 +604,8 @@ class EquipoRepository extends EntityRepository {
                 ->innerJoin('d.edificio', 'ed')
                 ->innerJoin('ed.ubicacion', 'u');
 
-        // Other conditions than the ones sent by the Ajax call ?
-        if ($otherConditions === null) {
-            // No
-            // However, add a "always true" condition to keep an uniform treatment in all cases
-            $query->where("eu.actual=1");
-            $countQuery->where("eu.actual=1");
-        }
-        else {
-            // Add condition
-            $query->where($otherConditions);
-            $countQuery->where($otherConditions);
-        }
+        $query->where("eu.actual=1");
+        $countQuery->where("eu.actual=1");
 
         // Fields Search
         foreach ($columns as $key => $column) {
@@ -879,43 +879,44 @@ class EquipoRepository extends EntityRepository {
         $query->setFirstResult($start)->setMaxResults($length);
 
         // Order
-        foreach ($orders as $key => $order) {
-            // $order['name'] is the name of the order column as sent by the JS
-            if ($order['name'] != '') {
-                $orderColumn = null;
+        /* foreach ($orders as $key => $order) {
+          // $order['name'] is the name of the order column as sent by the JS
+          if ($order['name'] != '') {
+          $orderColumn = null;
+          switch ($order['name']) {
+          case 'nroSerie': {
+          $orderColumn = 'e.nroSerie';
+          break;
+          }
+          case 'nombre': {
+          $orderColumn = 'e.nombre';
+          break;
+          }
+          case 'tipo': {
+          $orderColumn = 'tipo.nombre';
+          break;
+          }
+          case 'estado': {
+          $orderColumn = 'estado.nombre';
+          break;
+          }
+          case 'marca': {
+          $orderColumn = 'marca.nombre';
+          break;
+          }
+          case 'modelo': {
+          $orderColumn = 'modelo.nombre';
+          break;
+          }
+          }
+          if ($orderColumn !== null) {
+          $query->orderBy($orderColumn, $order['dir']);
+          }
+          }
+          } */
 
-                switch ($order['name']) {
-                    case 'nroSerie': {
-                            $orderColumn = 'e.nroSerie';
-                            break;
-                        }
-                    case 'nombre': {
-                            $orderColumn = 'e.nombre';
-                            break;
-                        }
-                    case 'tipo': {
-                            $orderColumn = 'tipo.nombre';
-                            break;
-                        }
-                    case 'estado': {
-                            $orderColumn = 'estado.nombre';
-                            break;
-                        }
-                    case 'marca': {
-                            $orderColumn = 'marca.nombre';
-                            break;
-                        }
-                    case 'modelo': {
-                            $orderColumn = 'modelo.nombre';
-                            break;
-                        }
-                }
+        $query->orderBy('tipo.nombre,e.nombre,marca.nombre,modelo.nombre');
 
-                if ($orderColumn !== null) {
-                    $query->orderBy($orderColumn, $order['dir']);
-                }
-            }
-        }
         if ($userId) {
             $query->innerJoin('ed.usuarios', 'us')
                     ->andWhere('us.id=' . $userId);
@@ -943,6 +944,47 @@ class EquipoRepository extends EntityRepository {
                 ->andWhere('d.id=' . $dpto)
                 ->andWhere('u.redIp is not null');
         return $query->getQuery()->getResult();
+    }
+
+    public function getPrimeraUbicacionParaBienes($id) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('u')
+                ->from('AppBundle\Entity\EquipoUbicacion', 'u')
+                ->innerJoin('u.equipo', 'e')
+                ->where("e.id=" . $id)
+                ->orderBy('u.id', 'ASC')
+                ->setMaxResults(1);
+        return $query->getQuery()->getOneOrNullResult();
+    }
+
+    public function getTareaOperativoParaBienes($id) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('t')
+                ->from('AppBundle\Entity\Tarea', 't')
+                ->innerJoin('t.tipoTarea', 'tt')
+                ->innerJoin('t.ordenTrabajoDetalles', 'otd')
+                ->innerJoin('otd.equipo', 'e')
+                ->where('e.id=' . $id)
+                //->andWhere('tt.abreviatura=' . "'RE'")
+                ->andWhere("t.descripcion LIKE '%<strong>Operativo</strong>%' ")
+                ->orderBy('t.id', 'ASC')
+                ->setMaxResults(1);
+        return $query->getQuery()->getOneOrNullResult();
+    }
+
+    public function getFechaInstalacion($id) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('t.fecha')
+                ->from('AppBundle\Entity\Tarea', 't')
+                ->innerJoin('t.tipoTarea', 'tt')
+                ->innerJoin('t.ordenTrabajoDetalles', 'otd')
+                ->innerJoin('otd.equipo', 'e')
+                ->where('e.id=' . $id)
+                ->andWhere('tt.abreviatura=' . "'RE'")
+                ->andWhere("t.descripcion LIKE '%Estado: <strong>Operativo</strong>%' ")
+                ->orderBy('t.id', 'ASC')
+                ->setMaxResults(1);
+        return $query->getQuery()->getOneOrNullResult();
     }
 
 }

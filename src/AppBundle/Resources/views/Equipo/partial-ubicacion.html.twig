@@ -9,7 +9,9 @@
             {% if entity.id and form.ubicaciones|length >1 %}
             <li><a href="#tab_historico" data-toggle="tab">Histórico</a></li>              
             {% endif %}
-            <li class="pull-left header"><i class="fa fa-building"></i> Ubicación del Equipo</li>
+            <li class="pull-left header"><i class="fa fa-building"></i>
+                Ubicación del Equipo
+            </li>
         </ul>
         <div class="tab-content">
             {% if not reubicacion %} 
@@ -18,7 +20,7 @@
             <div data-index="{{form.ubicaciones | length }}" class="collectionHolder tab-pane active" id="tab_actual"
                  data-prototype="{% filter escape %}{% include 'AppBundle:Equipo:prototypeUbicacion.html.twig' with {'item':form.ubicaciones.vars.prototype} %}{% endfilter %}">                               
                 {% if entity.ubicaciones|length>0 %}                
-                    {% set ubicacionActual = form.ubicaciones[ form.ubicaciones|length -1 ] %}                                            
+                    {% set ubicacionActual = form.ubicaciones[ 0 ] %}   
                     <div id="ubicacion-actual">                                                        
                         <fieldset>
                             <div class="col-md-2">
@@ -68,7 +70,7 @@
             {% if entity.id and form.ubicaciones|length >1 %}
                 <div class="tab-pane" id="tab_historico">
                     {% for ubicacion in form.ubicaciones %}   
-                        {% if not loop.last %}  
+                        {% if not loop.first %}  
                             {% if not loop.first %} <hr class="historico"> {% endif %}                        
                             {% set ubic = ubicacion.vars.data %}
                             <div class="row">

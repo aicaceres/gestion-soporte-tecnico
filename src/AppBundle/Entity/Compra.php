@@ -57,6 +57,18 @@ class Compra {
     protected $ordenCompra;
 
     /**
+     * @var string $nroCuenta
+     * @ORM\Column(name="nro_cuenta", type="string", length=20,nullable=true)
+     */
+    protected $nroCuenta;
+
+    /**
+     * @var string $cotizacionDolar
+     * @ORM\Column(name="cotizacion_dolar", type="decimal", scale=2, nullable=true)
+     */
+    protected $cotizacionDolar = 0;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Proveedor")
      * @ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
      */
@@ -572,6 +584,48 @@ class Compra {
             $nro = ( $nro == '') ? $rec_nro : $nro . ' <br> ' . $rec_nro;
         }
         return $nro;
+    }
+
+    /**
+     * Set nroCuenta
+     *
+     * @param string $nroCuenta
+     * @return Compra
+     */
+    public function setNroCuenta($nroCuenta) {
+        $this->nroCuenta = $nroCuenta;
+
+        return $this;
+    }
+
+    /**
+     * Get nroCuenta
+     *
+     * @return string
+     */
+    public function getNroCuenta() {
+        return $this->nroCuenta;
+    }
+
+    /**
+     * Set cotizacionDolar
+     *
+     * @param string $cotizacionDolar
+     * @return Compra
+     */
+    public function setCotizacionDolar($cotizacionDolar) {
+        $this->cotizacionDolar = $cotizacionDolar;
+
+        return $this;
+    }
+
+    /**
+     * Get cotizacionDolar
+     *
+     * @return string
+     */
+    public function getCotizacionDolar() {
+        return $this->cotizacionDolar;
     }
 
 }

@@ -566,11 +566,13 @@ class InsumoController extends Controller {
             $em->getConnection()->setAutoCommit(false);
             $entity->setFechaAutorizado(new \DateTime());
             $entity->setAutorizante($this->getUser());
+            $aprobado = false;
             switch ($tipo) {
                 case 'APROBAR':
                     $entity->setCantidadAprobada($entity->getCantidad());
                     $insumo = $entity->getInsumo();
                     // registrar aprobado y poner mensaje a tarea nueva
+                    $aprobado = true;
                     break;
                 case 'RECHAZAR':
                     $entity->setCantidadAprobada(0);
@@ -582,11 +584,12 @@ class InsumoController extends Controller {
                     $insumo = $em->getRepository('AppBundle:Insumo')->find($insumoId);
                     $entity->setInsumo($insumo);
                     $entity->setCantidadAprobada($cant);
+                    $aprobado = $entity->getCantidadAprobada() > 0;
                     // registrar aprobado y poner mensaje a tarea nueva
                     break;
             }
             $em->persist($entity);
-            //$em->flush();
+            $em->flush();
             // completar registro de tarea nueva
             //$cloneInsumo = clone($entity);
             // $newTarea->addInsumo($cloneInsumo);
@@ -594,7 +597,7 @@ class InsumoController extends Controller {
                 $newTarea->addOrdenTrabajoDetalle($otdetalle);
             }
 
-            if ($entity->getCantidadAprobada() > 0) {
+            if ($aprobado) {
                 //$cloneInsumo->setInsumo($insumo);
                 // actualizar stock
                 $deposito = $em->getRepository('ConfigBundle:Departamento')->find($depositoId);
@@ -622,7 +625,7 @@ class InsumoController extends Controller {
                         $movim->setCantidad($entity->getCantidadAprobada());
                         $movim->setDeposito($deposito);
                         $em->persist($movim);
-                        //$em->flush();
+                        $em->flush();
                     }
                 }
             }
@@ -666,12 +669,13 @@ class InsumoController extends Controller {
                 'span' => $span,
                 'nombre' => ($insumo) ? $insumo->getTexto() : null,
                 'stock' => ($insumo) ? $insumo->getStockByDeposito($deposito->getId()) : null);
+            $jsondata = json_encode($data);
             $em->getConnection()->commit();
-            return new Response(json_encode($data));
+            return new Response($jsondata);
         }
         catch (\Exception $ex) {
             $em->getConnection()->rollback();
-            // var_dump($ex->getMessage());
+            var_dump($ex->getMessage());
             return new Response(json_encode('ERROR'));
         }
     }

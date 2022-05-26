@@ -442,8 +442,10 @@ class EquipoController extends Controller {
         //$repo = $em->getRepository('Gedmo\Loggable\Entity\LogEntry'); // we use default log entry class
         //$item = $em->find('AppBundle\Entity\Insumo', $id /*article id*/);
         //$logs = $repo->getLogEntries($item);
+        $fechaInstalacion = $em->getRepository('AppBundle:Equipo')->getFechaInstalacion($id);
 
         return array(
+            'fechaInstalacion' => $fechaInstalacion['fecha'],
             'entity' => $entity,
             'form' => $editForm->createView(),
             'reubicacion' => $reubicacion,
@@ -484,7 +486,13 @@ class EquipoController extends Controller {
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
             try {
-                // verificar que solo el Ãºltimo este como actual
+                // dejar solo el último como actual para los casos en que guarda mal el actual.
+                $actual = $entity->getUbicacionActual();
+                foreach ($entity->getUbicaciones() as $ubic) {
+                    if ($ubic != $actual) {
+                        $ubic->setActual(0);
+                    }
+                }
                 $em->flush();
                 // $this->addFlash('success','El equipo se modificó con éxito!');
                 return $this->redirectToRoute('equipo');
@@ -1146,11 +1154,11 @@ class EquipoController extends Controller {
 
         // Process Parameters
         // Orders
-        foreach ($orders as $key => $order) {
-            // Orders does not contain the name of the column, but its number,
-            // so add the name so we can handle it just like the $columns array
-            $orders[$key]['name'] = $columns[$order['column']]['name'];
-        }
+        /* foreach ($orders as $key => $order) {
+          // Orders does not contain the name of the column, but its number,
+          // so add the name so we can handle it just like the $columns array
+          $orders[$key]['name'] = $columns[$order['column']]['name'];
+          } */
 
         // Further filtering can be done in the Repository by passing necessary arguments
         $otherConditions = "array or whatever is needed";
@@ -1313,6 +1321,42 @@ class EquipoController extends Controller {
             }
         }
         return $cadena;
+    }
+
+    /**
+     * PLANILLA VALORIZADO DE EQUIPOS
+     */
+
+    /**
+     * @Route("/valorizado", name="equipo_valorizado")
+     * @Method("GET")
+     */
+    public function valorizadoAction(Request $request) {
+        UtilsController::haveAccess($this->getUser(), 'equipo_valorizado');
+        $em = $this->getDoctrine()->getManager();
+        //$entities = $em->getRepository('AppBundle:Equipo')->findByEstado(6);
+        return $this->render('AppBundle:Equipo:informe-valorizado.html.twig', array(
+                    'entities' => null
+        ));
+    }
+
+    /**
+     * @Route("/resetVerificado", name="equipo-reset-verificado")
+     * @Method("GET")
+     */
+    public function resetVerificadoAction() {
+        if (!$this->getUser()->getRol()->getAdmin()) {
+            return new JsonResponse('ERROR');
+        }
+        try {
+            $em = $this->getDoctrine()->getManager();
+            $results = $em->getRepository('AppBundle:Equipo')->setNoVerificado();
+            $msg = ($results) ? 'OK' : 'ERROR';
+        }
+        catch (Exception $ex) {
+            $msg = 'ERROR';
+        }
+        return new Response($msg);
     }
 
 }

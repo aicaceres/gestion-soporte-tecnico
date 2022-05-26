@@ -92,7 +92,7 @@
                                 </div>
                             </fieldset>  
                             <fieldset>  
-                                <div class="col-md-5">
+                                <div class="col-md-4">
                                     {{ form_label(form.proveedor) }}
                                     <div class="input-group">
                                         {{ form_widget(form.proveedor, { 'attr': {'class' : 'select2' } }) }}                                
@@ -105,29 +105,64 @@
                                     </div>
                                     {{ form_errors(form.proveedor) }}
                                 </div>  
-                                <div class="col-md-2">
-                                    {{ form_row(form.fechaCompra) }}
-                                </div>
-                                <div class="col-md-2">
-                                    {{ form_row(form.nroOrdenCompra) }}
-                                </div>
-                                <div class="col-md-3">
-                                    {{ form_row(form.nroRemito) }}
-                                </div>
-                            </fieldset>  
-                            <fieldset>  
-                                <div class="col-md-3">
-                                    {{ form_row(form.nroFactura) }}
-                                </div>
-                                <div class="col-md-6">
+                                <div class="col-md-5">
                                     {{ form_row(form.observaciones) }}
                                 </div>
                                 <div class="col-md-3">
                                     {{ form_row(form.estado, { 'attr': {'class' : 'select2' } }) }}
+                                    
+                                    {% if fechaInstalacion %}
+                                        <small style="font-size:10px;">
+                                            <label>Inicio de vida útil: </label> {{ fechaInstalacion|date('d/m/Y') }}
+                                        </small>
+                                    {% endif %}                                    
                                 </div>
                             </fieldset>  
+                            <fieldset>                                                                  
+                                {% if entity.detcompra|length == 0 %}
+                                    <div class="col-md-3">
+                                        {{ form_row(form.fechaCompra) }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ form_row(form.nroOrdenCompra) }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ form_row(form.nroRemito) }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ form_row(form.nroFactura) }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ form_row(form.moneda) }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {{ form_row(form.precio, { 'attr': {'class' : 'number' } }) }}
+                                    </div>                                    
+                                    <div class="col-md-2">
+                                        {{ form_row(form.cotizacionDolar, { 'attr': {'class' : 'number' } }) }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group ">
+                                            <label>Valorizado USD:</label>
+                                            <input type="text" value="{{ entity.precioDolares|number_format(2,'.',',') }}" id="valorizado" disabled="disabled" class="number form-control"> 
+                                        </div>
+                                    </div>
+                                    
+                                {% else %}
+                                    <div class="col-md-12">
+                                        <label>Fecha Compra:</label> {{ entity.fechaAdquisicion }}
+                                        <label style="padding-left:10px;">O.C.:</label> {{ entity.ordenCompra.txt }}
+                                        <label style="padding-left:10px;">Remito:</label> {{ entity.remito }}
+                                        <label style="padding-left:10px;">Factura:</label> {{ entity.factura}} 
+                                    </div>                                    
+                                    <div class="col-md-12">
+                                        <label>Precio ARG:</label> {{ entity.precioPesos|number_format(2,'.',',')}}  [ Cotiz U$S: {{ entity.cotizacionEquipo|number_format(2,'.',',') }} ]
+                                        <label style="padding-left:10px;">Valorizado USD:</label> {{ entity.precioDolares|number_format(2,'.',',') }}
+                                    </div>                                    
+                                {% endif %}    
+                            </fieldset>  
                         </div>  
-                        <div class="col-md-2">
+                        <div class="col-md-2 no-padding">
                             <fieldset>
                                 <div class="col-md-12 pad" style="padding:5px 0;" data-fotourl="{{path('foto_modelo')}}">
                                     {% if entity.id and entity.modelo.webPath %}
@@ -142,12 +177,12 @@
                                     {{ form_widget(form.verificado) }}
                                     {{ form_errors(form.verificado) }}
                                 </div>
-                            </fieldset>   
-                                
+                            </fieldset>                                   
                         </div>         
-                    </div>                                      
+                    </div>                                 
                     {% include "admin-form-data.html.twig" with {'table':entity} %}  
                     {% include "admin-form-deleted-data.html.twig" with {'table':entity} %}
+                    <br>
                     {% if entity.importado %}
                         {% set imp = entity.importado %} 
                     <div class="row" style="padding-top:12px;">
@@ -217,7 +252,7 @@ $(document).ready(function() {
     $('#appbundle_equipo_verificado').parent().parent().css('padding','0');
     $('#appbundle_equipo_verificado').parent().css('margin-right','5px');
     // restringuir las ubicaciones no permitidas        
-        //const lista = $.parseJSON('{{lista_ubicaciones}}') ;     
+       
         $('#ubicacion-actual').find(".ubicacion_selector option").each( function(){
             item = parseInt($(this).val())
             if( $.inArray( item , lista) == -1 ){

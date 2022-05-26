@@ -6,7 +6,7 @@
                 <div class='box-header'>
                     <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Registro de Compras  </h3>
                 </div><!-- /.box-header -->                
-                <div class='box-body'> 
+                <div class='box-body no-padding'> 
                     {% include "notification.html.twig" %}    
                     <div class="box box-solid">            
                         <div class="box-body border-radius-none">                
@@ -28,15 +28,18 @@
                                 <div class="col-md-4">
                                     <span><strong>Proveedor:</strong>&nbsp;{{entity.proveedor}}</span>
                                 </div>
-                                <div class="col-md-3">
-                                    <span><strong>N° Factura:</strong>&nbsp;{{entity.nroFactura}}</span>                        
+                                <div class="col-md-2">
+                                    <span><strong>Factura:</strong>&nbsp;{{entity.nroFactura}}</span>                        
                                 </div>
                                 <div class="col-md-2">
                                     {% if entity.fechaEnvioProveedor %}
                                     <span><strong>Pedido el:</strong>&nbsp;{{entity.fechaEnvioProveedor|date('d-m-Y')}}</span>
                                     {% endif %}    
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
+                                    <span><strong>N° Cuenta:</strong>&nbsp;{{entity.nroCuenta}}</span>
+                                </div>    
+                                <div class="col-md-2">
                                     <span><strong>Estado:</strong>&nbsp;{{entity.estado}}</span>
                                 </div>    
                             </fieldset>
@@ -52,8 +55,11 @@
                     </div>
                     <div class="col-md-12">
                         <div class="nav-tabs-custom" style="box-shadow:none;margin-bottom:0;">
+                            <div style="float:right; padding-right: 10px;"><span><strong>Cotización U$S:</strong>&nbsp;{{entity.cotizacionDolar|number_format(2,'.',',')}}</span></div>
                             <ul class="nav nav-tabs">
-                                <li class="active"><a href="#detalle" data-toggle="tab"><strong>Detalle de la Compra</strong></a></li>
+                                <li class="active">
+                                    <a href="#detalle" data-toggle="tab"><strong>Detalle de la Compra</strong></a>                                    
+                                </li>
                                 {% if entity.recepciones|length>0 %}
                                     {% for entrega in entity.recepciones %}
                                     <li><a href="#entrega{{ loop.index }}" data-toggle="tab"> Entrega N° {{ loop.index }}</a></li>   

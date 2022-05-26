@@ -1,0 +1,204 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Bienes en Stock</h3>
+                <div class="pull-right box-tools">                
+                    <form id="printform" name="printform" target="_blank" 
+                          action="{{ path('print_bienes_en_stock') }}" method="post">                        
+                        <input type="hidden" id="searchterm" name="searchterm"/>
+                        <input type="hidden" id="datalist" name="datalist"/>
+                        <input type="hidden" id="option" name="option"/>
+                        <button type="button" id="pdf" style="display:none;" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i></button> 
+                        <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i></button> 
+                    </form> 
+                </div>        
+            </div><!-- /.box-header -->
+            <div class='box-body' >
+                <form id="searchform" action="{{ path('compra_bienes_stock') }}" method="get" >                    
+                    <div class="col-md-12">                
+                        <fieldset>             
+                            <div class="col-md-2">
+                                <label class="required">Razón Social:</label>
+                                <div class="input-group">
+                                    <select class="select2 form-control" name="razonSocialId" id="selectRazonSocial">
+                                        <option value="0">Todos</option>
+                                        {%for razon in razonesSociales %}
+                                            <option {%if razon.id== app.session.get('filtro_compras_bienes')['razonSocialId'] %} selected="selected" {%endif%} value="{{razon.id}}">{{razon.abreviatura}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="required">Proveedor:</label>
+                                <div class="input-group">
+                                    <select class="select2 form-control" name="proveedorId" id="selectProveedor">
+                                        <option value="0">Todos</option>
+                                        {%for prov in proveedores %}
+                                            <option {%if prov.id== app.session.get('filtro_compras_bienes')['proveedorId'] %} selected="selected" {%endif%} value="{{prov.id}}">{{prov.nombre}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="required">Fecha de Adquisición:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{app.session.get('filtro_compras_bienes')['desde']}}">
+                                </div>   
+                            </div>    
+                            <div class="col-md-2"> 
+                                <label>&nbsp;</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{app.session.get('filtro_compras_bienes')['hasta'] }}">                                            
+                                </div>                                           
+                            </div>    
+                            <div class="col-md-2"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label style="width:100%;">&nbsp;</label>
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <div class="col-md-2">
+                                <label class="required">Fecha de Movimiento:</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="movDesde" id="movDesde" class="form-control datepicker" value="{{app.session.get('filtro_compras_bienes')['movDesde']}}">
+                                </div>   
+                            </div>    
+                            <div class="col-md-2"> 
+                                <label>&nbsp;</label>
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="movHasta" id="movHasta" class="form-control datepicker" value="{{app.session.get('filtro_compras_bienes')['movHasta'] }}">                                            
+                                </div>                                           
+                            </div>   
+                            <div class="col-md-3">
+                                <label class="required">Estado:</label>
+                                <div class="input-group">
+                                    <select class="select2 form-control" name="estado" id="selectEstado">
+                                        <option value="0"   {%if app.session.get('filtro_compras_bienes')['estado'] == '0' %} selected="selected" {%endif%}>Todos</option>
+                                        <option value="STS" {%if app.session.get('filtro_compras_bienes')['estado'] == 'STS' %} selected="selected" {%endif%} >Stock de Seguridad</option>
+                                        <option value="ET"  {%if app.session.get('filtro_compras_bienes')['estado'] == 'ET' %} selected="selected" {%endif%} >En Tránsito</option>
+                                        <option value="OP"  {%if app.session.get('filtro_compras_bienes')['estado'] == 'OP' %} selected="selected" {%endif%} >Operativo</option>
+                                    </select> 
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div> 
+                </form>                      
+
+                <div class="table-responsive" style="padding: 15px; overflow: auto;">
+                    <table id="tablelist" class="table table-bordered table-hover" style="font-size:11px;">
+                        <thead>
+                            <tr>
+                                <th class="no-sort">Razón Social</th>
+                                <th class="no-sort">Proveedor</th>
+                                <th class="no-sort">Descripción</th>
+                                <th class="no-sort">N° de Serie</th>
+                                <th class="no-sort">Ubicación</th>
+                                <th class="no-sort">Cuenta</th>
+                                <th class="no-sort">Factura</th>
+                                <th class="no-sort">Remito</th>
+                                <th class="no-sort">OC</th>
+                                <th class="no-sort">Fecha Adquisición</th>
+                                <th class="no-sort">Valor Adquisición USD</th>
+                                <th class="no-sort">TC</th>
+                                <th class="no-sort">Valor Adquisición ARS</th>
+                                <th class="no-sort">Fecha Movimiento</th>
+                                <th class="no-sort">Orden Trabajo</th>
+                                <th class="no-sort">Nueva Ubicación</th>
+                                <th class="no-sort">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in datos %}
+                                <tr>
+                                    <td>{{ item.razonSocial }}</td>                                
+                                    <td>{{ item.proveedor }}</td>                                
+                                    <td>{{ item.nombre }}</td>
+                                    <td>{{ item.nroSerie }}</td>
+                                    <td>{{ item.ubicInicial }}</td>
+                                    <td>{{ item.cuenta }} </td>
+                                    <td>{{ item.factura }}</td>
+                                    <td>{{ item.remito }}</td>
+                                    <td>{% if item.nroOC %} 
+                                        <a target="_blank" href="{{ path('compra_admin_show', { 'id': item.nroOC }) }}" >{{ item.txtOC }}</a>
+                                        {% else %} 
+                                            {{ item.txtOC }} 
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.fechaAdquisicion }}</td>
+                                    <td style="text-align:right" >{{ item.precioDolares|number_format(2,'.',',') }}</td>
+                                    <td style="text-align:right" >{{ item.cotizacionEquipo|number_format(2,'.',',') }}</td>
+                                    <td style="text-align:right" >{{ item.precioPesos|number_format(2,'.',',') }}</td>
+                                    <td>{{ item.fechaMovimiento }} </td>
+                                    <td>{% if item.nroOT %}
+                                        <a href="{{ path('print_ordentrabajo', { 'id': item.idOT }) }}" target="_blank"> 
+                                            {{ item.nroOT }}                                                
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ item.nuevaUbicacion }} </td>
+                                    <td>{{ item.estado }}</td>
+                                    
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+    
+$(document).ready(function() {    
+    $('.sidebar-toggle').click();
+    $('#limpiar-filtros').on('click',function(){
+        $('#searchform').find('.select2').val(0);
+        $('.select2').trigger('change');
+        $('#searchform').find('.datepicker').val('');
+        $('#opFiltro').val('limpiar');
+        $('#searchform').submit();
+    });    
+    $('body').on('click','.view-ot',function(){
+        var options = {
+           url: $(this).data('url'),
+           title:'Orden de Trabajo N° '+$(this).data('nro'),
+           size: eModal.size.xl,
+           buttons: [               
+               {text: 'Cerrar', style: 'success', close: true }
+           ]
+       };
+       eModal.ajax(options);
+    });     
+   $('#pdf,#xls,#csv').on('click',function(){   
+        $('#option').val( $(this).attr('id') );             
+        $('#searchterm').val( $('#tablelist_filter input').val() );
+        $('#printform').submit();
+    });       
+        
+});
+</script>    
+{% endblock %}

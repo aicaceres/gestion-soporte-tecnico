@@ -103,6 +103,26 @@ class CompraDetalle {
      */
     protected $nroSerie;
 
+    //nro de remito
+    public function getNroRemitoEquipo() {
+        $nro = '';
+        if ($this->getEquipo()) {
+            $nro = 'x';
+            if ($this->getCompra()->getNroRemito()) {
+                $nro = $this->getCompra()->getNroRemito();
+            }
+            else if (count($this->getRecepciones()) > 0) {
+                foreach ($this->getRecepciones() as $recep) {
+                    if ($recep->getRecepcion()->getNroRemito()) {
+                        $nro = $recep->getRecepcion()->getNroRemito();
+                        break;
+                    }
+                }
+            }
+        }
+        return $nro;
+    }
+
     public function getRecepcionesArray() {
         $recepciones = array();
         foreach ($this->getRecepciones() as $recep) {

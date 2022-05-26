@@ -11,6 +11,7 @@ use ConfigBundle\Controller\UtilsController;
 use Doctrine\Common\Collections\ArrayCollection;
 use AppBundle\Entity\Compra;
 use AppBundle\Form\CompraType;
+use AppBundle\Form\CompraEditType;
 use AppBundle\Entity\RecepcionCompra;
 use AppBundle\Entity\RecepcionCompraDetalle;
 use AppBundle\Form\RecepcionCompraType;
@@ -47,6 +48,7 @@ class CompraController extends Controller {
                     'razonSocialId' => $request->get('razonSocialId'),
                     'solicitanteId' => $request->get('solicitanteId'),
                     'estado' => $request->get('estado'),
+                    'cuenta' => $request->get('cuenta'),
                     'desde' => $periodo['desde'],
                     'hasta' => $periodo['hasta'],
                 );
@@ -60,6 +62,7 @@ class CompraController extends Controller {
                         'razonSocialId' => $sessionFiltro['razonSocialId'],
                         'solicitanteId' => $sessionFiltro['solicitanteId'],
                         'estado' => $sessionFiltro['estado'],
+                        'cuenta' => $sessionFiltro['cuenta'],
                         'desde' => $periodo['desde'],
                         'hasta' => $periodo['hasta'],
                     );
@@ -67,7 +70,7 @@ class CompraController extends Controller {
                 else {
                     $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
                     $filtro = array('proveedorId' => 0, 'razonSocialId' => 0, 'solicitanteId' => 0, 'estado' => '',
-                        'desde' => $periodo['desde'], 'hasta' => $periodo['hasta']);
+                        'desde' => $periodo['desde'], 'hasta' => $periodo['hasta'], 'cuenta' => '');
                 }
                 break;
         }
@@ -194,9 +197,6 @@ class CompraController extends Controller {
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        //$repo = $em->getRepository('Gedmo\Loggable\Entity\LogEntry'); // we use default log entry class
-        //$item = $em->find('AppBundle\Entity\Insumo', $id /*article id*/);
-        //$logs = $repo->getLogEntries($item);
         return array(
             'entity' => $entity,
             'form' => $editForm->createView(),
@@ -466,6 +466,7 @@ class CompraController extends Controller {
                             else {
                                 // equipo nuevo -> crear
                                 $producto = new Equipo();
+                                $producto->setVerificado(true);
                                 $producto->setNroSerie($formCompraDetalle[$key]['nroSerie']);
                                 $producto->setNombre($formCompraDetalle[$key]['nombre']);
                                 $producto->setProveedor($compra->getProveedor());
@@ -582,125 +583,6 @@ class CompraController extends Controller {
             'entity' => $compra,
             'form' => $form->createView(),
         );
-    }
-
-    private function ccrecepcionDeCompra($em, $compra, $recepcion = NULL, $file = NULL) {
-        try {
-            //$em->getConnection()->beginTransaction();
-            if (is_null($recepcion)) {
-                /*
-                 * Si es nuevo crear una recepción antes de procesar
-                 */
-                $recepcion = new RecepcionCompra();
-                $recepcion->setFechaRecepcion($compra->getFechaCompra());
-                $recepcion->setNroFactura($compra->getNroFactura());
-                $recepcion->setNroRemito($compra->getNroRemito());
-                $recepcion->setFile($file);
-                $recepcion->setCompra($compra);
-                foreach ($compra->getDetalles() as $det) {
-                    if ($det->isPendiente()) {
-                        $detrec = new RecepcionCompraDetalle();
-                        $detrec->setCompraDetalle($det);
-                        $detrec->setCantidad($det->getCantidad());
-                        $recepcion->addDetalle($detrec);
-                    }
-                }
-                $em->persist($recepcion);
-                $em->flush();
-            }
-            /*
-             * CREAR EQUIPO E INSUMOS y ACTUALIZAR STOCK
-             */
-            foreach ($recepcion->getDetalles() as $detalle) {
-                $compraDetalle = $detalle->getCompraDetalle();
-                $deposito = $em->getRepository('ConfigBundle:Departamento')->findOneByInicial(1);
-                if ($compraDetalle->getInsumo()) {
-                    // es insumo existente
-                    $producto = $em->getRepository('AppBundle:Insumo')->find($compraDetalle->getInsumo()->getId());
-                    $tipo = $producto->getTipo();
-                }
-                else {
-                    // crear insumo o equipo
-                    $tipo = $em->getRepository('ConfigBundle:Tipo')->find($compraDetalle->getTipo());
-                    if ($tipo->getClase() == 'I') {
-                        $producto = new Insumo();
-                    }
-                    else {
-                        $producto = new Equipo();
-                        $producto->setProveedor($compra->getProveedor());
-                        $producto->setNroSerie($compraDetalle->getNroSerie());
-                        $producto->setFechaCompra($compra->getFechaCompra());
-                        $producto->setNroFactura($compra->getNroFactura());
-                        $oc = ($compra->getRazonSocial()) ?
-                                $compra->getRazonSocial()->getAbreviatura() . '/' . $compra->getOrdenCompra() :
-                                $compra->getOrdenCompra();
-                        $producto->setNroOrdenCompra($oc);
-                        $producto->setNroRemito($recepcion->getNroRemito());
-                        $estado = $em->getRepository('ConfigBundle:Estado')->findOneByInicial(1);
-                        $producto->setEstado($estado);
-                    }
-                    $producto->setTipo($tipo);
-                    $producto->setNombre($compraDetalle->getNombre());
-                    $producto->setCodigo($compraDetalle->getCodigo());
-                    $producto->setMarca($em->getRepository('ConfigBundle:Marca')->find($compraDetalle->getItemMarca()));
-                    $producto->setModelo($em->getRepository('ConfigBundle:Modelo')->find($compraDetalle->getItemModelo()));
-                    $em->persist($producto);
-                    $em->flush();
-                    if ($tipo->getClase() == 'E') {
-                        $compraDetalle->setEquipo($producto);
-                        $em->persist($compraDetalle);
-                        $producto->setBarcode(str_pad($producto->getTipo()->getId(), 3, '0', STR_PAD_LEFT) .
-                                str_pad($producto->getMarca()->getId(), 3, '0', STR_PAD_LEFT) . str_pad($producto->getModelo()->getId(), 3, '0', STR_PAD_LEFT) .
-                                str_pad($producto->getId(), 5, '0', STR_PAD_LEFT));
-                        // agregar ubicacion
-                        $ubicacion = new EquipoUbicacion();
-                        $ubicacion->setUbicacion($deposito->getEdificio()->getUbicacion());
-                        $ubicacion->setEdificio($deposito->getEdificio());
-                        $ubicacion->setDepartamento($deposito);
-                        $ubicacion->setPiso($deposito->getPisos()[0]);
-                        $ubicacion->setActual(TRUE);
-                        $ubicacion->setFechaEntrega($compra->getFechaCompra());
-                        $conceptoEntrega = $em->getRepository('ConfigBundle:ConceptoEntrega')->findOneByInicial(1);
-                        $ubicacion->setConceptoEntrega($conceptoEntrega);
-                        $producto->addUbicacion($ubicacion);
-                        $em->persist($producto);
-                        $em->flush();
-                    }
-                }
-                if ($tipo->getClase() == 'I') {
-                    // Ajustar stock
-                    $stock = $em->getRepository('AppBundle:Stock')->findInsumoDeposito($producto->getId(), $deposito->getId());
-                    if (!$stock) {
-                        $stock = new Stock();
-                        $stock->setInsumo($producto);
-                        $stock->setDeposito($deposito);
-                        $stock->setCantidad(0);
-                    }
-                    $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
-                    $em->persist($stock);
-                    $em->flush();
-                    // Cargar movimiento
-                    $movim = new StockHistorico();
-                    $movim->setFecha($recepcion->getFechaRecepcion());
-                    $movim->setTipo('COMPRA');
-                    $movim->setSigno('+');
-                    $movim->setMovimiento($compra->getId());
-                    $movim->setInsumo($producto);
-                    $movim->setStock($producto->getStockTotal());
-                    $movim->setCantidad($detalle->getCantidad());
-                    $movim->setDeposito($deposito);
-                    $em->persist($movim);
-                    $em->flush();
-                }
-            }
-
-            // $em->getConnection()->commit();
-            return true;
-        }
-        catch (\Exception $ex) {
-            //   $em->getConnection()->rollback();
-            return false;
-        }
     }
 
     /**
@@ -1039,6 +921,195 @@ class CompraController extends Controller {
             return new Response($ex->getMessage());
         }
         return new Response('ERROR');
+    }
+
+    /**
+     * PLANILLA PARA ADMINISTRACION DE ESTADO DE EQUIPOS
+     */
+
+    /**
+     * @Route("/bienesEnStock", name="compra_bienes_stock")
+     * @Method("GET")
+     */
+    public function bienesEnStockAction(Request $request) {
+        UtilsController::haveAccess($this->getUser(), 'compra');
+        $em = $this->getDoctrine()->getManager();
+        $session = $this->get('session');
+        $sessionFiltro = $session->get('filtro_compras_bienes');
+        switch ($request->get('_opFiltro')) {
+            case 'buscar':
+                $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+                $filtro = array(
+                    'razonSocialId' => $request->get('razonSocialId'),
+                    'proveedorId' => $request->get('proveedorId'),
+                    'desde' => $periodo['desde'],
+                    'hasta' => $periodo['hasta'],
+                    'movDesde' => $request->get('movDesde'),
+                    'movHasta' => $request->get('movHasta'),
+                    'estado' => $request->get('estado'),
+                );
+                break;
+            case 'limpiar':
+                $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+                $filtro = array(
+                    'razonSocialId' => 0,
+                    'proveedorId' => 0,
+                    'desde' => $periodo['desde'],
+                    'hasta' => $periodo['hasta'],
+                    'movDesde' => '',
+                    'movHasta' => '',
+                    'estado' => '0',
+                );
+                break;
+            default:
+                //desde paginacion, se usa session
+                if (!$sessionFiltro) {
+                    $periodo = UtilsController::ultimoMesParaFiltro($sessionFiltro['desde'], $sessionFiltro['hasta']);
+                    $filtro = array(
+                        'razonSocialId' => $sessionFiltro['razonSocialId'],
+                        'proveedorId' => $sessionFiltro['proveedorId'],
+                        'desde' => $periodo['desde'],
+                        'hasta' => $periodo['hasta'],
+                        'movDesde' => $sessionFiltro['movDesde'],
+                        'movHasta' => $sessionFiltro['movHasta'],
+                        'estado' => $sessionFiltro['estado'],
+                    );
+                }
+                else {
+                    $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+                    $filtro = array('proveedorId' => 0, 'razonSocialId' => 0, 'estado' => '0',
+                        'desde' => $periodo['desde'], 'hasta' => $periodo['hasta'], 'movDesde' => '', 'movHasta' => '');
+                }
+                break;
+        }
+        $session->set('filtro_compras_bienes', $filtro);
+        $proveedores = $em->getRepository('AppBundle:Proveedor')->findBy(array(), array('nombre' => 'ASC'));
+        $razonesSociales = $em->getRepository('ConfigBundle:Ubicacion')->findBy(array('razonSocial' => '1'), array('abreviatura' => 'ASC'));
+
+
+        $datos = $this->getBienesEnStock($filtro, $em);
+
+        return $this->render('AppBundle:Compra:bienes-en-stock.html.twig', array(
+                    'datos' => $datos,
+                    'proveedores' => $proveedores,
+                    'razonesSociales' => $razonesSociales,
+                    'filtro' => $filtro
+        ));
+    }
+
+    /**
+     * @Route("/printBienesEnStock", name="print_bienes_en_stock")
+     * @Method("POST")
+     * @Template()
+     */
+    public function printBienesEnStockAction(Request $request) {
+
+        $op = $request->get('option');
+        $em = $this->getDoctrine()->getManager();
+        $session = $this->get('session');
+        $filtro = $session->get('filtro_compras_bienes');
+        //$searchTerm = $request->get('searchterm');
+        $proveedor = $em->getRepository('AppBundle:Proveedor')->find($filtro['proveedorId']);
+        $razonSocial = $em->getRepository('ConfigBundle:Ubicacion')->find($filtro['razonSocialId']);
+        $estado = $em->getRepository('ConfigBundle:Estado')->find($filtro['estado']);
+        $arrayFiltro = array(
+            $razonSocial ? $razonSocial->getAbreviatura() : 'Todas',
+            $proveedor ? $proveedor->getNombre() : 'Todos',
+            $estado ? $estado->getNombre() : 'Todos',
+            $filtro['desde'], $filtro['hasta'],
+            $filtro['movDesde'], $filtro['movHasta']
+        );
+        $hoy = new \DateTime();
+        $datos = $this->getBienesEnStock($filtro, $em);
+        switch ($op) {
+            case 'pdf':
+                $logo1 = __DIR__ . '/../../../web/bundles/app/img/homeTSG.png';
+                $facade = $this->get('ps_pdf.facade');
+                $response = new Response();
+                $this->render('AppBundle:Compra:listado.pdf.twig', array('items' => $datos, 'filtro' => $arrayFiltro, 'logo' => $logo1,
+                    'search' => $request->get('searchterm')), $response);
+
+                $xml = $response->getContent();
+                $content = $facade->render($xml);
+
+                return new Response($content, 200, array('content-type' => 'application/pdf',
+                    'Content-Disposition' => 'filename=listado_compras_' . $hoy->format('dmY_Hi') . '.pdf'));
+
+            case 'xls':
+                $partial = $this->renderView('AppBundle:Compra:bienes-en-stock-xls.html.twig',
+                        array('items' => $datos, 'filtro' => $arrayFiltro));
+
+                $fileName = 'Bienes_en_Stock_' . $hoy->format('dmY_Hi');
+                $response = new Response();
+                $response->setStatusCode(200);
+                $response->headers->set('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+                $response->headers->set('Content-Disposition', 'filename="' . $fileName . '.xls"');
+                $response->setContent($partial);
+                return $response;
+        }
+    }
+
+    private function getBienesEnStock($filtro, $em) {
+        $entities = $em->getRepository('AppBundle:Compra')->getBienesEnStock($filtro);
+        $desde = ($filtro['movDesde']) ? date('Ymd', strtotime($filtro['movDesde'])) : '';
+        $hasta = ($filtro['movHasta']) ? date('Ymd', strtotime($filtro['movHasta'])) : '';
+        $datos = array();
+        foreach ($entities as $entity) {
+            $ubicInicial = $em->getRepository('AppBundle:Equipo')->getPrimeraUbicacionParaBienes($entity->getId());
+            // TRAER LA OT PARA TENER TODOS LOS DATOS DE PUESTO EN OPERATIVO.
+            $tareaop = $em->getRepository('AppBundle:Equipo')->getTareaOperativoParaBienes($entity->getId());
+            $fechaMovimiento = $idOT = $nroOT = $nuevaUbicacion = '';
+            if ($desde && $hasta) {
+                if (count($tareaop) == 0) {
+                    // saltear equipo por no haber sido instalado
+                    continue;
+                }
+                else {
+                    // verificar la fecha de instalacion con el rango
+                    $fecha = $tareaop->getFecha()->format('Ymd');
+                    if (!($fecha >= $desde && $fecha <= $hasta)) {
+                        continue;
+                    }
+                }
+            }
+            if (count($tareaop) > 0) {
+                $fechaMovimiento = $tareaop->getFecha()->format('d/m/Y');
+                $idOT = $tareaop->getOrdenTrabajo()->getId();
+                $nroOT = $tareaop->getOrdenTrabajo()->getNroOT();
+                if ($tareaop->getOrdenTrabajoDetalles()[0]->getEquipoUbicacionFinal()) {
+                    $nuevaUbicacion = '';
+                    foreach ($tareaop->getOrdenTrabajoDetalles() as $tarea) {
+                        $nuevaUbicacion = $nuevaUbicacion . 'f ' . $tarea->getEquipoUbicacionFinal()->getTexto();
+                    }
+                }
+                else {
+                    $nuevaUbicacion = 'Verificar: OTD' . $tareaop->getOrdenTrabajoDetalles()[0]->getId() . ' EQ' . $entity->getId();
+                }
+            }
+
+            $datos[] = array(
+                'razonSocial' => $entity->getRazonSocial(),
+                'proveedor' => $entity->getProveedor(),
+                'nombre' => $entity->getNombre(),
+                'nroSerie' => $entity->getNroSerie(),
+                'ubicInicial' => ($ubicInicial) ? $ubicInicial->getDepartamento() : '',
+                'cuenta' => $entity->getCuenta(),
+                'factura' => $entity->getFactura(),
+                'remito' => $entity->getRemito(),
+                'nroOC' => $entity->getOrdenCompra()['id'],
+                'txtOC' => $entity->getOrdenCompra()['txt'],
+                'fechaAdquisicion' => $entity->getFechaAdquisicion(),
+                'precioDolares' => $entity->getPrecioDolares(),
+                'cotizacionEquipo' => $entity->getCotizacionEquipo(),
+                'precioPesos' => $entity->getPrecioPesos(),
+                'fechaMovimiento' => $fechaMovimiento,
+                'idOT' => $idOT,
+                'nroOT' => $nroOT,
+                'nuevaUbicacion' => $nuevaUbicacion,
+                'estado' => $entity->getEstado()
+            );
+        }
+        return $datos;
     }
 
 }

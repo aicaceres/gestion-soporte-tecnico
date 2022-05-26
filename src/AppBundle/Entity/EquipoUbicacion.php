@@ -1,16 +1,17 @@
 <?php
+
 namespace AppBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+
 /**
  * AppBundle\Entity\EquipoUbicacion
  * @ORM\Table(name="equipo_ubicacion")
  * @ORM\Entity()
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
- * @Gedmo\Loggable()  
+ * @Gedmo\Loggable()
  */
-class EquipoUbicacion
-{
+class EquipoUbicacion {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -19,59 +20,68 @@ class EquipoUbicacion
      */
     protected $id;
 
-     /**
-     *@ORM\ManyToOne(targetEntity="AppBundle\Entity\Equipo", inversedBy="ubicaciones")
-     *@ORM\JoinColumn(name="equipo_id", referencedColumnName="id")      
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Equipo", inversedBy="ubicaciones")
+     * @ORM\JoinColumn(name="equipo_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
     protected $equipo;
+
     /**
      * @var string $redIp
-     * @ORM\Column(name="red_ip", type="string", nullable=true)     
+     * @ORM\Column(name="red_ip", type="string", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $redIp;    
+    protected $redIp;
+
     /**
-     *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Ubicacion")
-     *@ORM\JoinColumn(name="ubicacion_id", referencedColumnName="id") 
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Ubicacion")
+     * @ORM\JoinColumn(name="ubicacion_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
     protected $ubicacion;
+
     /**
-     *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Departamento",inversedBy="equipos")
-     *@ORM\JoinColumn(name="departamento_id", referencedColumnName="id") 
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Departamento",inversedBy="equipos")
+     * @ORM\JoinColumn(name="departamento_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
     protected $departamento;
+
     /**
-     *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Edificio")
-     *@ORM\JoinColumn(name="edificio_id", referencedColumnName="id")
-     * @Gedmo\Versioned() 
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Edificio")
+     * @ORM\JoinColumn(name="edificio_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $edificio;
+
     /**
-     *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Piso")
-     *@ORM\JoinColumn(name="piso_id", referencedColumnName="id")
-     * @Gedmo\Versioned() 
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Piso")
+     * @ORM\JoinColumn(name="piso_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $piso;
+
     /**
-     *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\ConceptoEntrega")
-     *@ORM\JoinColumn(name="concepto_entrega_id", referencedColumnName="id")
-     * @Gedmo\Versioned() 
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\ConceptoEntrega")
+     * @ORM\JoinColumn(name="concepto_entrega_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $conceptoEntrega;
+
     /**
      * @var date $fechaEntrega
      * @ORM\Column(name="fecha_entrega", type="date", nullable=true)
      * @Gedmo\Versioned()
      */
-    private $fechaEntrega;    
+    private $fechaEntrega;
+
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $observaciones;         
+    protected $observaciones;
+
     /**
      * @ORM\Column(name="actual", type="boolean")
      */
@@ -83,12 +93,14 @@ class EquipoUbicacion
      * @ORM\Column(type="datetime")
      */
     private $created;
+
     /**
      * @var datetime $updated
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
      */
-    private $updated;    
+    private $updated;
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -96,52 +108,62 @@ class EquipoUbicacion
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+
     /**
      * @var User $updatedBy
      * @Gedmo\Blameable(on="update")
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;    
+    private $updatedBy;
+
     /**
      * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
      */
-    private $deletedAt;    
-    
+    private $deletedAt;
+
     /**
-    * @ORM\OneToOne(targetEntity="AppBundle\Entity\RequerimientoDetalle", inversedBy="equipoUbicacionRequerimiento",cascade={"persist"})
-    * @ORM\JoinColumn(name="requerimiento_detalle_id", referencedColumnName="id", onDelete="CASCADE")
-    */
-    protected $requerimientoDetalle;    
-    
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\RequerimientoDetalle", inversedBy="equipoUbicacionRequerimiento",cascade={"persist"})
+     * @ORM\JoinColumn(name="requerimiento_detalle_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $requerimientoDetalle;
+
     /**
-    * @ORM\OneToOne(targetEntity="AppBundle\Entity\OrdenTrabajoDetalle", inversedBy="equipoUbicacionOrdenTrabajo",cascade={"persist"})
-    * @ORM\JoinColumn(name="orden_trabajo_detalle_id", referencedColumnName="id", onDelete="CASCADE")
-    */
-    protected $ordenTrabajoDetalle;    
-    
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\OrdenTrabajoDetalle", inversedBy="equipoUbicacionOrdenTrabajo",cascade={"persist"})
+     * @ORM\JoinColumn(name="orden_trabajo_detalle_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    protected $ordenTrabajoDetalle;
 
     public function __toString() {
-        return $this->ubicacion;
+        return $this->getUbicacion();
     }
-    
-    public function getTexto() {        
-        if( $this->getDepartamento() ){
-           $cadena = $this->getDepartamento()->getEdificio()->getUbicacion()->getAbreviatura().' - '.$this->getDepartamento()->getEdificio().' - '.$this->getDepartamento().' - '.$this->getPiso(); 
-        }else{
-           $cadena = 'Sin Departamento asignado';
-        }   
+
+    public function getTexto() {
+        if ($this->getDepartamento()) {
+            $cadena = $this->getDepartamento()->getEdificio()->getUbicacion()->getAbreviatura() . ' - ' . $this->getDepartamento()->getEdificio() . ' - ' . $this->getDepartamento() . ' - ' . $this->getPiso();
+        }
+        else {
+            $cadena = 'Sin Departamento asignado';
+        }
         return $cadena;
     }
 
+    public function getTextoParaBienes() {
+        if ($this->getDepartamento()) {
+            $cadena = $this->getDepartamento()->getEdificio()->getUbicacion()->getAbreviatura() . ' - ' . $this->getDepartamento()->getEdificio() . ' - ' . $this->getDepartamento();
+        }
+        else {
+            $cadena = 'Sin Departamento asignado';
+        }
+        return $cadena;
+    }
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -151,8 +173,7 @@ class EquipoUbicacion
      * @param \DateTime $fechaEntrega
      * @return EquipoUbicacion
      */
-    public function setFechaEntrega($fechaEntrega)
-    {
+    public function setFechaEntrega($fechaEntrega) {
         $this->fechaEntrega = $fechaEntrega;
 
         return $this;
@@ -161,10 +182,9 @@ class EquipoUbicacion
     /**
      * Get fechaEntrega
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getFechaEntrega()
-    {
+    public function getFechaEntrega() {
         return $this->fechaEntrega;
     }
 
@@ -174,8 +194,7 @@ class EquipoUbicacion
      * @param string $observaciones
      * @return EquipoUbicacion
      */
-    public function setObservaciones($observaciones)
-    {
+    public function setObservaciones($observaciones) {
         $this->observaciones = $observaciones;
 
         return $this;
@@ -184,10 +203,9 @@ class EquipoUbicacion
     /**
      * Get observaciones
      *
-     * @return string 
+     * @return string
      */
-    public function getObservaciones()
-    {
+    public function getObservaciones() {
         return $this->observaciones;
     }
 
@@ -197,8 +215,7 @@ class EquipoUbicacion
      * @param boolean $actual
      * @return EquipoUbicacion
      */
-    public function setActual($actual)
-    {
+    public function setActual($actual) {
         $this->actual = $actual;
 
         return $this;
@@ -207,10 +224,9 @@ class EquipoUbicacion
     /**
      * Get actual
      *
-     * @return boolean 
+     * @return boolean
      */
-    public function getActual()
-    {
+    public function getActual() {
         return $this->actual;
     }
 
@@ -220,8 +236,7 @@ class EquipoUbicacion
      * @param \DateTime $created
      * @return EquipoUbicacion
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -230,10 +245,9 @@ class EquipoUbicacion
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -243,8 +257,7 @@ class EquipoUbicacion
      * @param \DateTime $updated
      * @return EquipoUbicacion
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -253,10 +266,9 @@ class EquipoUbicacion
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -266,8 +278,7 @@ class EquipoUbicacion
      * @param \DateTime $deletedAt
      * @return EquipoUbicacion
      */
-    public function setDeletedAt($deletedAt)
-    {
+    public function setDeletedAt($deletedAt) {
         $this->deletedAt = $deletedAt;
 
         return $this;
@@ -276,10 +287,9 @@ class EquipoUbicacion
     /**
      * Get deletedAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getDeletedAt()
-    {
+    public function getDeletedAt() {
         return $this->deletedAt;
     }
 
@@ -289,8 +299,7 @@ class EquipoUbicacion
      * @param \AppBundle\Entity\Equipo $equipo
      * @return EquipoUbicacion
      */
-    public function setEquipo(\AppBundle\Entity\Equipo $equipo = null)
-    {
+    public function setEquipo(\AppBundle\Entity\Equipo $equipo = null) {
         $this->equipo = $equipo;
 
         return $this;
@@ -299,10 +308,9 @@ class EquipoUbicacion
     /**
      * Get equipo
      *
-     * @return \AppBundle\Entity\Equipo 
+     * @return \AppBundle\Entity\Equipo
      */
-    public function getEquipo()
-    {
+    public function getEquipo() {
         return $this->equipo;
     }
 
@@ -312,8 +320,7 @@ class EquipoUbicacion
      * @param \ConfigBundle\Entity\Ubicacion $ubicacion
      * @return EquipoUbicacion
      */
-    public function setUbicacion(\ConfigBundle\Entity\Ubicacion $ubicacion = null)
-    {
+    public function setUbicacion(\ConfigBundle\Entity\Ubicacion $ubicacion = null) {
         $this->ubicacion = $ubicacion;
 
         return $this;
@@ -322,10 +329,9 @@ class EquipoUbicacion
     /**
      * Get ubicacion
      *
-     * @return \ConfigBundle\Entity\Ubicacion 
+     * @return \ConfigBundle\Entity\Ubicacion
      */
-    public function getUbicacion()
-    {
+    public function getUbicacion() {
         return $this->ubicacion;
     }
 
@@ -335,8 +341,7 @@ class EquipoUbicacion
      * @param \ConfigBundle\Entity\Departamento $departamento
      * @return EquipoUbicacion
      */
-    public function setDepartamento(\ConfigBundle\Entity\Departamento $departamento = null)
-    {
+    public function setDepartamento(\ConfigBundle\Entity\Departamento $departamento = null) {
         $this->departamento = $departamento;
 
         return $this;
@@ -345,10 +350,9 @@ class EquipoUbicacion
     /**
      * Get departamento
      *
-     * @return \ConfigBundle\Entity\Departamento 
+     * @return \ConfigBundle\Entity\Departamento
      */
-    public function getDepartamento()
-    {
+    public function getDepartamento() {
         return $this->departamento;
     }
 
@@ -358,8 +362,7 @@ class EquipoUbicacion
      * @param \ConfigBundle\Entity\Edificio $edificio
      * @return EquipoUbicacion
      */
-    public function setEdificio(\ConfigBundle\Entity\Edificio $edificio = null)
-    {
+    public function setEdificio(\ConfigBundle\Entity\Edificio $edificio = null) {
         $this->edificio = $edificio;
 
         return $this;
@@ -368,10 +371,9 @@ class EquipoUbicacion
     /**
      * Get edificio
      *
-     * @return \ConfigBundle\Entity\Edificio 
+     * @return \ConfigBundle\Entity\Edificio
      */
-    public function getEdificio()
-    {
+    public function getEdificio() {
         return $this->edificio;
     }
 
@@ -381,8 +383,7 @@ class EquipoUbicacion
      * @param \ConfigBundle\Entity\Piso $piso
      * @return EquipoUbicacion
      */
-    public function setPiso(\ConfigBundle\Entity\Piso $piso = null)
-    {
+    public function setPiso(\ConfigBundle\Entity\Piso $piso = null) {
         $this->piso = $piso;
 
         return $this;
@@ -391,10 +392,9 @@ class EquipoUbicacion
     /**
      * Get piso
      *
-     * @return \ConfigBundle\Entity\Piso 
+     * @return \ConfigBundle\Entity\Piso
      */
-    public function getPiso()
-    {
+    public function getPiso() {
         return $this->piso;
     }
 
@@ -404,8 +404,7 @@ class EquipoUbicacion
      * @param \ConfigBundle\Entity\ConceptoEntrega $conceptoEntrega
      * @return EquipoUbicacion
      */
-    public function setConceptoEntrega(\ConfigBundle\Entity\ConceptoEntrega $conceptoEntrega = null)
-    {
+    public function setConceptoEntrega(\ConfigBundle\Entity\ConceptoEntrega $conceptoEntrega = null) {
         $this->conceptoEntrega = $conceptoEntrega;
 
         return $this;
@@ -414,10 +413,9 @@ class EquipoUbicacion
     /**
      * Get conceptoEntrega
      *
-     * @return \ConfigBundle\Entity\ConceptoEntrega 
+     * @return \ConfigBundle\Entity\ConceptoEntrega
      */
-    public function getConceptoEntrega()
-    {
+    public function getConceptoEntrega() {
         return $this->conceptoEntrega;
     }
 
@@ -427,8 +425,7 @@ class EquipoUbicacion
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return EquipoUbicacion
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -437,10 +434,9 @@ class EquipoUbicacion
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -450,8 +446,7 @@ class EquipoUbicacion
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return EquipoUbicacion
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -460,10 +455,9 @@ class EquipoUbicacion
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -473,8 +467,7 @@ class EquipoUbicacion
      * @param string $redIp
      * @return EquipoUbicacion
      */
-    public function setRedIp($redIp)
-    {
+    public function setRedIp($redIp) {
         $this->redIp = $redIp;
 
         return $this;
@@ -483,13 +476,11 @@ class EquipoUbicacion
     /**
      * Get redIp
      *
-     * @return string 
+     * @return string
      */
-    public function getRedIp()
-    {
+    public function getRedIp() {
         return $this->redIp;
     }
-    
 
     /**
      * Set ubicacionRequerimiento
@@ -497,8 +488,7 @@ class EquipoUbicacion
      * @param \AppBundle\Entity\RequerimientoDetalle $ubicacionRequerimiento
      * @return EquipoUbicacion
      */
-    public function setUbicacionRequerimiento(\AppBundle\Entity\RequerimientoDetalle $ubicacionRequerimiento = null)
-    {
+    public function setUbicacionRequerimiento(\AppBundle\Entity\RequerimientoDetalle $ubicacionRequerimiento = null) {
         $this->ubicacionRequerimiento = $ubicacionRequerimiento;
 
         return $this;
@@ -507,10 +497,9 @@ class EquipoUbicacion
     /**
      * Get ubicacionRequerimiento
      *
-     * @return \AppBundle\Entity\RequerimientoDetalle 
+     * @return \AppBundle\Entity\RequerimientoDetalle
      */
-    public function getUbicacionRequerimiento()
-    {
+    public function getUbicacionRequerimiento() {
         return $this->ubicacionRequerimiento;
     }
 
@@ -520,8 +509,7 @@ class EquipoUbicacion
      * @param \AppBundle\Entity\RequerimientoDetalle $requerimientoDetalle
      * @return EquipoUbicacion
      */
-    public function setRequerimientoDetalle(\AppBundle\Entity\RequerimientoDetalle $requerimientoDetalle = null)
-    {
+    public function setRequerimientoDetalle(\AppBundle\Entity\RequerimientoDetalle $requerimientoDetalle = null) {
         $this->requerimientoDetalle = $requerimientoDetalle;
 
         return $this;
@@ -530,10 +518,9 @@ class EquipoUbicacion
     /**
      * Get requerimientoDetalle
      *
-     * @return \AppBundle\Entity\RequerimientoDetalle 
+     * @return \AppBundle\Entity\RequerimientoDetalle
      */
-    public function getRequerimientoDetalle()
-    {
+    public function getRequerimientoDetalle() {
         return $this->requerimientoDetalle;
     }
 
@@ -543,8 +530,7 @@ class EquipoUbicacion
      * @param \AppBundle\Entity\OrdenTrabajoDetalle $ordenTrabajoDetalle
      * @return EquipoUbicacion
      */
-    public function setOrdenTrabajoDetalle(\AppBundle\Entity\OrdenTrabajoDetalle $ordenTrabajoDetalle = null)
-    {
+    public function setOrdenTrabajoDetalle(\AppBundle\Entity\OrdenTrabajoDetalle $ordenTrabajoDetalle = null) {
         $this->ordenTrabajoDetalle = $ordenTrabajoDetalle;
 
         return $this;
@@ -553,10 +539,10 @@ class EquipoUbicacion
     /**
      * Get ordenTrabajoDetalle
      *
-     * @return \AppBundle\Entity\OrdenTrabajoDetalle 
+     * @return \AppBundle\Entity\OrdenTrabajoDetalle
      */
-    public function getOrdenTrabajoDetalle()
-    {
+    public function getOrdenTrabajoDetalle() {
         return $this->ordenTrabajoDetalle;
     }
+
 }

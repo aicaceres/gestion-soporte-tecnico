@@ -1,24 +1,25 @@
 <?php
+
 namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+
 /**
  * AppBundle\Entity\Equipo
  * @ORM\Table(name="equipo",uniqueConstraints={@ORM\UniqueConstraint(name="equipo_idx", columns={"tipo_id","nro_serie","nombre"})})
  * @ORM\Entity(repositoryClass="AppBundle\Entity\EquipoRepository")
  * @UniqueEntity(
- *     fields={"tipo","nroSerie","nombre"}, errorPath="nombre", 
+ *     fields={"tipo","nroSerie","nombre"}, errorPath="nombre",
  *     message="Ya existe un equipo con la misma descripción o nro de serie para este tipo."
  * )
  * @ORM\HasLifecycleCallbacks
- * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)   
- * @Gedmo\Loggable()  
+ * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @Gedmo\Loggable()
  */
-class Equipo
-{
+class Equipo {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -26,129 +27,168 @@ class Equipo
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string",unique=true, nullable=false)
      * @Assert\NotBlank()
      * @Gedmo\Versioned()
      */
-    protected $nombre;    
+    protected $nombre;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Tipo")
      * @ORM\JoinColumn(name="tipo_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $tipo;     
+    protected $tipo;
+
     /**
      * @var string $codigo
      * @ORM\Column(name="codigo", type="string", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $codigo; 
+    protected $codigo;
+
     /**
      * @var string $barcode
      * @ORM\Column(name="barcode", type="string", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $barcode; 
+    protected $barcode;
+
     /**
      * @var string $nroSerie
      * @ORM\Column(name="nro_serie", type="string",unique=true, nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $nroSerie; 
+    protected $nroSerie;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Estado")
      * @ORM\JoinColumn(name="estado_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $estado;    
+    protected $estado;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Marca",inversedBy="equipos")
      * @ORM\JoinColumn(name="marca_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $marca;    
+    protected $marca;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Modelo")
      * @ORM\JoinColumn(name="modelo_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $modelo;    
-    
+    protected $modelo;
+
     /**
-     *@ORM\ManyToOne(targetEntity="AppBundle\Entity\Proveedor", inversedBy="equipos")
-     *@ORM\JoinColumn(name="proveedor_id", referencedColumnName="id") 
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Proveedor", inversedBy="equipos")
+     * @ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $proveedor;   
+    protected $proveedor;
+
     /**
      * @var date $fechaCompra
      * @ORM\Column(name="fecha_compra", type="date", nullable=true)
      * @Gedmo\Versioned()
      */
-    private $fechaCompra; 
+    private $fechaCompra;
+
     /**
      * @var string $nroOrdenCompra
      * @ORM\Column(name="nro_orden_compra", type="string", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $nroOrdenCompra;    
+    protected $nroOrdenCompra;
+
     /**
      * @var string $nroFactura
      * @ORM\Column(name="nro_factura", type="string", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $nroFactura;    
+    protected $nroFactura;
+
     /**
      * @var string $nroRemito
      * @ORM\Column(name="nro_remito", type="string", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $nroRemito;    
+    protected $nroRemito;
+
+    /**
+     * @var integer $precio
+     * @ORM\Column(name="precio", type="decimal", scale=2,nullable=true )
+     */
+    protected $precio;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
+     * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
+     */
+    protected $moneda;
+
+    /**
+     * @var string $cotizacionDolar
+     * @ORM\Column(name="cotizacion_dolar", type="decimal", scale=2, nullable=true)
+     */
+    protected $cotizacionDolar = 0;
 
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
      */
     protected $observaciones;
-    
+
     /**
      * @ORM\Column(name="verificado", type="boolean", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $verificado = false;    
+    protected $verificado = false;
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\RequerimientoDetalle", mappedBy="equipo",cascade={"remove"})
      */
-    protected $requerimientos;    
+    protected $requerimientos;
+
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\OrdenTrabajoDetalle", mappedBy="equipo",cascade={"remove"})
      */
-    protected $ordenesdetrabajo;    
-    
+    protected $ordenesdetrabajo;
+
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\EquipoUbicacion", mappedBy="equipo",cascade={"persist", "remove"})
+     * @ORM\OrderBy({"created" = "DESC"})
      */
-    protected $ubicaciones;    
-            
+    protected $ubicaciones;
+
+    /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\RecepcionCompraDetalle", mappedBy="equipo")
+     */
+    protected $detcompra;
+
     /**
      * @ORM\OneToOne(targetEntity="ConfigBundle\Entity\Importados")
-     */    
+     */
     private $importado;
-    
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */
     private $created;
+
     /**
      * @var datetime $updated
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
      */
-    private $updated;    
+    private $updated;
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -156,57 +196,119 @@ class Equipo
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+
     /**
      * @var User $updatedBy
      * @Gedmo\Blameable(on="update")
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;    
+    private $updatedBy;
+
     /**
      * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
      */
-    private $deletedAt;    
-    
+    private $deletedAt;
 
     public function __toString() {
         return $this->nombre;
-    }    
+    }
+
     public function getTexto() {
-        return $this->codigo.' - '.$this->nombre.' - '.$this->nroSerie;
-    }   
+        return $this->codigo . ' - ' . $this->nombre . ' - ' . $this->nroSerie;
+    }
+
     public function getTextoOT() {
-        return $this->getTipo()->getNombre().' │ '.$this->nombre.' │ '.$this->nroSerie.' │ '.$this->getMarca()->getNombre().' │ '.$this->getModelo()->getNombre();
-    }   
+        return $this->getTipo()->getNombre() . ' │ ' . $this->nombre . ' │ ' . $this->nroSerie . ' │ ' . $this->getMarca()->getNombre() . ' │ ' . $this->getModelo()->getNombre();
+    }
+
     public function getTextoCompleto() {
-        return $this->getTipo()->getNombre().' │ '.$this->nombre.' │ '.$this->getMarca()->getNombre().' │ '.$this->getModelo()->getNombre().' │ '.$this->nroSerie;
-    }   
-    public function getTipoMarcaModelo(){
-        return $this->getTipo()->getNombre().' │ '.$this->getMarca()->getNombre().' │ '.$this->getModelo()->getNombre();
+        return $this->getTipo()->getNombre() . ' │ ' . $this->nombre . ' │ ' . $this->getMarca()->getNombre() . ' │ ' . $this->getModelo()->getNombre() . ' │ ' . $this->nroSerie;
     }
-    public function getCodigoItem(){
-       return  ( $this->barcode ) ? $this->barcode : $this->codigo;
+
+    public function getTipoMarcaModelo() {
+        return $this->getTipo()->getNombre() . ' │ ' . $this->getMarca()->getNombre() . ' │ ' . $this->getModelo()->getNombre();
     }
-    public function getUbicacionActual(){
-        $fecha = '20000101';        
-        $ubicActual = null;
-        foreach( $this->getUbicaciones() as $ubic){
-            $fechaUbicacion = ($ubic->getFechaEntrega()) ? $ubic->getFechaEntrega()->format('Ymd') : '20000101';
-            if( $fechaUbicacion>=$fecha ){
-                $fecha = $fechaUbicacion;
-                $ubicActual = $ubic;
+
+    public function getCodigoItem() {
+        return ( $this->barcode ) ? $this->barcode : $this->codigo;
+    }
+
+    public function getUbicacionActual() {
+        foreach ($this->getUbicaciones() as $ubic) {
+            if ($ubic->getActual()) {
+                return $ubic;
             }
         }
         return $ubicActual;
-    }   
-    
+    }
+
+    /*     * *
+     * DATOS PARA LISTADOS DE BIENES EN STOCK Y VALORIZADO
+     */
+
+    private function getOC() {
+        return (count($this->getDetcompra()) > 0) ? $this->getDetcompra()[0]->getCompraDetalle() : null;
+    }
+
+    public function getOrdenCompra() {
+        $oc = array('txt' => $this->getNroOrdenCompra(), 'id' => null);
+        if ($this->getOC()) {
+            $oc = array('txt' => $this->getOC()->getCompra()->getOrdenCompra(), 'id' => $this->getOC()->getCompra()->getId());
+        }
+        return $oc;
+    }
+
+    public function getCuenta() {
+        return ($this->getOC()) ? $this->getOC()->getCompra()->getNroCuenta() : '';
+    }
+
+    public function getFactura() {
+        return ($this->getOC()) ? $this->getOC()->getCompra()->getNroFactura() : $this->getNroFactura();
+    }
+
+    public function getRemito() {
+        return ($this->getOC()) ? $this->getOC()->getNroRemitoEquipo() : $this->getNroRemito();
+    }
+
+    public function getRazonSocial() {
+        return ($this->getOC()) ? $this->getOC()->getCompra()->getRazonSocial() : '';
+    }
+
+    public function getFechaAdquisicion() {
+        $fecha = ($this->getFechaCompra()) ? $this->getFechaCompra()->format('d/m/Y') : '';
+        return ($this->getOC()) ? $this->getOC()->getCompra()->getFechaCompra()->format('d/m/Y') : $fecha;
+    }
+
+    public function getPrecioEquipo() {
+        return ($this->getOC()) ? $this->getOC()->getPrecio() : $this->getPrecio();
+    }
+
+    public function getMonedaEquipo() {
+        return ($this->getOC()) ? $this->getOC()->getMoneda()->getAbreviatura() : $this->getMoneda()->getAbreviatura();
+    }
+
+    public function getCotizacionEquipo() {
+        return ($this->getOC()) ? $this->getOC()->getCompra()->getCotizacionDolar() : $this->getCotizacionDolar();
+    }
+
+    public function getPrecioDolares() {
+        $cot = ($this->getCotizacionEquipo() == 0) ? 1 : $this->getCotizacionEquipo();
+        return ($this->getMonedaEquipo() == '$') ? $this->getPrecioEquipo() / $cot : $this->getPrecioEquipo();
+    }
+
+    public function getPrecioPesos() {
+        return ($this->getMonedaEquipo() == 'U$S') ? $this->getPrecioEquipo() * $this->getCotizacionEquipo() : $this->getPrecioEquipo();
+    }
+
+    /*     * ************************** */
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -216,8 +318,7 @@ class Equipo
      * @param string $nombre
      * @return Equipo
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -226,10 +327,9 @@ class Equipo
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
 
@@ -239,8 +339,7 @@ class Equipo
      * @param string $codigo
      * @return Equipo
      */
-    public function setCodigo($codigo)
-    {
+    public function setCodigo($codigo) {
         $this->codigo = $codigo;
 
         return $this;
@@ -249,10 +348,9 @@ class Equipo
     /**
      * Get codigo
      *
-     * @return string 
+     * @return string
      */
-    public function getCodigo()
-    {
+    public function getCodigo() {
         return $this->codigo;
     }
 
@@ -262,8 +360,7 @@ class Equipo
      * @param string $barcode
      * @return Equipo
      */
-    public function setBarcode($barcode)
-    {
+    public function setBarcode($barcode) {
         $this->barcode = $barcode;
 
         return $this;
@@ -272,10 +369,9 @@ class Equipo
     /**
      * Get barcode
      *
-     * @return string 
+     * @return string
      */
-    public function getBarcode()
-    {
+    public function getBarcode() {
         return $this->barcode;
     }
 
@@ -285,8 +381,7 @@ class Equipo
      * @param string $nroSerie
      * @return Equipo
      */
-    public function setNroSerie($nroSerie)
-    {
+    public function setNroSerie($nroSerie) {
         $this->nroSerie = $nroSerie;
 
         return $this;
@@ -295,10 +390,9 @@ class Equipo
     /**
      * Get nroSerie
      *
-     * @return string 
+     * @return string
      */
-    public function getNroSerie()
-    {
+    public function getNroSerie() {
         return $this->nroSerie;
     }
 
@@ -308,8 +402,7 @@ class Equipo
      * @param \DateTime $created
      * @return Equipo
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -318,10 +411,9 @@ class Equipo
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -331,8 +423,7 @@ class Equipo
      * @param \DateTime $updated
      * @return Equipo
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -341,10 +432,9 @@ class Equipo
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -354,8 +444,7 @@ class Equipo
      * @param \DateTime $deletedAt
      * @return Equipo
      */
-    public function setDeletedAt($deletedAt)
-    {
+    public function setDeletedAt($deletedAt) {
         $this->deletedAt = $deletedAt;
 
         return $this;
@@ -364,10 +453,9 @@ class Equipo
     /**
      * Get deletedAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getDeletedAt()
-    {
+    public function getDeletedAt() {
         return $this->deletedAt;
     }
 
@@ -377,8 +465,7 @@ class Equipo
      * @param \ConfigBundle\Entity\Tipo $tipo
      * @return Equipo
      */
-    public function setTipo(\ConfigBundle\Entity\Tipo $tipo = null)
-    {
+    public function setTipo(\ConfigBundle\Entity\Tipo $tipo = null) {
         $this->tipo = $tipo;
 
         return $this;
@@ -387,10 +474,9 @@ class Equipo
     /**
      * Get tipo
      *
-     * @return \ConfigBundle\Entity\Tipo 
+     * @return \ConfigBundle\Entity\Tipo
      */
-    public function getTipo()
-    {
+    public function getTipo() {
         return $this->tipo;
     }
 
@@ -400,8 +486,7 @@ class Equipo
      * @param \ConfigBundle\Entity\Estado $estado
      * @return Equipo
      */
-    public function setEstado(\ConfigBundle\Entity\Estado $estado = null)
-    {
+    public function setEstado(\ConfigBundle\Entity\Estado $estado = null) {
         $this->estado = $estado;
 
         return $this;
@@ -410,10 +495,9 @@ class Equipo
     /**
      * Get estado
      *
-     * @return \ConfigBundle\Entity\Estado 
+     * @return \ConfigBundle\Entity\Estado
      */
-    public function getEstado()
-    {
+    public function getEstado() {
         return $this->estado;
     }
 
@@ -423,8 +507,7 @@ class Equipo
      * @param \ConfigBundle\Entity\Marca $marca
      * @return Equipo
      */
-    public function setMarca(\ConfigBundle\Entity\Marca $marca = null)
-    {
+    public function setMarca(\ConfigBundle\Entity\Marca $marca = null) {
         $this->marca = $marca;
 
         return $this;
@@ -433,10 +516,9 @@ class Equipo
     /**
      * Get marca
      *
-     * @return \ConfigBundle\Entity\Marca 
+     * @return \ConfigBundle\Entity\Marca
      */
-    public function getMarca()
-    {
+    public function getMarca() {
         return $this->marca;
     }
 
@@ -446,8 +528,7 @@ class Equipo
      * @param \ConfigBundle\Entity\Modelo $modelo
      * @return Equipo
      */
-    public function setModelo(\ConfigBundle\Entity\Modelo $modelo = null)
-    {
+    public function setModelo(\ConfigBundle\Entity\Modelo $modelo = null) {
         $this->modelo = $modelo;
 
         return $this;
@@ -456,10 +537,9 @@ class Equipo
     /**
      * Get modelo
      *
-     * @return \ConfigBundle\Entity\Modelo 
+     * @return \ConfigBundle\Entity\Modelo
      */
-    public function getModelo()
-    {
+    public function getModelo() {
         return $this->modelo;
     }
 
@@ -469,8 +549,7 @@ class Equipo
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Equipo
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -479,10 +558,9 @@ class Equipo
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -492,8 +570,7 @@ class Equipo
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Equipo
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -502,16 +579,15 @@ class Equipo
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
-    
-/**
- * MANEJO DE FOTO
- */
+
+    /**
+     * MANEJO DE FOTO
+     */
     /**
      * @ORM\Column(name="path", type="string", length=255, nullable=true)
      */
@@ -522,8 +598,7 @@ class Equipo
      * @param string $path
      * @return paciente
      */
-    public function setPath($path)
-    {
+    public function setPath($path) {
         $this->path = $path;
         return $this;
     }
@@ -532,69 +607,60 @@ class Equipo
      * Get path
      * @return string
      */
-    public function getPath()
-    {
+    public function getPath() {
         return $this->path;
     }
 
-    public function getAbsolutePath()
-    {
-        return null === $this->path
-            ? null
-            : $this->getUploadRootDir().'/'.$this->path;
+    public function getAbsolutePath() {
+        return null === $this->path ? null : $this->getUploadRootDir() . '/' . $this->path;
     }
 
-    public function getWebPath()
-    {
-        return null === $this->path
-            ? null
-            : $this->getUploadDir().'/'.$this->path;
+    public function getWebPath() {
+        return null === $this->path ? null : $this->getUploadDir() . '/' . $this->path;
     }
 
-    protected function getUploadRootDir()
-    {
+    protected function getUploadRootDir() {
         // la ruta absoluta del directorio donde se deben
         // guardar los archivos cargados
-        return __DIR__.'/../../../web/'.$this->getUploadDir();
+        return __DIR__ . '/../../../web/' . $this->getUploadDir();
     }
 
-    protected function getUploadDir()
-    {
+    protected function getUploadDir() {
         // se deshace del __DIR__ para no meter la pata
         // al mostrar el documento/imagen cargada en la vista.
         return 'uploads/photos';
-    } 
+    }
 
     /**
-     * @Assert\File(maxSize="3M", mimeTypes={"image/jpeg", "image/pjpeg", "image/png", "image/x-png"}, 
-     *              mimeTypesMessage="El tipo de imagen no es válido. Debe ser .png o .jpg") 
+     * @Assert\File(maxSize="3M", mimeTypes={"image/jpeg", "image/pjpeg", "image/png", "image/x-png"},
+     *              mimeTypesMessage="El tipo de imagen no es válido. Debe ser .png o .jpg")
      */
     private $file;
     private $filenameForRemove;
+
     /**
      * Get file.
      * @return UploadedFile
      */
-    public function getFile()
-    {
+    public function getFile() {
         return $this->file;
     }
 
     private $temp;
-    
+
     /**
      * Sets file.
      * @param UploadedFile $file
      */
-    public function setFile(UploadedFile $file = null)
-    {
+    public function setFile(UploadedFile $file = null) {
         $this->file = $file;
         // check if we have an old image path
         if (isset($this->path)) {
             // store the old name to delete after the update
             $this->temp = $this->path;
             $this->path = null;
-        } else {
+        }
+        else {
             $this->path = 'initial';
         }
     }
@@ -603,12 +669,11 @@ class Equipo
      * @ORM\PrePersist()
      * @ORM\PreUpdate()
      */
-    public function preUpload()
-    {
+    public function preUpload() {
         if (null !== $this->getFile()) {
             // haz lo que quieras para generar un nombre único
             $filename = sha1(uniqid(mt_rand(), true));
-            $this->path = $filename.'.'.$this->getFile()->guessExtension();
+            $this->path = $filename . '.' . $this->getFile()->guessExtension();
         }
     }
 
@@ -616,8 +681,7 @@ class Equipo
      * @ORM\PostPersist()
      * @ORM\PostUpdate()
      */
-    public function upload()
-    {
+    public function upload() {
         if (null === $this->getFile()) {
             return;
         }
@@ -628,34 +692,33 @@ class Equipo
         // check if we have an old image
         if (isset($this->temp)) {
             // delete the old image
-            if( file_exists($this->getUploadRootDir().'/'.$this->temp) )
-             unlink($this->getUploadRootDir().'/'.$this->temp);
+            if (file_exists($this->getUploadRootDir() . '/' . $this->temp))
+                unlink($this->getUploadRootDir() . '/' . $this->temp);
             // clear the temp image path
             $this->temp = null;
         }
         $this->file = null;
     }
+
     /**
      * @ORM\PreRemove()
      */
-    public function storeFilenameForRemove()
-    {
+    public function storeFilenameForRemove() {
         $this->filenameForRemove = $this->getAbsolutePath();
     }
 
     /**
      * @ORM\PostRemove()
      */
-    public function removeUpload()
-    {
+    public function removeUpload() {
         if ($this->filenameForRemove) {
             unlink($this->filenameForRemove);
         }
     }
+
     /*
-    * FIN MANEJO DE FOTO
-    */            
-    
+     * FIN MANEJO DE FOTO
+     */
 
     /**
      * Set observaciones
@@ -663,8 +726,7 @@ class Equipo
      * @param string $observaciones
      * @return Equipo
      */
-    public function setObservaciones($observaciones)
-    {
+    public function setObservaciones($observaciones) {
         $this->observaciones = $observaciones;
 
         return $this;
@@ -673,10 +735,9 @@ class Equipo
     /**
      * Get observaciones
      *
-     * @return string 
+     * @return string
      */
-    public function getObservaciones()
-    {
+    public function getObservaciones() {
         return $this->observaciones;
     }
 
@@ -686,8 +747,7 @@ class Equipo
      * @param \ConfigBundle\Entity\Importados $importado
      * @return Equipo
      */
-    public function setImportado(\ConfigBundle\Entity\Importados $importado = null)
-    {
+    public function setImportado(\ConfigBundle\Entity\Importados $importado = null) {
         $this->importado = $importado;
 
         return $this;
@@ -696,10 +756,9 @@ class Equipo
     /**
      * Get importado
      *
-     * @return \ConfigBundle\Entity\Importados 
+     * @return \ConfigBundle\Entity\Importados
      */
-    public function getImportado()
-    {
+    public function getImportado() {
         return $this->importado;
     }
 
@@ -709,8 +768,7 @@ class Equipo
      * @param \DateTime $fechaCompra
      * @return Equipo
      */
-    public function setFechaCompra($fechaCompra)
-    {
+    public function setFechaCompra($fechaCompra) {
         $this->fechaCompra = $fechaCompra;
 
         return $this;
@@ -719,10 +777,9 @@ class Equipo
     /**
      * Get fechaCompra
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getFechaCompra()
-    {
+    public function getFechaCompra() {
         return $this->fechaCompra;
     }
 
@@ -732,8 +789,7 @@ class Equipo
      * @param string $nroFactura
      * @return Equipo
      */
-    public function setNroFactura($nroFactura)
-    {
+    public function setNroFactura($nroFactura) {
         $this->nroFactura = $nroFactura;
 
         return $this;
@@ -742,10 +798,9 @@ class Equipo
     /**
      * Get nroFactura
      *
-     * @return string 
+     * @return string
      */
-    public function getNroFactura()
-    {
+    public function getNroFactura() {
         return $this->nroFactura;
     }
 
@@ -755,8 +810,7 @@ class Equipo
      * @param string $nroRemito
      * @return Equipo
      */
-    public function setNroRemito($nroRemito)
-    {
+    public function setNroRemito($nroRemito) {
         $this->nroRemito = $nroRemito;
 
         return $this;
@@ -765,10 +819,9 @@ class Equipo
     /**
      * Get nroRemito
      *
-     * @return string 
+     * @return string
      */
-    public function getNroRemito()
-    {
+    public function getNroRemito() {
         return $this->nroRemito;
     }
 
@@ -778,8 +831,7 @@ class Equipo
      * @param \AppBundle\Entity\Proveedor $proveedor
      * @return Equipo
      */
-    public function setProveedor(\AppBundle\Entity\Proveedor $proveedor = null)
-    {
+    public function setProveedor(\AppBundle\Entity\Proveedor $proveedor = null) {
         $this->proveedor = $proveedor;
 
         return $this;
@@ -788,17 +840,16 @@ class Equipo
     /**
      * Get proveedor
      *
-     * @return \AppBundle\Entity\Proveedor 
+     * @return \AppBundle\Entity\Proveedor
      */
-    public function getProveedor()
-    {
+    public function getProveedor() {
         return $this->proveedor;
     }
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->ubicaciones = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -808,9 +859,8 @@ class Equipo
      * @param \AppBundle\Entity\EquipoUbicacion $ubicaciones
      * @return Equipo
      */
-    public function addUbicacion(\AppBundle\Entity\EquipoUbicacion $ubicaciones)
-    {
-        $ubicaciones->setEquipo( $this );
+    public function addUbicacion(\AppBundle\Entity\EquipoUbicacion $ubicaciones) {
+        $ubicaciones->setEquipo($this);
         $this->ubicaciones[] = $ubicaciones;
         return $this;
     }
@@ -820,18 +870,16 @@ class Equipo
      *
      * @param \AppBundle\Entity\EquipoUbicacion $ubicaciones
      */
-    public function removeUbicacion(\AppBundle\Entity\EquipoUbicacion $ubicaciones)
-    {
+    public function removeUbicacion(\AppBundle\Entity\EquipoUbicacion $ubicaciones) {
         $this->ubicaciones->removeElement($ubicaciones);
     }
 
     /**
      * Get ubicaciones
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getUbicaciones()
-    {
+    public function getUbicaciones() {
         return $this->ubicaciones;
     }
 
@@ -841,8 +889,7 @@ class Equipo
      * @param boolean $verificado
      * @return Equipo
      */
-    public function setVerificado($verificado)
-    {
+    public function setVerificado($verificado) {
         $this->verificado = $verificado;
 
         return $this;
@@ -851,13 +898,11 @@ class Equipo
     /**
      * Get verificado
      *
-     * @return boolean 
+     * @return boolean
      */
-    public function getVerificado()
-    {
+    public function getVerificado() {
         return $this->verificado;
     }
-
 
     /**
      * Set nroOrdenCompra
@@ -865,8 +910,7 @@ class Equipo
      * @param string $nroOrdenCompra
      * @return Equipo
      */
-    public function setNroOrdenCompra($nroOrdenCompra)
-    {
+    public function setNroOrdenCompra($nroOrdenCompra) {
         $this->nroOrdenCompra = $nroOrdenCompra;
 
         return $this;
@@ -875,13 +919,11 @@ class Equipo
     /**
      * Get nroOrdenCompra
      *
-     * @return string 
+     * @return string
      */
-    public function getNroOrdenCompra()
-    {
+    public function getNroOrdenCompra() {
         return $this->nroOrdenCompra;
     }
-
 
     /**
      * Add requerimientos
@@ -889,8 +931,7 @@ class Equipo
      * @param \AppBundle\Entity\RequerimientoDetalle $requerimientos
      * @return Equipo
      */
-    public function addRequerimiento(\AppBundle\Entity\RequerimientoDetalle $requerimientos)
-    {
+    public function addRequerimiento(\AppBundle\Entity\RequerimientoDetalle $requerimientos) {
         $this->requerimientos[] = $requerimientos;
 
         return $this;
@@ -901,18 +942,16 @@ class Equipo
      *
      * @param \AppBundle\Entity\RequerimientoDetalle $requerimientos
      */
-    public function removeRequerimiento(\AppBundle\Entity\RequerimientoDetalle $requerimientos)
-    {
+    public function removeRequerimiento(\AppBundle\Entity\RequerimientoDetalle $requerimientos) {
         $this->requerimientos->removeElement($requerimientos);
     }
 
     /**
      * Get requerimientos
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getRequerimientos()
-    {
+    public function getRequerimientos() {
         return $this->requerimientos;
     }
 
@@ -922,8 +961,7 @@ class Equipo
      * @param \AppBundle\Entity\OrdenTrabajoDetalle $ordenesdetrabajo
      * @return Equipo
      */
-    public function addOrdenesdetrabajo(\AppBundle\Entity\OrdenTrabajoDetalle $ordenesdetrabajo)
-    {
+    public function addOrdenesdetrabajo(\AppBundle\Entity\OrdenTrabajoDetalle $ordenesdetrabajo) {
         $this->ordenesdetrabajo[] = $ordenesdetrabajo;
 
         return $this;
@@ -934,42 +972,39 @@ class Equipo
      *
      * @param \AppBundle\Entity\OrdenTrabajoDetalle $ordenesdetrabajo
      */
-    public function removeOrdenesdetrabajo(\AppBundle\Entity\OrdenTrabajoDetalle $ordenesdetrabajo)
-    {
+    public function removeOrdenesdetrabajo(\AppBundle\Entity\OrdenTrabajoDetalle $ordenesdetrabajo) {
         $this->ordenesdetrabajo->removeElement($ordenesdetrabajo);
     }
 
     /**
      * Get ordenesdetrabajo
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getOrdenesdetrabajo()
-    {
+    public function getOrdenesdetrabajo() {
         return $this->ordenesdetrabajo;
     }
-    
-    public function getEnOrdenAbierta($id=null)
-    {
+
+    public function getEnOrdenAbierta($id = null) {
         foreach ($this->getOrdenesdetrabajo() as $otDet) {
-            if($otDet->getOrdenTrabajo()->getEstado()=='ABIERTO' && $otDet->getEntregado()==0){
-                if( $otDet->getOrdenTrabajo()->getId() == $id){
-                   continue; 
+            if ($otDet->getOrdenTrabajo()->getEstado() == 'ABIERTO' && $otDet->getEntregado() == 0) {
+                if ($otDet->getOrdenTrabajo()->getId() == $id) {
+                    continue;
                 }
                 return true;
             }
         }
         return false;
     }
-    public function getEnRequerimientoAbierto($id=null)
-    {
+
+    public function getEnRequerimientoAbierto($id = null) {
         foreach ($this->getRequerimientos() as $req) {
-            if( in_array($req->getRequerimiento()->getEstado(), array('SIN ASIGNAR','ASIGNADO') ) ){
-                if( $req->getRequerimiento()->getId() == $id){
-                   continue; 
+            if (in_array($req->getRequerimiento()->getEstado(), array('SIN ASIGNAR', 'ASIGNADO'))) {
+                if ($req->getRequerimiento()->getId() == $id) {
+                    continue;
                 }
-                if( $req->getOrdenTrabajoDetalle()){
-                    if( $req->getOrdenTrabajoDetalle()->getEntregado()){
+                if ($req->getOrdenTrabajoDetalle()) {
+                    if ($req->getOrdenTrabajoDetalle()->getEntregado()) {
                         continue;
                     }
                 }
@@ -977,6 +1012,78 @@ class Equipo
             }
         }
         return false;
+    }
+
+    /**
+     * Get detcompra
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getDetcompra() {
+        return $this->detcompra;
+    }
+
+    /**
+     * Set precio
+     *
+     * @param string $precio
+     * @return Equipo
+     */
+    public function setPrecio($precio) {
+        $this->precio = $precio;
+
+        return $this;
+    }
+
+    /**
+     * Get precio
+     *
+     * @return string
+     */
+    public function getPrecio() {
+        return $this->precio;
+    }
+
+    /**
+     * Set cotizacionDolar
+     *
+     * @param string $cotizacionDolar
+     * @return Equipo
+     */
+    public function setCotizacionDolar($cotizacionDolar) {
+        $this->cotizacionDolar = $cotizacionDolar;
+
+        return $this;
+    }
+
+    /**
+     * Get cotizacionDolar
+     *
+     * @return string
+     */
+    public function getCotizacionDolar() {
+        return $this->cotizacionDolar;
+    }
+
+    /**
+     * Set moneda
+     *
+     * @param \ConfigBundle\Entity\Moneda $moneda
+     * @return Equipo
+     */
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null) {
+        $this->moneda = $moneda;
+
+        return $this;
+    }
+
+    /**
+     * Get moneda
+     *
+     * @return \ConfigBundle\Entity\Moneda
+     */
+    public function getMoneda() {
+        return $this->moneda;
     }
 
 }

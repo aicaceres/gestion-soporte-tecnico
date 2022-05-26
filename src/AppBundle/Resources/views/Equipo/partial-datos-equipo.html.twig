@@ -15,15 +15,24 @@
         <div>
             <b>Proveedor:</b> {{ datos.proveedor}}
         </div>
-        <div>
-            <b>Fecha Compra:</b>{%if datos.fechaCompra%} {{ datos.fechaCompra|date('d-m-Y')}} {%endif%}
-        </div>
-        <div>
-            <b>N° Remito:</b> {{ datos.nroRemito}}
-        </div>
-        <div>
-            <b>N° Factura:</b> {{ datos.nroFactura}}
-        </div>
+            <div>
+            <b>Fecha Compra:</b> {{ datos.fechaAdquisicion }}
+            </div>
+            <div>
+                <b>N° O.C.:</b> {{ datos.ordenCompra.txt }}
+            </div>
+            <div>
+                <b>N° Remito:</b> {{ datos.remito}}
+            </div>
+            <div>
+                <b>N° Factura:</b> {{ datos.factura}}
+            </div>
+            <div>
+                <b>Precio ARG:</b> {{ datos.precioPesos|number_format(2,'.',',')}} [ Cotiz U$S: {{ datos.cotizacionEquipo|number_format(2,'.',',') }}]
+            </div>
+            <div>
+                <b>Valorizado USD:</b> {{ datos.precioDolares|number_format(2,'.',',') }} 
+            </div>
     </fieldset>  
     <fieldset>  
         <div>

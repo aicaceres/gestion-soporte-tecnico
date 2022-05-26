@@ -44,6 +44,9 @@ table tr td{
                     <th>N° OC</th>                
                     <th>Fecha</th>                
                     <th>Proveedor</th>
+                    <th>N° Cuenta</th>
+                    <th>N° Factura</th>
+                    <th>N° Remito</th>
                     <th>Estado</th>                
                     <th>Insumos/Equipos</th>                
                     <th>Cantidad</th>    
@@ -62,6 +65,9 @@ table tr td{
                         <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.ordenCompra}}</td>
                         <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.fechaCompra|date('d-m-Y')}}</td>
                         <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.proveedor}}</td>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.nroCuenta}}</td>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.nroRemito}}</td>
+                        <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.nroFactura}}</td>
                         <td {{ rowspan }} height="20px" vertical-align="middle" padding-left="5px">{{item.estado}}</td>
                         {% if rows==1 %}
                             <td height="20px" vertical-align="middle" padding-left="5px">{{item.detalles[0]}}</td>

@@ -95,7 +95,7 @@
                             <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Compra:itemPrototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
                                 {% for item in form.detalles %}
                                     {% set clase = item.vars.data.claseDetalle  %}                                    
-                                    <tr class="item" divdata="item_items" {% if item.vars.data.recibido > 0 %} style="display:none" {% endif %}>
+                                    <tr class="item" divdata="item_items">
                                         <td class="ordTd" style="vertical-align:middle;padding-left:10px;font-weight:bold"></td>
                                         <td class="insumoTd" {% if not item.vars.data.insumo %} style="display:none"{% endif %} >
                                             <div class="col-md-12">
@@ -158,21 +158,11 @@
                                             </div>
                                         </td> 
                                         <td class="delTd" style="text-align:center;"></td>
-                                    </tr>
-
-
-                                {% if item.vars.data.recibido > 0 %}      
-                                    <tr>
-                                        <td style="vertical-align:middle;padding-left:10px;font-weight:bold">{{loop.index}}</td>
-                                        <td> <i class="fa {% if clase=='I' %} fa-puzzle-piece {%else%} fa-desktop {%endif%}"></i> &nbsp; {{ item.vars.data.descripcion }}</td>                                                 
-                                        <td style="text-align:right"><small style='float:left'>{{ item.vars.data.moneda }}</small> {{ item.vars.data.precio|number_format(2,'.',',') }} </td>
-                                        <td style="text-align:right">{{ (item.vars.data.cantidad)|number_format(0,'.',',') }} </td>
-                                    </tr>
-                                {% endif %}           
+                                    </tr>           
                                 {% endfor %}           
                             </tbody>
                             <tfoot>
-                            <th colspan="5" style="text-align:center;{% if entity.estado in ['RECIBIDO','RECEPCION PARCIAL'] %} display:none; {% endif %}">
+                            <th colspan="5" style="text-align:center">
                                 <button type="button" data-tipo="I" class="btn btn-sm btn-info linkAdd"> <i class="fa fa-plus-square"></i>&nbsp; INSUMO</button>
                                 <button type="button" data-tipo="E" class="btn btn-sm btn-primary linkAdd"> <i class="fa fa-plus-square"></i>&nbsp; EQUIPO</button>
                             </th>
@@ -236,7 +226,7 @@ $(document).ready(function() {
                     band=false;
                     return false;
                 }                    
-            }else if(newItemTd.data('tipo')=='E' && newItemTd.is(":visible")){
+            }else{
                if( !newItemTd.find('[id$="_tipo"]').val() ){
                    alert('Debe indicar el tipo');
                    newItemTd.find('[id$="_tipo"]').focus();

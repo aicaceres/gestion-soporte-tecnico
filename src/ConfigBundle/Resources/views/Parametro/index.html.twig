@@ -31,6 +31,13 @@
                                 <li><a href="{{ path('configuracion_parametro',{ 'table': 'ConceptoEntrega' }) }}"> Conceptos de Entrega</a></li>
                                 <li><a href="{{ path('configuracion_parametro',{ 'table': 'TipoSoporte' }) }}"> Tipos Soporte Técnico</a></li>
                                 <li><a href="{{ path('configuracion_parametro',{ 'table': 'TipoVencimiento' }) }}"> Tipos de Vencimiento</a></li>
+                                 {% if app.user.rol.admin %}
+                                <li class="header">&nbsp;</li>
+                                <li style="text-align:center">
+                                    <button class="btn js-setear-verificados" title="Resetear verificados en equipos" type="button" data-url="{{ path('equipo-reset-verificado') }}">
+                                        Resetear Verificados en Equipos</button>
+                                </li>
+                                {% endif %}
                             </ul>
                         </div>
                     </div><!-- /.col (LEFT) -->
@@ -136,6 +143,23 @@ $(document).ready(function() {
         });        
     });
     
+    // resetear los verificados en modulo equipos.
+    $('.js-setear-verificados').on('click',function(){
+        if(confirm('Confirma la desactivación de todos los checks de verificado en el módulo de equipos? \n Esta acción no se puede deshacer.')){
+            var url = $(this).data('url');
+            $.ajax({
+                type: 'get',
+                url: url,
+                success: function(data) {
+                    if(data=='OK'){
+                        alert('Se desmarcaron las verificaciones de todos los equipos!.')
+                    }else{
+                        alert('No se pudieron desmarcar los verificados. Vuelva a intentarlo.')
+                    }
+                }
+            });  
+        }
+    });
 });
 function addNewItem($collectionHolder) {
     var prototype = $collectionHolder.data('prototype');

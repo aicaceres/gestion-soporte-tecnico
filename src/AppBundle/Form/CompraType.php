@@ -44,6 +44,8 @@ class CompraType extends AbstractType {
                 //->add('recibido','checkbox',array('mapped' => false,'required' => false))
                 //->add('file', 'file', array('mapped' => false,'label'=>'Comprobante:', 'required' => false))
                 ->add('ordenCompra', null, array('label' => 'N° de Orden:', 'required' => true))
+                ->add('nroCuenta', null, array('label' => 'N° de Cuenta:', 'required' => false))
+                ->add('cotizacionDolar', null, array('label' => 'Cotización U$S:', 'required' => true))
                 ->add('fechaCompra', 'date', array('widget' => 'single_text', 'label' => 'Fecha Compra:',
                     'format' => 'dd-MM-yyyy', 'required' => true))
                 ->add('total')

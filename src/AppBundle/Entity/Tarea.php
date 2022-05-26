@@ -1,4 +1,5 @@
 <?php
+
 namespace AppBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
@@ -11,8 +12,7 @@ use ConfigBundle\Controller\UtilsController;
  * @ORM\HasLifecycleCallbacks
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
  */
-class Tarea
-{
+class Tarea {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -25,31 +25,33 @@ class Tarea
      * @var datetime $fecha
      * @ORM\Column(name="fecha", type="datetime", nullable=false)
      */
-    private $fecha;    
-    
+    private $fecha;
+
     /**
      * @var string $descripcion
      * @ORM\Column(name="descripcion", type="text", nullable=true)
-     */    
-    protected $descripcion;  
+     */
+    protected $descripcion;
+
     /**
      * @var string $textoAdicional
      * @ORM\Column(name="texto_adicional", type="text", nullable=true)
-     */    
-    protected $textoAdicional;    
-     /**
+     */
+    protected $textoAdicional;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\TipoTarea")
      * @ORM\JoinColumn(name="tipo_tarea_id", referencedColumnName="id")
      */
-    protected $tipoTarea;          
-    
-     /**
+    protected $tipoTarea;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\OrdenTrabajo",inversedBy="tareas" )
      * @ORM\JoinColumn(name="orden_trabajo_id", referencedColumnName="id")
      */
-    protected $ordenTrabajo;    
-    
-     /**
+    protected $ordenTrabajo;
+
+    /**
      * @ORM\ManyToMany(targetEntity="AppBundle\Entity\OrdenTrabajoDetalle",inversedBy="tareas")
      * @ORM\JoinTable(name="equipo_x_tarea",
      *      joinColumns={@ORM\JoinColumn(name="tarea_id", referencedColumnName="id")},
@@ -57,24 +59,24 @@ class Tarea
      * )
      */
     private $ordenTrabajoDetalles;
-    
-     /**
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Departamento")
      * @ORM\JoinColumn(name="equipo_ubicacion_final_id", referencedColumnName="id")
      */
-    protected $equipoUbicacionFinal;    
-    
-     /**
+    protected $equipoUbicacionFinal;
+
+    /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\InsumoxTarea", mappedBy="tarea",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $insumos;   
-    
+    private $insumos;
+
     /**
      * @var string $conceptoEntrega
      * @ORM\Column(name="concepto_entrega", type="string", nullable=true)
-     */    
-    protected $conceptoEntrega;                
-    
+     */
+    protected $conceptoEntrega;
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
@@ -88,7 +90,7 @@ class Tarea
      * @ORM\Column(type="datetime")
      */
     private $updated;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -103,31 +105,46 @@ class Tarea
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;     
+    private $updatedBy;
+
     /**
      * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
      */
     private $deletedAt;
 
-    public function getFechaLarga(){
-        return UtilsController::longDateSpanish( $this->getFecha() );
-    }        
-    
+    public function getFechaLarga() {
+        return UtilsController::longDateSpanish($this->getFecha());
+    }
+
+    /**
+     * lista de insumos aprovados para impresion de OT
+     */
+    public function getInsumosAprobados() {
+        $insumos = array();
+        if ($this->getTipoTarea()->getAbreviatura() == 'SI') {
+            foreach ($this->getInsumos() as $insxtarea) {
+                if ($insxtarea->getCantidadAprobada() > 0) {
+                    $insumos[] = array('cantidad' => $insxtarea->getCantidadAprobada(),
+                        'descripcion' => $insxtarea->getDescripcion());
+                }
+            }
+        }
+        return $insumos;
+    }
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->ordenTrabajoDetalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -137,8 +154,7 @@ class Tarea
      * @param \DateTime $fecha
      * @return Tarea
      */
-    public function setFecha($fecha)
-    {
+    public function setFecha($fecha) {
         $this->fecha = $fecha;
 
         return $this;
@@ -147,10 +163,9 @@ class Tarea
     /**
      * Get fecha
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getFecha()
-    {
+    public function getFecha() {
         return $this->fecha;
     }
 
@@ -160,8 +175,7 @@ class Tarea
      * @param string $descripcion
      * @return Tarea
      */
-    public function setDescripcion($descripcion)
-    {
+    public function setDescripcion($descripcion) {
         $this->descripcion = $descripcion;
 
         return $this;
@@ -170,10 +184,9 @@ class Tarea
     /**
      * Get descripcion
      *
-     * @return string 
+     * @return string
      */
-    public function getDescripcion()
-    {
+    public function getDescripcion() {
         return $this->descripcion;
     }
 
@@ -183,8 +196,7 @@ class Tarea
      * @param \DateTime $created
      * @return Tarea
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -193,10 +205,9 @@ class Tarea
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -206,8 +217,7 @@ class Tarea
      * @param \DateTime $updated
      * @return Tarea
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -216,10 +226,9 @@ class Tarea
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -229,8 +238,7 @@ class Tarea
      * @param \DateTime $deletedAt
      * @return Tarea
      */
-    public function setDeletedAt($deletedAt)
-    {
+    public function setDeletedAt($deletedAt) {
         $this->deletedAt = $deletedAt;
 
         return $this;
@@ -239,10 +247,9 @@ class Tarea
     /**
      * Get deletedAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getDeletedAt()
-    {
+    public function getDeletedAt() {
         return $this->deletedAt;
     }
 
@@ -252,8 +259,7 @@ class Tarea
      * @param \ConfigBundle\Entity\TipoTarea $tipoTarea
      * @return Tarea
      */
-    public function setTipoTarea(\ConfigBundle\Entity\TipoTarea $tipoTarea = null)
-    {
+    public function setTipoTarea(\ConfigBundle\Entity\TipoTarea $tipoTarea = null) {
         $this->tipoTarea = $tipoTarea;
 
         return $this;
@@ -262,10 +268,9 @@ class Tarea
     /**
      * Get tipoTarea
      *
-     * @return \ConfigBundle\Entity\TipoTarea 
+     * @return \ConfigBundle\Entity\TipoTarea
      */
-    public function getTipoTarea()
-    {
+    public function getTipoTarea() {
         return $this->tipoTarea;
     }
 
@@ -275,8 +280,7 @@ class Tarea
      * @param \AppBundle\Entity\OrdenTrabajo $ordenTrabajo
      * @return Tarea
      */
-    public function setOrdenTrabajo(\AppBundle\Entity\OrdenTrabajo $ordenTrabajo = null)
-    {
+    public function setOrdenTrabajo(\AppBundle\Entity\OrdenTrabajo $ordenTrabajo = null) {
         $this->ordenTrabajo = $ordenTrabajo;
 
         return $this;
@@ -285,10 +289,9 @@ class Tarea
     /**
      * Get ordenTrabajo
      *
-     * @return \AppBundle\Entity\OrdenTrabajo 
+     * @return \AppBundle\Entity\OrdenTrabajo
      */
-    public function getOrdenTrabajo()
-    {
+    public function getOrdenTrabajo() {
         return $this->ordenTrabajo;
     }
 
@@ -298,8 +301,7 @@ class Tarea
      * @param \AppBundle\Entity\OrdenTrabajoDetalle $ordenTrabajoDetalles
      * @return Tarea
      */
-    public function addOrdenTrabajoDetalle(\AppBundle\Entity\OrdenTrabajoDetalle $ordenTrabajoDetalles)
-    {
+    public function addOrdenTrabajoDetalle(\AppBundle\Entity\OrdenTrabajoDetalle $ordenTrabajoDetalles) {
         $this->ordenTrabajoDetalles[] = $ordenTrabajoDetalles;
 
         return $this;
@@ -310,18 +312,16 @@ class Tarea
      *
      * @param \AppBundle\Entity\OrdenTrabajoDetalle $ordenTrabajoDetalles
      */
-    public function removeOrdenTrabajoDetalle(\AppBundle\Entity\OrdenTrabajoDetalle $ordenTrabajoDetalles)
-    {
+    public function removeOrdenTrabajoDetalle(\AppBundle\Entity\OrdenTrabajoDetalle $ordenTrabajoDetalles) {
         $this->ordenTrabajoDetalles->removeElement($ordenTrabajoDetalles);
     }
 
     /**
      * Get ordenTrabajoDetalles
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getOrdenTrabajoDetalles()
-    {
+    public function getOrdenTrabajoDetalles() {
         return $this->ordenTrabajoDetalles;
     }
 
@@ -331,8 +331,7 @@ class Tarea
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Tarea
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -341,10 +340,9 @@ class Tarea
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -354,8 +352,7 @@ class Tarea
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Tarea
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -364,10 +361,9 @@ class Tarea
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -377,8 +373,7 @@ class Tarea
      * @param \ConfigBundle\Entity\Departamento $equipoUbicacionFinal
      * @return Tarea
      */
-    public function setEquipoUbicacionFinal(\ConfigBundle\Entity\Departamento $equipoUbicacionFinal = null)
-    {
+    public function setEquipoUbicacionFinal(\ConfigBundle\Entity\Departamento $equipoUbicacionFinal = null) {
         $this->equipoUbicacionFinal = $equipoUbicacionFinal;
 
         return $this;
@@ -387,10 +382,9 @@ class Tarea
     /**
      * Get equipoUbicacionFinal
      *
-     * @return \AppBundle\Entity\EquipoUbicacion 
+     * @return \AppBundle\Entity\EquipoUbicacion
      */
-    public function getEquipoUbicacionFinal()
-    {
+    public function getEquipoUbicacionFinal() {
         return $this->equipoUbicacionFinal;
     }
 
@@ -400,8 +394,7 @@ class Tarea
      * @param \AppBundle\Entity\InsumoxTarea $insumosxTarea
      * @return Tarea
      */
-    public function addInsumosxTarea(\AppBundle\Entity\InsumoxTarea $insumosxTarea)
-    {
+    public function addInsumosxTarea(\AppBundle\Entity\InsumoxTarea $insumosxTarea) {
         $insumosxTarea->setTarea($this);
         $this->insumosxTarea[] = $insumosxTarea;
         return $this;
@@ -412,18 +405,16 @@ class Tarea
      *
      * @param \AppBundle\Entity\InsumoxTarea $insumosxTarea
      */
-    public function removeInsumosxTarea(\AppBundle\Entity\InsumoxTarea $insumosxTarea)
-    {
+    public function removeInsumosxTarea(\AppBundle\Entity\InsumoxTarea $insumosxTarea) {
         $this->insumosxTarea->removeElement($insumosxTarea);
     }
 
     /**
      * Get insumosxTarea
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getInsumosxTarea()
-    {
+    public function getInsumosxTarea() {
         return $this->insumosxTarea;
     }
 
@@ -433,8 +424,7 @@ class Tarea
      * @param \AppBundle\Entity\InsumoxTarea $insumos
      * @return Tarea
      */
-    public function addInsumo(\AppBundle\Entity\InsumoxTarea $insumos)
-    {
+    public function addInsumo(\AppBundle\Entity\InsumoxTarea $insumos) {
         $insumos->setTarea($this);
         $this->insumos[] = $insumos;
 
@@ -446,18 +436,16 @@ class Tarea
      *
      * @param \AppBundle\Entity\InsumoxTarea $insumos
      */
-    public function removeInsumo(\AppBundle\Entity\InsumoxTarea $insumos)
-    {
+    public function removeInsumo(\AppBundle\Entity\InsumoxTarea $insumos) {
         $this->insumos->removeElement($insumos);
     }
 
     /**
      * Get insumos
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getInsumos()
-    {
+    public function getInsumos() {
         return $this->insumos;
     }
 
@@ -467,8 +455,7 @@ class Tarea
      * @param string $conceptoEntrega
      * @return Tarea
      */
-    public function setConceptoEntrega($conceptoEntrega)
-    {
+    public function setConceptoEntrega($conceptoEntrega) {
         $this->conceptoEntrega = $conceptoEntrega;
 
         return $this;
@@ -477,10 +464,9 @@ class Tarea
     /**
      * Get conceptoEntrega
      *
-     * @return string 
+     * @return string
      */
-    public function getConceptoEntrega()
-    {
+    public function getConceptoEntrega() {
         return $this->conceptoEntrega;
     }
 
@@ -490,8 +476,7 @@ class Tarea
      * @param string $textoAdicional
      * @return Tarea
      */
-    public function setTextoAdicional($textoAdicional)
-    {
+    public function setTextoAdicional($textoAdicional) {
         $this->textoAdicional = $textoAdicional;
 
         return $this;
@@ -500,10 +485,10 @@ class Tarea
     /**
      * Get textoAdicional
      *
-     * @return string 
+     * @return string
      */
-    public function getTextoAdicional()
-    {
+    public function getTextoAdicional() {
         return $this->textoAdicional;
     }
+
 }

@@ -25,13 +25,13 @@
         
         <table font-size="10px">
             <tr>
-                <td height="10px" width="4 cm" vertical-align="middle" margin-bottom="10px" border.type="none">
+                <td height="10px" width="3.5 cm" vertical-align="middle" margin-bottom="10px" border.type="none">
                     Fecha Compra: <strong>{{compra.fechaCompra|date('d-m-Y')}}</strong>
                 </td>
                 <td height="10px" width="3 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
                     Razón Social: <strong>{{compra.razonSocial}}</strong>
                 </td>
-                <td height="10px" width="3 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                <td height="10px" width="3.5 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
                     N° OC: <strong>{{compra.ordenCompra}}</strong>
                 </td>
                 <td height="10px" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
@@ -55,6 +55,16 @@
                 <td height="10px" width="4 cm" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
                     Estado: <strong font-size="9px">{{compra.estado}}</strong>
                 </td>
+            </tr>            
+        </table>   
+        <table font-size="10px">
+            <tr>
+                <td height="10px" width="4 cm" vertical-align="middle" margin-bottom="10px" border.type="none">
+                    N° Cuenta: <strong>{{compra.nroCuenta}}</strong>
+                </td>
+                <td height="10px" vertical-align="middle" padding-left="10px" margin-bottom="10px" border.type="none">
+                    Cotización U$S: <strong>{{compra.cotizacionDolar}}</strong>
+                </td>               
             </tr>            
         </table>   
         <table font-size="10px">
