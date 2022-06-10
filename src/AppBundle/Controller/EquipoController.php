@@ -659,7 +659,8 @@ class EquipoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $equipo = $em->getRepository('AppBundle:Equipo')->findOneByBarcode($barcode);
         if ($equipo) {
-            if ($equipo->getEnOrdenAbierta($id)) {
+            $enOrdenAbierta = $em->getRepository('AppBundle:Equipo')->checkEnOrdenAbierta($equipo->getId(), $id);
+            if ($enOrdenAbierta) {
                 return new Response(json_encode(null));
             }
             else {
@@ -691,7 +692,8 @@ class EquipoController extends Controller {
         $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
         $equipo = $em->getRepository('AppBundle:Equipo')->find($id);
-        if ($equipo->getEnRequerimientoAbierto() || $equipo->getEnOrdenAbierta()) {
+        $enOrdenAbierta = $em->getRepository('AppBundle:Equipo')->checkEnOrdenAbierta($id);
+        if ($equipo->getEnRequerimientoAbierto() || $enOrdenAbierta) {
             $data = json_encode(array('msj' => 'El equipo ya se encuentra asignado'));
         }
         else {

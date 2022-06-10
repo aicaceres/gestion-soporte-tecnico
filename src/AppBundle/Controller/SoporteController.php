@@ -354,7 +354,8 @@ class SoporteController extends Controller {
             foreach ($list as $item) {
                 $equipo = $em->getRepository('AppBundle:Equipo')->find($item);
                 //Controlar que no se encuentre en otra OT abierta.
-                if ($equipo->getEnOrdenAbierta()) {
+                $enOrdenAbierta = $em->getRepository('AppBundle:Equipo')->checkEnOrdenAbierta($equipo->getId());
+                if ($enOrdenAbierta) {
                     --$cant;
                     ++$rech;
                     continue;

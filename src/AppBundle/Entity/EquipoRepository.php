@@ -506,7 +506,7 @@ class EquipoRepository extends EntityRepository {
                 ->where("o.estado IN ('ABIERTO')");
 
         $query = $this->_em->createQueryBuilder();
-        $query->select("e.id,concat( t.nombre,'  â”‚  ', e.nombre,'  â”‚  ', e.nroSerie,' â”‚  ',m.nombre,'  â”‚  ',mo.nombre) nombre")
+        $query->select("e.id,concat( t.nombre,'  |  ', e.nombre,'  |  ', e.nroSerie,' |  ',m.nombre,'  |  ',mo.nombre) nombre")
                 ->from('AppBundle\Entity\Equipo', 'e')
                 ->innerJoin('e.tipo', 't')
                 ->innerJoin('e.ubicaciones', 'eu')
@@ -525,7 +525,7 @@ class EquipoRepository extends EntityRepository {
     public function findByStockTecnico() {
         // busca equipos que esten en stock tecnico.
         $query = $this->_em->createQueryBuilder();
-        $query->select("e.id,concat( t.nombre,'  â”‚  ', e.nombre,'  â”‚  ', e.nroSerie,' â”‚  ',m.nombre,'  â”‚  ',mo.nombre) nombre")
+        $query->select("e.id,concat( t.nombre,'  |  ', e.nombre,'  |  ', e.nroSerie,' |  ',m.nombre,'  |  ',mo.nombre) nombre")
                 ->from('AppBundle\Entity\Equipo', 'e')
                 ->innerJoin('e.tipo', 't')
                 ->innerJoin('e.marca', 'm')
@@ -984,6 +984,21 @@ class EquipoRepository extends EntityRepository {
                 ->andWhere("t.descripcion LIKE '%Estado: <strong>Operativo</strong>%' ")
                 ->orderBy('t.id', 'ASC')
                 ->setMaxResults(1);
+        return $query->getQuery()->getOneOrNullResult();
+    }
+
+    public function checkEnOrdenAbierta($eqId, $otDetId = null) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('e')
+                ->from('AppBundle\Entity\Equipo', 'e')
+                ->innerJoin('e.ordenesdetrabajo', 'otd')
+                ->innerJoin('otd.ordenTrabajo', 'ot')
+                ->where('e.id=' . $eqId)
+                ->andWhere('ot.estado =' . "'ABIERTO'")
+                ->andWhere("otd.entregado = 0 ");
+        if ($otDetId) {
+            $query->andWhere('otd.id !=' . $otDetId);
+        }
         return $query->getQuery()->getOneOrNullResult();
     }
 

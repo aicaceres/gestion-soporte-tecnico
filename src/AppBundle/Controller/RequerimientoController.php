@@ -757,7 +757,8 @@ class RequerimientoController extends Controller {
                 // verificar que el equipo no esté en otro requerimiento, u ot
                 $equipo = $detalle->getEquipo();
                 if ($equipo) {
-                    if ($equipo->getEnRequerimientoAbierto() || $equipo->getEnOrdenAbierta()) {
+                    $enOrdenAbierta = $em->getRepository('AppBundle:Equipo')->checkEnOrdenAbierta($equipo->getId());
+                    if ($equipo->getEnRequerimientoAbierto() || $enOrdenAbierta) {
                         $this->addFlash('danger', 'Este equipo ya se encuentra en un requerimiento abierto');
                         $em->getConnection()->rollback();
                     }
