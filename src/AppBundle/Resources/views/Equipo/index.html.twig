@@ -57,6 +57,7 @@
                         <span id="spUbicacion" class="bg-primary"></span> 
                         <span id="spEdificio" class="bg-primary"></span>  
                         <span id="spDepartamento" class="bg-primary"></span>  
+                        <span id="spPiso" class="bg-primary"></span>  
                         <span id="spVerificado" class="bg-primary"></span> 
                         <span id="spAdicional" class="bg-primary"></span> 
                     </div>
@@ -69,7 +70,7 @@
 
                         <button type="button" id="limpiarfiltros" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Limpiar Filtros"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-12 no-padding">
                             <fieldset>
                                 <div class="col-md-4">
                                     <div class="form-group ">
@@ -117,7 +118,7 @@
                                 </div>
                             </fieldset>
                         </div>    
-                        <div class="col-md-12">
+                        <div class="col-md-12 no-padding">
                             <fieldset>
                                 <div class="col-md-2">
                                     <div class="form-group ">
@@ -130,7 +131,7 @@
                                         </select> 
                                     </div>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="form-group ">
                                         <label class="required">Edificio:</label>
                                         <select class="select2 form-control" name="idEdificio" id="selectEdificio">
@@ -138,6 +139,17 @@
                                             {%for ed in edificios %}                                                
                                                 <option {%if ed.id==filtro['idEdificio']%} selected="selected" {%endif%} value="{{ed.id}}">{{ed.nombre}}</option>                                                
                                             {% endfor %}  
+                                        </select> 
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group ">
+                                        <label class="required">Piso:</label>
+                                        <select class="select2 form-control" name="idPiso" id="selectPiso">
+                                            <option value="0">Todos</option>
+                                            {%for piso in pisos %}
+                                                <option {%if piso.id==filtro['idPiso']%} selected="selected" {%endif%} value="{{piso.id}}">{{piso.nombre}}</option>
+                                            {% endfor %}                                          
                                         </select> 
                                     </div>
                                 </div>
@@ -275,6 +287,9 @@ $(document).ready(function() {
     if( $('#selectDepartamento').val()>0 ){ 
          $('#spDepartamento').html('<b>DEPARTAMENTO: </b>'+$('#selectDepartamento option:selected').text() );
     }else{ $('#spDepartamento').hide();}
+    if( $('#selectPiso').val()>0 ){ 
+         $('#spPiso').html('<b>PISO: </b>'+$('#selectPiso option:selected').text() );
+    }else{ $('#spPiso').hide();}
     if( $('#verificado').val()!=='T' ){ 
          $('#spVerificado').html('<b>VERIFICADO: </b>'+$('#verificado option:selected').text() ); 
     }else{ $('#spVerificado').hide();}

@@ -111,7 +111,7 @@
                                 <div class="col-md-3">
                                     {{ form_row(form.estado, { 'attr': {'class' : 'select2' } }) }}
                                     
-                                    {% if fechaInstalacion %}
+                                    {% if fechaInstalacion is defined %}
                                         <small style="font-size:10px;">
                                             <label>Inicio de vida útil: </label> {{ fechaInstalacion|date('d/m/Y') }}
                                         </small>
@@ -235,7 +235,7 @@
 <script src="{{ asset('bundles/app/jQueyMask/jquery.mask.min.js') }}" type="text/javascript"></script>    
 <script type="text/javascript">
 var preguntar = true; 
-const lista = $.parseJSON('{{lista_ubicaciones}}') ;   
+const lista = {{ app.user.ubicacionesPermitidas|json_encode() }};   
 window.onbeforeunload=function(){   
     if(preguntar){
         return false; 

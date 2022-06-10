@@ -166,7 +166,16 @@ $(document).ready(function() {
                     return false;
                 }   
             });              
-        });                
+        });     
+        // filtrar ubicaciones segun permiso   
+        let ubics = {{ app.user.ubicacionesPermitidas|json_encode() }}
+        $(".ubicacion_selector option").each( function(){
+            item = parseInt($(this).val())
+            if( $.inArray( item , ubics) == -1 ){
+                $(this).remove();
+            }        
+        }); 
+         
         $('.ubicacion_selector').val(0).trigger('change'); 
     {% endif %}         
     

@@ -321,7 +321,6 @@ class OrdenTrabajoController extends Controller {
         $arrayFiltro = array($tecnico ? $tecnico->getNombre() : 'Todos', $filtro['estado'] ? $filtro['estado'] : 'Todos',
             $ubicacion ? $ubicacion->getAbreviatura() : 'Todos', $edificio ? $edificio->getNombre() : 'Todos',
             $departamento ? $departamento->getNombre() : 'Todos', $periodo['desde'], $periodo['hasta']);
-
         $hoy = new \DateTime();
         $logo1 = __DIR__ . '/../../../web/bundles/app/img/pdf_logo.png';
         $facade = $this->get('ps_pdf.facade');

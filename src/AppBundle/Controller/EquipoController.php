@@ -70,8 +70,10 @@ class EquipoController extends Controller {
         // Further filtering can be done in the Repository by passing necessary arguments
         $otherConditions = "array or whatever is needed";
 
+        // usuario para restringir edificios
+        $userId = $this->getUser()->getId();
         // Get results from the Repository
-        $results = $this->repository->getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions = null);
+        $results = $this->repository->getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $userId);
 
         // Returned objects are of type Town
         $objects = $results["results"];
@@ -209,7 +211,7 @@ class EquipoController extends Controller {
         switch ($request->get('_opFiltro')) {
             case 'limpiar':
                 $filtro = array('selTipos' => NULL, 'idMarca' => 0, 'idModelo' => 0, 'idEstado' => $estadoDefault,
-                    'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'verificado' => 'T',
+                    'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'idPiso' => 0, 'verificado' => 'T',
                     'opAdicional' => 0, 'txtAdicional' => '', 'fechaDesde' => '', 'fechaHasta' => '');
                 break;
             case 'buscar':
@@ -222,6 +224,7 @@ class EquipoController extends Controller {
                     'idUbicacion' => $request->get('idUbicacion'),
                     'idEdificio' => $request->get('idEdificio'),
                     'idDepartamento' => $request->get('idDepartamento'),
+                    'idPiso' => $request->get('idPiso'),
                     'verificado' => (is_null($request->get('verificado')) ? 'T' : $request->get('verificado') ),
                     'opAdicional' => $request->get('opAdicional'),
                     'txtAdicional' => $request->get('txtAdicional'),
@@ -241,6 +244,7 @@ class EquipoController extends Controller {
                         'idUbicacion' => $sessionFiltro['idUbicacion'],
                         'idEdificio' => $sessionFiltro['idEdificio'],
                         'idDepartamento' => $sessionFiltro['idDepartamento'],
+                        'idPiso' => $sessionFiltro['idPiso'],
                         'verificado' => $sessionFiltro['verificado'],
                         'opAdicional' => $sessionFiltro['opAdicional'],
                         'txtAdicional' => $sessionFiltro['txtAdicional'],
@@ -251,7 +255,7 @@ class EquipoController extends Controller {
                 else {
                     //,'idTipo'=>0
                     $filtro = array('selTipos' => NULL, 'idMarca' => 0, 'idModelo' => 0, 'idEstado' => $estadoDefault,
-                        'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'verificado' => 'T',
+                        'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'idPiso' => 0, 'verificado' => 'T',
                         'opAdicional' => 0, 'txtAdicional' => '', 'fechaDesde' => '', 'fechaHasta' => '');
                 }
                 break;
@@ -284,11 +288,12 @@ class EquipoController extends Controller {
         $estados = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT es.id,es.nombre', 'es.nombre', 'estado', $userId);
         //$estados = $em->getRepository('AppBundle:Equipo')->findComboEstado($filtro);
         $ubicaciones = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT u.id,u.abreviatura', 'u.abreviatura', 'ubicacion', $userId);
-        $edificios = $departamentos = NULL;
+        $edificios = $departamentos = $pisos = NULL;
         if ($filtro['idUbicacion']) {
             $edificios = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT ed.id,ed.nombre', 'ed.nombre', 'edificio', $userId);
             if ($filtro['idEdificio']) {
                 $departamentos = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT d.id,d.nombre', 'd.nombre', 'departamento', $userId);
+                $pisos = $em->getRepository('AppBundle:Equipo')->findCombosByCriteria($filtro, 'DISTINCT p.id,p.nombre', 'p.nombre', 'piso', $userId);
             }
         }
 
@@ -301,6 +306,7 @@ class EquipoController extends Controller {
             'ubicaciones' => $ubicaciones,
             'edificios' => $edificios,
             'departamentos' => $departamentos,
+            'pisos' => $pisos,
             'adicionales' => $adicionales,
             'deleteForms' => $deleteForms,
             'summary' => $summary
@@ -374,11 +380,6 @@ class EquipoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $estado = $em->getRepository('ConfigBundle:Estado')->findOneByInicial(1);
         $entity->setEstado($estado);
-        /* $depto = $em->getRepository('ConfigBundle:Departamento')->findOneByInicial(1);
-          $ubicacion->setDepartamento($depto);
-          $ubicacion->setEdificio($depto->getEdificio());
-          $ubicacion->setUbicacion($depto->getEdificio()->getUbicacion());
-          $ubicacion->setPiso($depto->getPisos()[0]); */
         $ubicacion->setActual(TRUE);
         $ubicacion->setFechaEntrega(new \DateTime());
         $conceptoEntrega = $em->getRepository('ConfigBundle:ConceptoEntrega')->findOneByInicial(1);
@@ -389,7 +390,7 @@ class EquipoController extends Controller {
             'entity' => $entity,
             'form' => $form->createView(),
             'reubicacion' => false,
-            'lista_ubicaciones' => json_encode($this->getUser()->getUbicacionesPermitidas()),
+                //'lista_ubicaciones' => json_encode($this->getUser()->getUbicacionesPermitidas()),
         );
     }
 
@@ -421,17 +422,17 @@ class EquipoController extends Controller {
             $entity->addUbicacion($ubicacion);
         }
         else {
-            foreach ($entity->getUbicaciones() as $ubicacion) {
-                $dpto = $ubicacion->getDepartamento();
-                if ($dpto) {
-                    if ($ubicacion->getEdificio()->getId() != $dpto->getEdificio()->getId()) {
-                        $ubicacion->setEdificio($dpto->getEdificio());
-                        $ubicacion->setUbicacion($dpto->getEdificio()->getUbicacion());
-                        $em->persist($entity);
-                        $em->flush();
-                    }
-                }
-            }
+            /* foreach ($entity->getUbicaciones() as $ubicacion) {
+              $dpto = $ubicacion->getDepartamento();
+              if ($dpto) {
+              if ($ubicacion->getEdificio()->getId() != $dpto->getEdificio()->getId()) {
+              $ubicacion->setEdificio($dpto->getEdificio());
+              $ubicacion->setUbicacion($dpto->getEdificio()->getUbicacion());
+              $em->persist($entity);
+              $em->flush();
+              }
+              }
+              } */
         }
 
         /* $entity->setBarcode(  str_pad($entity->getTipo()->getId(),3,'0',STR_PAD_LEFT) .
@@ -450,7 +451,7 @@ class EquipoController extends Controller {
             'form' => $editForm->createView(),
             'reubicacion' => $reubicacion,
             'delete_form' => $deleteForm->createView(),
-            'lista_ubicaciones' => json_encode($this->getUser()->getUbicacionesPermitidas()),
+                //'lista_ubicaciones' => json_encode($this->getUser()->getUbicacionesPermitidas()),
         );
     }
 
@@ -508,7 +509,7 @@ class EquipoController extends Controller {
             'reubicacion' => $reubicacion,
             'form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
-            'lista_ubicaciones' => json_encode($this->getUser()->getUbicacionesPermitidas()),
+                //'lista_ubicaciones' => json_encode($this->getUser()->getUbicacionesPermitidas()),
         );
     }
 

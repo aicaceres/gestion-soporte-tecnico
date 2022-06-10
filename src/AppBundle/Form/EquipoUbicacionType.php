@@ -13,12 +13,6 @@ class EquipoUbicacionType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
 
-        /* /*$propertyPathToLocalidad = 'localidad';
-          $builder
-          ->addEventSubscriber(new AddLocalidadFieldSubscriber($propertyPathToLocalidad))
-          ->addEventSubscriber(new AddProvinciaFieldSubscriber($propertyPathToLocalidad))
-          ->addEventSubscriber(new AddPaisFieldSubscriber($propertyPathToLocalidad)); */
-
         $builder->add('fechaEntrega', NULL, array('widget' => 'single_text', 'label' => 'Fecha de Entrega:',
                     'format' => 'dd-MM-yyyy', 'html5' => false, 'required' => FALSE,
                     'attr' => array('class' => 'datepicker')))

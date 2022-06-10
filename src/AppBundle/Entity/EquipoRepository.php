@@ -134,6 +134,7 @@ class EquipoRepository extends EntityRepository {
                 ->innerJoin('e.estado', 'es')
                 ->innerJoin('e.ubicaciones', 'eu')
                 ->innerJoin('eu.departamento', 'd')
+                ->innerJoin('eu.piso', 'p')
                 ->innerJoin('d.edificio', 'ed')
                 ->innerJoin('ed.ubicacion', 'u')
                 ->where('eu.actual=1')
@@ -178,29 +179,15 @@ class EquipoRepository extends EntityRepository {
                                 $query->andWhere('d.id=' . $data['idDepartamento']);
                             }
                         }
+                        if ($tabla != 'piso') {
+                            if ($data['idPiso']) {
+                                $query->andWhere('p.id=' . $data['idPiso']);
+                            }
+                        }
                     }
                 }
             }
         }
-        /* if( $data['txtAdicional'] ){
-          switch ($data['opAdicional']) {
-          case 1:
-          $query->andWhere("e.barcode LIKE '%".trim($data['txtAdicional']) ."%'");
-          break;
-          case 2:
-          $query->innerJoin('e.proveedor', 'pr')
-          ->andWhere("pr.nombre LIKE '%".trim($data['txtAdicional']) ."%'");
-          break;
-          case 3:
-          $query->andWhere("e.nroFactura LIKE '%".trim($data['txtAdicional']) ."%'");
-          break;
-          case 4:
-          $query->andWhere("e.nroRemito LIKE '%".trim($data['txtAdicional']) ."%'");
-          break;
-          default:
-          break;
-          }
-          } */
         return $query->getQuery()->getArrayResult();
     }
 
@@ -298,6 +285,10 @@ class EquipoRepository extends EntityRepository {
                 $query->andWhere('ed.id=' . $data['idEdificio']);
                 if ($data['idDepartamento']) {
                     $query->andWhere('d.id=' . $data['idDepartamento']);
+                }
+                if ($data['idPiso']) {
+                    $query->innerJoin('eu.piso', 'p')
+                            ->andWhere('p.id=' . $data['idPiso']);
                 }
             }
         }
@@ -570,7 +561,7 @@ class EquipoRepository extends EntityRepository {
         return $query->getQuery()->getSingleScalarResult();
     }
 
-    public function getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions) {
+    public function getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions, $userId) {
         // Create Main Query
         $query = $this->_em->createQueryBuilder();
         $query->select("e")
@@ -694,7 +685,12 @@ class EquipoRepository extends EntityRepository {
                 }
             }
         }
-
+        if ($userId) {
+            $query->innerJoin('ed.usuarios', 'us')
+                    ->andWhere('us.id=' . $userId);
+            $countQuery->innerJoin('ed.usuarios', 'us')
+                    ->andWhere('us.id=' . $userId);
+        }
         // Execute
         $results = $query->getQuery()->getResult();
         $countResult = $countQuery->getQuery()->getSingleScalarResult();
@@ -812,6 +808,10 @@ class EquipoRepository extends EntityRepository {
                         }
                     case 'idEdificio': {
                             $searchQuery = 'ed.id=' . $searchItem;
+                            break;
+                        }
+                    case 'idPiso': {
+                            $searchQuery = 'p.id=' . $searchItem;
                             break;
                         }
                     case 'idDepartamento': {

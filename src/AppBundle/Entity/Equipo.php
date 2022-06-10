@@ -285,7 +285,11 @@ class Equipo {
     }
 
     public function getMonedaEquipo() {
-        return ($this->getOC()) ? $this->getOC()->getMoneda()->getAbreviatura() : $this->getMoneda()->getAbreviatura();
+        $moneda = $this->getMoneda() ? $this->getMoneda()->getAbreviatura() : null;
+        if ($this->getOC()) {
+            $moneda = $this->getOC()->getMoneda()->getAbreviatura();
+        }
+        return $moneda;
     }
 
     public function getCotizacionEquipo() {

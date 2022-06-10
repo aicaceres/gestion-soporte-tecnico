@@ -756,45 +756,47 @@ class RequerimientoController extends Controller {
                 $em->getConnection()->setAutoCommit(false);
                 // verificar que el equipo no esté en otro requerimiento, u ot
                 $equipo = $detalle->getEquipo();
-                if ($equipo->getEnRequerimientoAbierto() || $equipo->getEnOrdenAbierta()) {
-                    $this->addFlash('danger', 'Este equipo ya se encuentra en un requerimiento abierto');
-                    $em->getConnection()->rollback();
-                }
-                else {
-//                    $em->flush();
-                    // mover el equipo y cambiar estado
-                    //$estado = $em->getRepository('ConfigBundle:Estado')->findOneByAbreviatura('RP');
-                    $detalle->setEstadoOriginal($equipo->getEstado());
-                    //$equipo->setEstado($estado);
-                    //$servTecnico = $em->getRepository('ConfigBundle:Departamento')->findOneByServicioTecnico(1);
-                    $ubicOrignal = $equipo->getUbicacionActual();
-                    $detalle->setEquipoUbicacionOriginal($ubicOrignal);
-                    // quitar equipo actual para agregar el nuevo
-                    //self::unsetUbicaciones($em, $equipo->getId());
-                    //
-                    /* /*$ubicacion = new EquipoUbicacion();
-                      $ubicacion->setActual(1);
-                      $ubicacion->setDepartamento($servTecnico);
-                      $ubicacion->setEdificio($servTecnico->getEdificio());
-                      $ubicacion->setUbicacion($servTecnico->getEdificio()->getUbicacion());
-                      $ubicacion->setPiso($servTecnico->getPisos()[0]);
-                      $ubicacion->setFechaEntrega(new \DateTime());
-                      $ubicacion->setConceptoEntrega($em->getRepository('ConfigBundle:ConceptoEntrega')->findOneByAbreviatura('ST'));
+                if ($equipo) {
+                    if ($equipo->getEnRequerimientoAbierto() || $equipo->getEnOrdenAbierta()) {
+                        $this->addFlash('danger', 'Este equipo ya se encuentra en un requerimiento abierto');
+                        $em->getConnection()->rollback();
+                    }
+                    else {
+                        //                    $em->flush();
+                        // mover el equipo y cambiar estado
+                        //$estado = $em->getRepository('ConfigBundle:Estado')->findOneByAbreviatura('RP');
+                        $detalle->setEstadoOriginal($equipo->getEstado());
+                        //$equipo->setEstado($estado);
+                        //$servTecnico = $em->getRepository('ConfigBundle:Departamento')->findOneByServicioTecnico(1);
+                        $ubicOrignal = $equipo->getUbicacionActual();
+                        $detalle->setEquipoUbicacionOriginal($ubicOrignal);
+                        // quitar equipo actual para agregar el nuevo
+                        //self::unsetUbicaciones($em, $equipo->getId());
+                        //
+                        /* /*$ubicacion = new EquipoUbicacion();
+                          $ubicacion->setActual(1);
+                          $ubicacion->setDepartamento($servTecnico);
+                          $ubicacion->setEdificio($servTecnico->getEdificio());
+                          $ubicacion->setUbicacion($servTecnico->getEdificio()->getUbicacion());
+                          $ubicacion->setPiso($servTecnico->getPisos()[0]);
+                          $ubicacion->setFechaEntrega(new \DateTime());
+                          $ubicacion->setConceptoEntrega($em->getRepository('ConfigBundle:ConceptoEntrega')->findOneByAbreviatura('ST'));
 
-                      if ($op == 'req') {
-                      $ubicacion->setRequerimientoDetalle($detalle);
-                      $detalle->setEquipoUbicacionRequerimiento($ubicacion);
-                      }
-                      else {
-                      $ubicacion->setOrdenTrabajoDetalle($detalle);
-                      $detalle->setEquipoUbicacionOrdenTrabajo($ubicacion);
-                      }
-                      $equipo->addUbicacion($ubicacion);
-                      $em->persist($equipo); */
-                    $em->persist($detalle);
-                    $em->flush();
-                    $em->getConnection()->commit();
-                    $this->addFlash('success', 'El equipo fue agregado correctamente.');
+                          if ($op == 'req') {
+                          $ubicacion->setRequerimientoDetalle($detalle);
+                          $detalle->setEquipoUbicacionRequerimiento($ubicacion);
+                          }
+                          else {
+                          $ubicacion->setOrdenTrabajoDetalle($detalle);
+                          $detalle->setEquipoUbicacionOrdenTrabajo($ubicacion);
+                          }
+                          $equipo->addUbicacion($ubicacion);
+                          $em->persist($equipo); */
+                        $em->persist($detalle);
+                        $em->flush();
+                        $em->getConnection()->commit();
+                        $this->addFlash('success', 'El equipo fue agregado correctamente.');
+                    }
                 }
             }
             catch (Exception $ex) {

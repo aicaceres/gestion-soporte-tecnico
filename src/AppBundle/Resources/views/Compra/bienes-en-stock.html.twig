@@ -34,7 +34,7 @@
                                     </select> 
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="required">Proveedor:</label>
                                 <div class="input-group">
                                     <select class="select2 form-control" name="proveedorId" id="selectProveedor">
@@ -45,6 +45,17 @@
                                     </select> 
                                 </div>
                             </div>
+                            <div class="col-md-3">
+                                <label class="required">Equipo:</label>
+                                <div class="input-group">
+                                    <select class="select2 form-control" name="equipoId" id="selectEquipo">
+                                        <option value="0">Todos</option>
+                                        {%for tipo in tiposEquipo %}
+                                            <option {%if tipo.id== app.session.get('filtro_compras_bienes')['equipoId'] %} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>        
                             <div class="col-md-2">
                                 <label class="required">Fecha de Adquisición:</label>
                                 <div class="input-group">
@@ -63,12 +74,7 @@
                                     <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{app.session.get('filtro_compras_bienes')['hasta'] }}">                                            
                                 </div>                                           
                             </div>    
-                            <div class="col-md-2"> 
-                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
-                                <label style="width:100%;">&nbsp;</label>
-                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
-                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
-                            </div>
+                            
                         </fieldset>
                         <fieldset>
                             <div class="col-md-2">
@@ -89,16 +95,27 @@
                                     <input type="text" name="movHasta" id="movHasta" class="form-control datepicker" value="{{app.session.get('filtro_compras_bienes')['movHasta'] }}">                                            
                                 </div>                                           
                             </div>   
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label class="required">Estado:</label>
                                 <div class="input-group">
                                     <select class="select2 form-control" name="estado" id="selectEstado">
                                         <option value="0"   {%if app.session.get('filtro_compras_bienes')['estado'] == '0' %} selected="selected" {%endif%}>Todos</option>
+                                        <option value="ENT"  {%if app.session.get('filtro_compras_bienes')['estado'] == 'ENT' %} selected="selected" {%endif%} >Entregado</option>
                                         <option value="STS" {%if app.session.get('filtro_compras_bienes')['estado'] == 'STS' %} selected="selected" {%endif%} >Stock de Seguridad</option>
-                                        <option value="ET"  {%if app.session.get('filtro_compras_bienes')['estado'] == 'ET' %} selected="selected" {%endif%} >En Tránsito</option>
-                                        <option value="OP"  {%if app.session.get('filtro_compras_bienes')['estado'] == 'OP' %} selected="selected" {%endif%} >Operativo</option>
                                     </select> 
                                 </div>
+                            </div>
+                            <div class="col-md-2"> 
+                                <label>N° de Cuenta:</label>
+                                <div class="input-group">                                    
+                                    <input type="text" name="cuenta" id="cuenta" class="form-control" value="{{app.session.get('filtro_compras_bienes')['cuenta'] }}">                                            
+                                </div>                                           
+                            </div>   
+                            <div class="col-md-3"> 
+                                <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                <label style="width:100%;">&nbsp;</label>
+                                <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
                             </div>
                         </fieldset>
                     </div> 
@@ -110,7 +127,7 @@
                             <tr>
                                 <th class="no-sort">Razón Social</th>
                                 <th class="no-sort">Proveedor</th>
-                                <th class="no-sort">Descripción</th>
+                                <th class="no-sort">Equipo</th>
                                 <th class="no-sort">N° de Serie</th>
                                 <th class="no-sort">Ubicación</th>
                                 <th class="no-sort">Cuenta</th>
@@ -150,13 +167,13 @@
                                     <td style="text-align:right" >{{ item.precioPesos|number_format(2,'.',',') }}</td>
                                     <td>{{ item.fechaMovimiento }} </td>
                                     <td>{% if item.nroOT %}
-                                        <a href="{{ path('print_ordentrabajo', { 'id': item.idOT }) }}" target="_blank"> 
+                                        <a href="{{ path('print_ordentrabajo_resumen', { 'id': item.idOT }) }}" target="_blank"> 
                                             {{ item.nroOT }}                                                
                                         </a>
                                         {% endif %}
                                     </td>
                                     <td>{{ item.nuevaUbicacion }} </td>
-                                    <td>{{ item.estado }}</td>
+                                    <td>{{ item.estado }} </td>
                                     
                                 </tr>
                             {% endfor %}
@@ -193,6 +210,10 @@ $(document).ready(function() {
        };
        eModal.ajax(options);
     });     
+    
+    var oTable = $('#tablelist').dataTable();
+    oTable.api().page.len(10).draw();
+    
    $('#pdf,#xls,#csv').on('click',function(){   
         $('#option').val( $(this).attr('id') );             
         $('#searchterm').val( $('#tablelist_filter input').val() );

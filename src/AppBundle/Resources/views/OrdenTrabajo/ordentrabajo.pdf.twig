@@ -126,7 +126,7 @@
                                                         {{ txt[0] }}<br></br>
                                                         {{ (item.tipoRecambio=='OUT') ? txt[1]|raw : txt[2]|raw }}   
                                                     {% else %}
-                                                        {{ tarea.descripcion|raw }}                         
+                                                        {{ tarea.descripcion|replace({'&':'y'})|raw }}                         
                                                     {% endif %}
                                                 </td> 
                                             </tr>

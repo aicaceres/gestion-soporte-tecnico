@@ -4,7 +4,6 @@ namespace AppBundle\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Doctrine\ORM\EntityRepository;
 
 class TareaType extends AbstractType {
 
@@ -67,39 +66,9 @@ class TareaType extends AbstractType {
                     ->add('ubicacion', new EquipoUbicacionType(), array('mapped' => false));
         }
         if ($tipoTarea == 'CE') {
-            /* $eqNuevo = array(
-              'class'         => 'AppBundle:Equipo',
-              'choice_label'  => 'textoOT', 'mapped'=>false,
-              'required'      => false, 'multiple' =>true,
-              'query_builder' => function (\Doctrine\ORM\EntityRepository $em ){
-              $qb = $em->createQueryBuilder('e')
-              ->innerJoin('e.tipo', 't')
-              ->innerJoin('e.marca','m')
-              ->innerJoin('e.modelo','mo')
-              ->innerJoin('e.estado','es')
-              ->where("es.abreviatura in ('AT','STRAF','STDGR') ")
-              ->orderBy("t.nombre, e.nombre, e.nroSerie");
-              return $qb;
-              }
-              );
-              $opDet = array(
-              'class'         => 'AppBundle:OrdenTrabajoDetalle',
-              'label'         => 'Equipos:', 'choice_label'  => 'equipoTextoOT','mapped'=>false,
-              'required'      => true,
-              'query_builder' => function (\Doctrine\ORM\EntityRepository $em ) use ($otId) {
-              $qb = $em->createQueryBuilder('od')
-              ->innerJoin('od.ordenTrabajo','o')
-              ->where("o.id = ".$otId)
-              ->andWhere("od.entregado=0");
-              return $qb;
-              }
-              ); */
-
             // ubicacion y estado nuevos
             $builder->add('estadoNuevoId', 'hidden', array('mapped' => false))
                     ->add('ubicacionNueva', new EquipoUbicacionType(), array('mapped' => false));
-            //->add('equipoNuevo', 'entity',$eqNuevo)
-            //->add('ordenTrabajoDetalle', 'entity',$opDet)
         }
         if ($tipoTarea == 'SI') {
             // solicitud de insumos
@@ -114,12 +83,7 @@ class TareaType extends AbstractType {
                 ))
             );
         }
-        /*
 
-
-          ->add('terminarSoporte','checkbox' , array('label' => 'Terminar Soporte', 'mapped' => false));
-         *
-         */
         $builder->add('deletedAt', null, array('widget' => 'single_text',
             'attr' => array('class' => 'hidden')));
     }

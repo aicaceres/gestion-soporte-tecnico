@@ -147,9 +147,17 @@ class CompraRepository extends EntityRepository {
                 ->innerJoin('cd.compra', 'c')
                 ->innerJoin('c.razonSocial', 'rs')
                 ->where('1 = 1');
-        if ($filtro['estado']) {
+        if ($filtro['estado'] == 'STS') {
+            // solo se filtra por el estado del equipo si se buscan STS
             $query->innerJoin('e.estado', 'es')
                     ->andWhere("es.abreviatura='" . $filtro['estado'] . "'");
+        }
+        if ($filtro['cuenta']) {
+            $query->andWhere("c.nroCuenta LIKE '%" . $filtro['cuenta'] . "%'");
+        }
+        if ($filtro['equipoId']) {
+            $query->innerJoin('e.tipo', 't')
+                    ->andWhere("t.id=" . $filtro['equipoId']);
         }
         if ($filtro['desde']) {
             $cadena = " c.fechaCompra >= '" . UtilsController::toAnsiDate($filtro['desde']) . "'";

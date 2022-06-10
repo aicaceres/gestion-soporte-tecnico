@@ -11,7 +11,6 @@ use ConfigBundle\Controller\UtilsController;
 use Doctrine\Common\Collections\ArrayCollection;
 use AppBundle\Entity\Compra;
 use AppBundle\Form\CompraType;
-use AppBundle\Form\CompraEditType;
 use AppBundle\Entity\RecepcionCompra;
 use AppBundle\Entity\RecepcionCompraDetalle;
 use AppBundle\Form\RecepcionCompraType;
@@ -942,11 +941,13 @@ class CompraController extends Controller {
                 $filtro = array(
                     'razonSocialId' => $request->get('razonSocialId'),
                     'proveedorId' => $request->get('proveedorId'),
+                    'equipoId' => $request->get('equipoId'),
                     'desde' => $periodo['desde'],
                     'hasta' => $periodo['hasta'],
                     'movDesde' => $request->get('movDesde'),
                     'movHasta' => $request->get('movHasta'),
                     'estado' => $request->get('estado'),
+                    'cuenta' => $request->get('cuenta'),
                 );
                 break;
             case 'limpiar':
@@ -954,30 +955,34 @@ class CompraController extends Controller {
                 $filtro = array(
                     'razonSocialId' => 0,
                     'proveedorId' => 0,
+                    'equipoId' => 0,
                     'desde' => $periodo['desde'],
                     'hasta' => $periodo['hasta'],
                     'movDesde' => '',
                     'movHasta' => '',
                     'estado' => '0',
+                    'cuenta' => '',
                 );
                 break;
             default:
                 //desde paginacion, se usa session
-                if (!$sessionFiltro) {
+                if ($sessionFiltro) {
                     $periodo = UtilsController::ultimoMesParaFiltro($sessionFiltro['desde'], $sessionFiltro['hasta']);
                     $filtro = array(
                         'razonSocialId' => $sessionFiltro['razonSocialId'],
                         'proveedorId' => $sessionFiltro['proveedorId'],
+                        'equipoId' => $sessionFiltro['equipoId'],
                         'desde' => $periodo['desde'],
                         'hasta' => $periodo['hasta'],
                         'movDesde' => $sessionFiltro['movDesde'],
                         'movHasta' => $sessionFiltro['movHasta'],
                         'estado' => $sessionFiltro['estado'],
+                        'cuenta' => $sessionFiltro['cuenta'],
                     );
                 }
                 else {
                     $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
-                    $filtro = array('proveedorId' => 0, 'razonSocialId' => 0, 'estado' => '0',
+                    $filtro = array('proveedorId' => 0, 'razonSocialId' => 0, 'equipoId' => 0, 'estado' => '0', 'cuenta' => '',
                         'desde' => $periodo['desde'], 'hasta' => $periodo['hasta'], 'movDesde' => '', 'movHasta' => '');
                 }
                 break;
@@ -985,7 +990,7 @@ class CompraController extends Controller {
         $session->set('filtro_compras_bienes', $filtro);
         $proveedores = $em->getRepository('AppBundle:Proveedor')->findBy(array(), array('nombre' => 'ASC'));
         $razonesSociales = $em->getRepository('ConfigBundle:Ubicacion')->findBy(array('razonSocial' => '1'), array('abreviatura' => 'ASC'));
-
+        $tiposEquipo = $em->getRepository('ConfigBundle:Tipo')->findBy(array(), array('nombre' => 'ASC'));
 
         $datos = $this->getBienesEnStock($filtro, $em);
 
@@ -993,6 +998,7 @@ class CompraController extends Controller {
                     'datos' => $datos,
                     'proveedores' => $proveedores,
                     'razonesSociales' => $razonesSociales,
+                    'tiposEquipo' => $tiposEquipo,
                     'filtro' => $filtro
         ));
     }
@@ -1011,13 +1017,14 @@ class CompraController extends Controller {
         //$searchTerm = $request->get('searchterm');
         $proveedor = $em->getRepository('AppBundle:Proveedor')->find($filtro['proveedorId']);
         $razonSocial = $em->getRepository('ConfigBundle:Ubicacion')->find($filtro['razonSocialId']);
-        $estado = $em->getRepository('ConfigBundle:Estado')->find($filtro['estado']);
+        $tipo = $em->getRepository('ConfigBundle:Tipo')->find($filtro['equipoId']);
         $arrayFiltro = array(
             $razonSocial ? $razonSocial->getAbreviatura() : 'Todas',
             $proveedor ? $proveedor->getNombre() : 'Todos',
-            $estado ? $estado->getNombre() : 'Todos',
+            ($filtro['estado'] == 'ENT') ? 'Entregado' : ($filtro['estado'] == 'STS') ? 'Stock de Seguridad' : 'Todos',
             $filtro['desde'], $filtro['hasta'],
-            $filtro['movDesde'], $filtro['movHasta']
+            $filtro['movDesde'], $filtro['movHasta'],
+            $tipo ? $tipo->getNombre() : 'Todos'
         );
         $hoy = new \DateTime();
         $datos = $this->getBienesEnStock($filtro, $em);
@@ -1076,21 +1083,21 @@ class CompraController extends Controller {
                 $fechaMovimiento = $tareaop->getFecha()->format('d/m/Y');
                 $idOT = $tareaop->getOrdenTrabajo()->getId();
                 $nroOT = $tareaop->getOrdenTrabajo()->getNroOT();
-                if ($tareaop->getOrdenTrabajoDetalles()[0]->getEquipoUbicacionFinal()) {
-                    $nuevaUbicacion = '';
-                    foreach ($tareaop->getOrdenTrabajoDetalles() as $tarea) {
-                        $nuevaUbicacion = $nuevaUbicacion . 'f ' . $tarea->getEquipoUbicacionFinal()->getTexto();
+                $nuevaUbicacion = '';
+                foreach ($tareaop->getOrdenTrabajoDetalles() as $tarea) {
+                    if ($tarea->getEquipo()->getId() == $entity->getId()) {
+                        $nuevaUbicacion = $nuevaUbicacion . $tarea->getEquipoUbicacionFinal()->getTexto();
                     }
                 }
-                else {
-                    $nuevaUbicacion = 'Verificar: OTD' . $tareaop->getOrdenTrabajoDetalles()[0]->getId() . ' EQ' . $entity->getId();
-                }
             }
-
+            if (($filtro['estado'] == 'ENT') && !$fechaMovimiento) {
+                // filtro por entregados y el equipo no se entrego
+                continue;
+            }
             $datos[] = array(
                 'razonSocial' => $entity->getRazonSocial(),
                 'proveedor' => $entity->getProveedor(),
-                'nombre' => $entity->getNombre(),
+                'nombre' => $entity->getTipo(),
                 'nroSerie' => $entity->getNroSerie(),
                 'ubicInicial' => ($ubicInicial) ? $ubicInicial->getDepartamento() : '',
                 'cuenta' => $entity->getCuenta(),
@@ -1106,7 +1113,7 @@ class CompraController extends Controller {
                 'idOT' => $idOT,
                 'nroOT' => $nroOT,
                 'nuevaUbicacion' => $nuevaUbicacion,
-                'estado' => $entity->getEstado()
+                'estado' => ($fechaMovimiento) ? 'Entregado' : $entity->getEstado()
             );
         }
         return $datos;
