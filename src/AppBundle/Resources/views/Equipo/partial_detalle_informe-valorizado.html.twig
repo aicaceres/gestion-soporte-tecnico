@@ -1,0 +1,57 @@
+<style>
+    #summaryData span{
+        font-size: 16px;
+        padding: 3px 10px;
+        display: block;        
+        text-align: center;
+    }
+    #tablelist tr th{
+        padding-right: 10px !important;
+    }
+</style>
+<div class="table-responsive" style="padding: 15px; overflow: auto;">
+    <table id="tablelist" class="table table-bordered table-hover detalle" style="font-size:11px">
+        <thead>
+            <tr>
+                <th class="no-sort">Tipo</th>
+                <th class="no-sort">Marca</th>
+                <th class="no-sort">Modelo</th>
+                <th class="no-sort">N° Serie</th>
+                <th class="no-sort">Proveedor</th>
+                <th class="no-sort">Cod. Barra</th>
+                <th class="no-sort">Ubicación</th>
+                <th class="no-sort">Estado</th>
+                <th class="no-sort">Inicio Vida Útil</th>
+                <th class="no-sort">Valor USD</th>
+                <th class="no-sort">Cotiz. USD</th>
+                <th class="no-sort">Valor $</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set usd, pes = 0,0 %}
+            {% for entity in entities %}
+                {% set usd, pes = usd+entity.precioDolares(filtro['cotizacion']) , pes+entity.precioPesos %}
+            <tr>    
+                <td>{{ entity.tipo }}</td>
+                <td>{{ entity.marca }}</td>
+                <td>{{ entity.modelo }}</td>
+                <td>{{ entity.nroSerie }}</td>
+                <td>{{ entity.proveedor }}</td>
+                <td>{{ entity.barcode }}</td>
+                <td>{{ entity.ubicacionActual.texto }}</td>
+                <td>{{ entity.estado }}</td>
+                <td>{% if entity.fechaInstalacion %} {{ entity.fechaInstalacion|date('d/m/Y') }} {% endif %}</td>
+                <td style="text-align:right;padding-right: 10px" > {{ entity.precioDolares(filtro['cotizacion'])|number_format(2,'.',',') }} </td>
+                <td style="text-align:right;padding-right: 10px" > {{ entity.cotizacionEquipo(filtro['cotizacion'])|number_format(2,'.',',') }} </td>
+                <td style="text-align:right;padding-right: 10px">{{ entity.precioPesos|number_format(2,'.',',') }}</td>
+            </tr>    
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <div class="col-md-12" id="summaryData" style="padding:0">    
+        
+                <span class="bg-red"> {{ entities|length }} Equipos: &nbsp;&nbsp; USD {{ usd|number_format(2,'.',',') }} &nbsp;&nbsp;-&nbsp;&nbsp; $ {{ pes|number_format(2,'.',',') }} </span> 
+        
+    </div>     
+</div>

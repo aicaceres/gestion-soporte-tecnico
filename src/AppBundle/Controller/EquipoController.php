@@ -1337,10 +1337,143 @@ class EquipoController extends Controller {
     public function valorizadoAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), 'equipo_valorizado');
         $em = $this->getDoctrine()->getManager();
-        //$entities = $em->getRepository('AppBundle:Equipo')->findByEstado(6);
+        $session = $this->get('session');
+        $sessionFiltro = $session->get('filtro_equipo_valorizado');
+
+        switch ($request->get('_opFiltro')) {
+            case 'limpiar':
+                $filtro = array('tipoReporte' => 'detalle', 'selTipos' => NULL,
+                    'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'cotizacion' => 1);
+                break;
+            case 'buscar':
+                $filtro = array(
+                    'tipoReporte' => $request->get('tipoReporte'),
+                    'selTipos' => $request->get('selTipos'),
+                    'idMarca' => $request->get('idMarca'),
+                    'idModelo' => $request->get('idModelo'),
+                    'idUbicacion' => $request->get('idUbicacion'),
+                    'cotizacion' => $request->get('cotizacion'),
+                );
+                break;
+            default:
+                //desde paginacion, se usa session
+                if ($sessionFiltro) {
+                    $filtro = array(
+                        'tipoReporte' => $sessionFiltro['tipoReporte'],
+                        'selTipos' => $sessionFiltro['selTipos'],
+                        'idMarca' => $sessionFiltro['idMarca'],
+                        'idModelo' => $sessionFiltro['idModelo'],
+                        'idUbicacion' => $sessionFiltro['idUbicacion'],
+                        'cotizacion' => $sessionFiltro['cotizacion'],
+                    );
+                }
+                else {
+                    $filtro = array('tipoReporte' => 'detalle', 'selTipos' => NULL,
+                        'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'cotizacion' => 1);
+                }
+                break;
+        }
+
+        $filtro['cotizacion'] = ($filtro['cotizacion'] == 0) ? 1 : $filtro['cotizacion'];
+        $session->set('filtro_equipo_valorizado', $filtro);
+        $userId = $this->getUser()->getId();
+
+        $em->getFilters()->disable('softdeleteable');
+
+        if ($filtro['tipoReporte'] == 'detalle') {
+            // informe detallado de equipos valorizados
+            $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoByCriteria($filtro);
+        }
+        else {
+            // informe sumariado por filtro: tipo - marca - modelo
+            $entities = null;
+        }
+
+        $tipos = $em->getRepository('AppBundle:Equipo')->valorizadoCombosByCriteria($filtro, 'DISTINCT t.id,t.nombre', 't.nombre', 'tipo', $userId);
+
+        $marcas = $em->getRepository('AppBundle:Equipo')->valorizadoCombosByCriteria($filtro, 'DISTINCT ma.id,ma.nombre', 'ma.nombre', 'marca', $userId);
+        if ($filtro['idMarca']) {
+            $modelos = $em->getRepository('AppBundle:Equipo')->valorizadoCombosByCriteria($filtro, 'DISTINCT mo.id,mo.nombre', 'mo.nombre', 'modelo', $userId);
+        }
+        else {
+            $modelos = NULL;
+        }
+
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+
         return $this->render('AppBundle:Equipo:informe-valorizado.html.twig', array(
-                    'entities' => null
+                    'entities' => $entities,
+                    'tipos' => $tipos,
+                    'marcas' => $marcas,
+                    'modelos' => $modelos,
+                    'ubicaciones' => $ubicaciones,
         ));
+    }
+
+    /**
+     * @Route("/printValorizadoEquipos", name="print_equipo_valorizado")
+     * @Method("POST")
+     * @Template()
+     */
+    public function printValorizadoEquipos(Request $request) {
+
+        $op = $request->get('option');
+        $em = $this->getDoctrine()->getManager();
+        $session = $this->get('session');
+        $filtro = $session->get('filtro_equipo_valorizado');
+        $searchTerm = $request->get('searchterm');
+
+        $tipos = $this->getTextoFiltro($em, $filtro['selTipos']);
+        $marca = $em->getRepository('ConfigBundle:Marca')->find($filtro['idMarca']);
+        $modelo = $em->getRepository('ConfigBundle:Modelo')->find($filtro['idModelo']);
+        $ubicacion = $em->getRepository('ConfigBundle:Ubicacion')->find($filtro['idUbicacion']);
+
+        $arrayFiltro = array(
+            'tipo' => $tipos ? $tipos : 'Todos',
+            'marca' => $marca ? $marca->getNombre() : 'Todas',
+            'modelo' => $modelo ? $modelo->getNombre() : 'Todos',
+            'ubicacion' => $ubicacion ? $ubicacion->getAbreviatura() : 'Todas',
+            'cotizacion' => $filtro['cotizacion'],
+            'tipoReporte' => $filtro['tipoReporte']);
+
+        $hoy = new \DateTime();
+        $userId = $this->getUser()->getId();
+        $em->getFilters()->disable('softdeleteable');
+        if ($filtro['tipoReporte'] == 'detalle') {
+            // informe detallado de equipos valorizados
+            $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoByCriteria($filtro);
+        }
+        else {
+            // informe sumariado por filtro: tipo - marca - modelo
+            $entities = null;
+        }
+        switch ($op) {
+            case 'pdf':
+                $entities = $em->getRepository('AppBundle:Equipo')->findSqlByCriteria($filtro, 'RES', $searchTerm, $userId);
+                $logo1 = __DIR__ . '/../../../web/bundles/app/img/pdf_logo.png';
+                $facade = $this->get('ps_pdf.facade');
+                $response = new Response();
+                $this->render('AppBundle:Equipo:listado.pdf.twig', array('items' => $entities, 'filtro' => $arrayFiltro, 'logo' => $logo1,
+                    'search' => $request->get('searchterm')), $response);
+
+                $xml = $response->getContent();
+                $content = $facade->render($xml);
+
+                return new Response($content, 200, array('content-type' => 'application/pdf',
+                    'Content-Disposition' => 'filename=listado_equipos_' . $hoy->format('dmY_Hi') . '.pdf'));
+
+            case 'xls':
+                $partial = $this->renderView('AppBundle:Equipo:valorizado-xls.html.twig',
+                        array('items' => $entities, 'filtro' => $arrayFiltro));
+
+                $fileName = 'Valorizado_Equipos_' . $hoy->format('dmY_Hi');
+                $response = new Response();
+                $response->setStatusCode(200);
+                $response->headers->set('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+                $response->headers->set('Content-Disposition', 'filename="' . $fileName . '.xls"');
+                $response->setContent($partial);
+                return $response;
+        }
     }
 
     /**

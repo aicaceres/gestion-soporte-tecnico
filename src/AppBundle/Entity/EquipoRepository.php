@@ -192,6 +192,87 @@ class EquipoRepository extends EntityRepository {
     }
 
     /*
+     * Obtiene los combos filtrados y ordenados para valorizado de equipos
+     */
+
+    public function valorizadoCombosByCriteria($data, $select, $order, $tabla = '', $userId = null) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select($select)
+                ->from('AppBundle\Entity\Equipo', 'e')
+                ->innerJoin('e.tipo', 't')
+                ->innerJoin('e.marca', 'ma')
+                ->innerJoin('e.modelo', 'mo')
+                ->innerJoin('e.estado', 'es')
+                ->innerJoin('e.ubicaciones', 'eu')
+                ->innerJoin('eu.departamento', 'd')
+                ->innerJoin('d.edificio', 'ed')
+                ->innerJoin('ed.ubicacion', 'u')
+                ->where('eu.actual=1')
+                ->andWhere("es.abreviatura IN ('OP','STS') ")
+                ->orderBy($order);
+        if ($userId) {
+            $query->innerJoin('ed.usuarios', 'us')
+                    ->andWhere('us.id=' . $userId);
+        }
+
+        if ($tabla != 'tipo') {
+            if ($data['selTipos']) {
+                $query->andWhere(' t.id IN (:tipos)')
+                        ->setParameter('tipos', $data['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+            }
+        }
+        if ($tabla != 'marca') {
+            if ($data['idMarca']) {
+                $query->andWhere('ma.id=' . $data['idMarca']);
+                if ($tabla != 'modelo') {
+                    if ($data['idModelo']) {
+                        $query->andWhere('mo.id=' . $data['idModelo']);
+                    }
+                }
+            }
+        }
+
+        if ($tabla != 'ubicacion') {
+            if ($data['idUbicacion']) {
+                $query->andWhere('u.id=' . $data['idUbicacion']);
+            }
+        }
+        return $query->getQuery()->getArrayResult();
+    }
+
+    public function findValorizadoByCriteria($data) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('e')
+                ->from('AppBundle\Entity\Equipo', 'e')
+                ->innerJoin('e.estado', 'es')
+                ->where("es.abreviatura IN ('OP','STS') ");
+
+        if ($data['selTipos']) {
+            $query->innerJoin('e.tipo', 't')
+                    ->andWhere(' t.id IN (:tipos)')
+                    ->setParameter('tipos', $data['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+        }
+
+        if ($data['idMarca']) {
+            $query->innerJoin('e.marca', 'ma')
+                    ->andWhere('ma.id=' . $data['idMarca']);
+            if ($data['idModelo']) {
+                $query->innerJoin('e.modelo', 'mo')
+                        ->andWhere('mo.id=' . $data['idModelo']);
+            }
+        }
+        if ($data['idUbicacion']) {
+            $query->innerJoin('e.ubicaciones', 'eu')
+                    ->innerJoin('eu.departamento', 'd')
+                    ->innerJoin('d.edificio', 'ed')
+                    ->innerJoin('ed.ubicacion', 'u')
+                    ->andWhere('eu.actual=1')
+                    ->andWhere('u.id=' . $data['idUbicacion']);
+        }
+        return $query->getQuery()->getResult();
+    }
+
+    /*
       public function findComboTipo($filtro){
       $query = $this->_em->createQueryBuilder();
       $query->select('DISTINCT t.id,t.nombre')

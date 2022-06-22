@@ -136,7 +136,7 @@ class Equipo {
      * @var string $cotizacionDolar
      * @ORM\Column(name="cotizacion_dolar", type="decimal", scale=2, nullable=true)
      */
-    protected $cotizacionDolar = 0;
+    protected $cotizacionDolar = 1;
 
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
@@ -247,7 +247,7 @@ class Equipo {
      * DATOS PARA LISTADOS DE BIENES EN STOCK Y VALORIZADO
      */
 
-    private function getOC() {
+    public function getOC() {
         return (count($this->getDetcompra()) > 0) ? $this->getDetcompra()[0]->getCompraDetalle() : null;
     }
 
@@ -292,20 +292,36 @@ class Equipo {
         return $moneda;
     }
 
-    public function getCotizacionEquipo() {
-        return ($this->getOC()) ? $this->getOC()->getCompra()->getCotizacionDolar() : $this->getCotizacionDolar();
+    public function getCotizacionEquipo($cotiz = 1) {
+        $cotizacion = ($this->getOC()) ? $this->getOC()->getCompra()->getCotizacionDolar() : $this->getCotizacionDolar();
+        return ( $cotizacion == 1 || $cotizacion == 0 ) ? $cotiz : $cotizacion;
     }
 
-    public function getPrecioDolares() {
-        $cot = ($this->getCotizacionEquipo() == 0) ? 1 : $this->getCotizacionEquipo();
-        return ($this->getMonedaEquipo() == '$') ? $this->getPrecioEquipo() / $cot : $this->getPrecioEquipo();
+    public function getPrecioDolares($cotiz = 1) {
+        return ($this->getMonedaEquipo() == '$') ? $this->getPrecioEquipo() / $this->getCotizacionEquipo($cotiz) : $this->getPrecioEquipo();
     }
 
     public function getPrecioPesos() {
         return ($this->getMonedaEquipo() == 'U$S') ? $this->getPrecioEquipo() * $this->getCotizacionEquipo() : $this->getPrecioEquipo();
     }
 
-    /*     * ************************** */
+    public function getFechaInstalacion() {
+        $fecha = '';
+        if ($this->getOrdenesdetrabajo()) {
+            foreach ($this->getOrdenesdetrabajo() as $ord) {
+                if ($ord->getTareas()) {
+                    foreach ($ord->getTareas() as $tar) {
+                        if (strpos($tar->getDescripcion(), '<strong>Operativo</strong>') !== false) {
+                            $fecha = $tar->getFecha();
+                        }
+                    }
+                }
+            }
+        }
+        return $fecha;
+    }
+
+    /*     * 9j5nwg3 ************************** */
 
     /**
      * Get id

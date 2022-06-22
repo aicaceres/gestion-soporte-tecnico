@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=UTF-8" />
+   </head>
+   <body  >  
+<style>
+.align-center{text-align: center}
+table{ font-family:'Arial';font-size: 12px; }
+table tr th{
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+    background: #CCCCCC;
+    font-size: 13px;
+    }
+table tr th:last-of-type, table tr.master td:last-of-type { 
+    border-right: 1px solid gray;  
+    
+}
+table tr.master:last-of-type td{    border-bottom: 1px solid gray;  }
+table tr.master:first-of-type td{    border-top: 1px solid gray;  }
+table tr.master td{
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+}
+table tr td, table tfoot th{ text-align: right;}
+</style>       
+       
+      <h2 text-align="center"> Listado de Equipos Valorizados - {{ filtro['tipoReporte']|upper }}</h2>              
+        <h4><strong>Ubicación:</strong> {{ filtro['ubicacion'] }}</h4>
+        <h4><strong>Tipos:</strong> {{ filtro['tipo'] }} - <strong>Marca:</strong> {{ filtro['marca'] }} - <strong>Modelo:</strong> {{ filtro['modelo'] }} </h4>        
+        <h4><strong>Cotización USD:</strong>  {{filtro['cotizacion']}} </h4>      
+        {% if filtro['tipoReporte'] == 'detalle' %}
+        
+    <table cellspacing="0">
+        <thead>
+        <tr>
+                <th>#</th>
+                <th>Tipo</th>                
+                <th>Marca</th>                
+                <th>Modelo</th>                
+                <th>N° Serie</th>                
+                <th>Proveedor</th>
+                <th>Cod. Barra</th>                
+                <th>Ubicación</th>                
+                <th>Estado</th>                
+                <th>Inicio Vida Útil</th>                
+                <th>Valor USD</th>            
+                <th>Cotiz. USD</th>            
+                <th>Valor $</th>            
+        </tr>        
+        </thead>
+        <tbody>
+        {% set usd, pes = 0,0 %}
+    {% for item in items %}
+        {% set usd, pes = usd + item.precioDolares(filtro['cotizacion']) , pes + item.precioPesos %}
+        <tr>
+            <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.tipo}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.marca}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.modelo}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.nroSerie}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.proveedor}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.barcode}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.ubicacionActual.texto}}</td>            
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.estado}}</td>            
+            <td height="20px" vertical-align="middle" padding-left="5px">{% if item.fechaInstalacion %} {{ item.fechaInstalacion|date('d/m/Y') }} {% endif %}</td>            
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioDolares(filtro['cotizacion'])|number_format(2,'.',',') }}</td>            
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.cotizacionEquipo(filtro['cotizacion'])|number_format(2,'.',',') }}</td>            
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioPesos|number_format(2,'.',',') }}</td>            
+        </tr>        
+    {% endfor %}
+    
+    <tr>
+        <td colspan="10" height="20px" vertical-align="middle" text-align="right"> {{ items|length }} Equipos: </td>
+        <td height="20px" vertical-align="middle" text-align="right"> {{ usd|number_format(2,'.',',') }} </td>
+        <td height="20px" vertical-align="middle" text-align="right"> </td>
+        <td height="20px" vertical-align="middle" text-align="right"> $ {{ pes|number_format(2,'.',',') }} </td>
+    </tr>
+    
+        </tbody>              
+    </table>    
+        
+        {% endif %}
+
+   </body>
+</html>

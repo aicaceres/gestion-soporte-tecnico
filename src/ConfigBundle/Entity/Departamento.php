@@ -1,9 +1,11 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\Departamento
  * @ORM\Table(name="departamento",uniqueConstraints={@ORM\UniqueConstraint(name="departamento_idx", columns={"edificio_id", "nombre"})})
@@ -11,12 +13,11 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * @UniqueEntity(
  *     fields={"edificio","nombre"}, errorPath="nombre",
  *     message="Este Departamento ya existe en este Edificio."
- * )  
+ * )
  * @ORM\HasLifecycleCallbacks
- * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)     
+ * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
  */
-class Departamento
-{
+class Departamento {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -24,106 +25,115 @@ class Departamento
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false)
      * @Assert\NotBlank()
      */
-    protected $nombre;   
+    protected $nombre;
+
     /**
      * @var string $direccion
      * @ORM\Column(name="direccion", type="string", nullable=true)
      */
-    protected $direccion;    
+    protected $direccion;
+
     /**
      * @var string $telefono
      * @ORM\Column(name="telefono", type="string", nullable=true)
      */
-    protected $telefono;    
+    protected $telefono;
+
     /**
      * @var string $responsable
      * @ORM\Column(name="responsable", type="string", nullable=true)
      */
-    protected $responsable;    
+    protected $responsable;
+
     /**
      * @var string $email
      * @ORM\Column(name="email", type="string", nullable=true)
      */
-    protected $email;    
+    protected $email;
+
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
      */
-    protected $observaciones;    
-    
+    protected $observaciones;
+
     /**
      * @ORM\Column(name="deposito", type="boolean")
      */
-    protected $deposito = false;    
+    protected $deposito = false;
+
     /**
      * @ORM\Column(name="servicio_tecnico", type="boolean")
      */
-    protected $servicioTecnico = false;    
-    
+    protected $servicioTecnico = false;
+
     /**
      * @ORM\Column(name="inicial", type="boolean", nullable=true)
      */
-    protected $inicial = false; 
-    
+    protected $inicial = false;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
      * @ORM\JoinColumn(name="localidad_id", referencedColumnName="id")
      */
-    protected $localidad;       
-  
-     /**
+    protected $localidad;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Edificio", inversedBy="departamentos")
      * @ORM\JoinColumn(name="edificio_id", referencedColumnName="id")
      */
-    protected $edificio;            
-    
-     /**
+    protected $edificio;
+
+    /**
      * @ORM\ManyToMany(targetEntity="ConfigBundle\Entity\Piso",inversedBy="departamentos")
      * @ORM\JoinTable(name="pisos_x_departamento",
      *      joinColumns={@ORM\JoinColumn(name="departamento_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="piso_id", referencedColumnName="id")}
      * )
      */
-    private $pisos; 
+    private $pisos;
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\EquipoUbicacion", mappedBy="departamento")
      */
-    protected $equipos;    
-    
+    protected $equipos;
+
     /**
      * @var string $ipPrincipal
-     * @ORM\Column(name="ip_principal", type="string", nullable=true)          
+     * @ORM\Column(name="ip_principal", type="string", nullable=true)
      */
-    protected $ipPrincipal;        
-    
+    protected $ipPrincipal;
+
     /**
      * @var string $ipRespaldo
-     * @ORM\Column(name="ip_respaldo", type="string", nullable=true)          
+     * @ORM\Column(name="ip_respaldo", type="string", nullable=true)
      */
-    protected $ipRespaldo;        
-    
+    protected $ipRespaldo;
+
     /**
      * @ORM\OneToOne(targetEntity="ConfigBundle\Entity\DepartamentoProveedor", mappedBy="departamento",cascade={"persist"})
-     */    
-    protected $proveedor;                 
-    
+     */
+    protected $proveedor;
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */
     private $created;
+
     /**
      * @var datetime $updated
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
      */
-    private $updated;    
+    private $updated;
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -131,57 +141,59 @@ class Departamento
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+
     /**
      * @var User $updatedBy
      * @Gedmo\Blameable(on="update")
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy; 
+    private $updatedBy;
+
     /**
      * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
      */
-    private $deletedAt;     
+    private $deletedAt;
 
     public function __toString() {
         return $this->nombre;
-    }    
-
-    public function getNombreCompleto(){
-        return $this->getEdificio()->getUbicacion()->getAbreviatura().' - '.$this->getEdificio()->getNombre().' - '.$this->getNombre(); 
     }
 
-    public function getEdificioDepartamento(){
-        return $this->getEdificio()->getNombre().' - '.$this->getNombre(); 
+    public function getNombreCompleto() {
+        return ($this->getEdificio()) ?
+                $this->getEdificio()->getUbicacion()->getAbreviatura() . ' - ' . $this->getEdificio()->getNombre() . ' - ' . $this->getNombre() : '';
     }
 
-    public function getCantidadEquipos(){
+    public function getEdificioDepartamento() {
+        return $this->getEdificio()->getNombre() . ' - ' . $this->getNombre();
+    }
+
+    public function getCantidadEquipos() {
         $cant = 0;
-        foreach($this->getEquipos() as $equipo){
-            if( $equipo->getActual()){
+        foreach ($this->getEquipos() as $equipo) {
+            if ($equipo->getActual()) {
                 $cant += 1;
             }
         }
-       return $cant;
+        return $cant;
     }
-    public function getCantidadEquiposParaMonitoreo(){
+
+    public function getCantidadEquiposParaMonitoreo() {
         $cant = 0;
-        foreach($this->getEquipos() as $equipo){
-            if( $equipo->getActual() && $equipo->getRedIp() ){
+        foreach ($this->getEquipos() as $equipo) {
+            if ($equipo->getActual() && $equipo->getRedIp()) {
                 $cant += 1;
             }
         }
-       return $cant;
+        return $cant;
     }
-    
-    
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -191,8 +203,7 @@ class Departamento
      * @param string $nombre
      * @return Departamento
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -201,10 +212,9 @@ class Departamento
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
 
@@ -214,8 +224,7 @@ class Departamento
      * @param string $direccion
      * @return Departamento
      */
-    public function setDireccion($direccion)
-    {
+    public function setDireccion($direccion) {
         $this->direccion = $direccion;
 
         return $this;
@@ -224,10 +233,9 @@ class Departamento
     /**
      * Get direccion
      *
-     * @return string 
+     * @return string
      */
-    public function getDireccion()
-    {
+    public function getDireccion() {
         return $this->direccion;
     }
 
@@ -237,8 +245,7 @@ class Departamento
      * @param \DateTime $created
      * @return Departamento
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -247,10 +254,9 @@ class Departamento
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -260,8 +266,7 @@ class Departamento
      * @param \DateTime $updated
      * @return Departamento
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -270,10 +275,9 @@ class Departamento
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -283,8 +287,7 @@ class Departamento
      * @param \DateTime $deletedAt
      * @return Departamento
      */
-    public function setDeletedAt($deletedAt)
-    {
+    public function setDeletedAt($deletedAt) {
         $this->deletedAt = $deletedAt;
 
         return $this;
@@ -293,10 +296,9 @@ class Departamento
     /**
      * Get deletedAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getDeletedAt()
-    {
+    public function getDeletedAt() {
         return $this->deletedAt;
     }
 
@@ -306,8 +308,7 @@ class Departamento
      * @param \ConfigBundle\Entity\Localidad $localidad
      * @return Departamento
      */
-    public function setLocalidad(\ConfigBundle\Entity\Localidad $localidad = null)
-    {
+    public function setLocalidad(\ConfigBundle\Entity\Localidad $localidad = null) {
         $this->localidad = $localidad;
 
         return $this;
@@ -316,10 +317,9 @@ class Departamento
     /**
      * Get localidad
      *
-     * @return \ConfigBundle\Entity\Localidad 
+     * @return \ConfigBundle\Entity\Localidad
      */
-    public function getLocalidad()
-    {
+    public function getLocalidad() {
         return $this->localidad;
     }
 
@@ -329,8 +329,7 @@ class Departamento
      * @param \ConfigBundle\Entity\Edificio $edificio
      * @return Departamento
      */
-    public function setEdificio(\ConfigBundle\Entity\Edificio $edificio = null)
-    {
+    public function setEdificio(\ConfigBundle\Entity\Edificio $edificio = null) {
         $this->edificio = $edificio;
 
         return $this;
@@ -339,10 +338,9 @@ class Departamento
     /**
      * Get edificio
      *
-     * @return \ConfigBundle\Entity\Edificio 
+     * @return \ConfigBundle\Entity\Edificio
      */
-    public function getEdificio()
-    {
+    public function getEdificio() {
         return $this->edificio;
     }
 
@@ -352,8 +350,7 @@ class Departamento
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Departamento
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -362,10 +359,9 @@ class Departamento
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -375,8 +371,7 @@ class Departamento
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Departamento
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -385,10 +380,9 @@ class Departamento
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -398,8 +392,7 @@ class Departamento
      * @param boolean $deposito
      * @return Departamento
      */
-    public function setDeposito($deposito)
-    {
+    public function setDeposito($deposito) {
         $this->deposito = $deposito;
 
         return $this;
@@ -408,20 +401,19 @@ class Departamento
     /**
      * Get deposito
      *
-     * @return boolean 
+     * @return boolean
      */
-    public function getDeposito()
-    {
+    public function getDeposito() {
         return $this->deposito;
     }
+
     /**
      * Set servicioTecnico
      *
      * @param boolean $servicioTecnico
      * @return Departamento
      */
-    public function setServicioTecnico($servicioTecnico)
-    {
+    public function setServicioTecnico($servicioTecnico) {
         $this->servicioTecnico = $servicioTecnico;
 
         return $this;
@@ -430,10 +422,9 @@ class Departamento
     /**
      * Get servicioTecnico
      *
-     * @return boolean 
+     * @return boolean
      */
-    public function getServicioTecnico()
-    {
+    public function getServicioTecnico() {
         return $this->servicioTecnico;
     }
 
@@ -443,8 +434,7 @@ class Departamento
      * @param string $telefono
      * @return Departamento
      */
-    public function setTelefono($telefono)
-    {
+    public function setTelefono($telefono) {
         $this->telefono = $telefono;
 
         return $this;
@@ -453,10 +443,9 @@ class Departamento
     /**
      * Get telefono
      *
-     * @return string 
+     * @return string
      */
-    public function getTelefono()
-    {
+    public function getTelefono() {
         return $this->telefono;
     }
 
@@ -466,8 +455,7 @@ class Departamento
      * @param string $responsable
      * @return Departamento
      */
-    public function setResponsable($responsable)
-    {
+    public function setResponsable($responsable) {
         $this->responsable = $responsable;
 
         return $this;
@@ -476,10 +464,9 @@ class Departamento
     /**
      * Get responsable
      *
-     * @return string 
+     * @return string
      */
-    public function getResponsable()
-    {
+    public function getResponsable() {
         return $this->responsable;
     }
 
@@ -489,8 +476,7 @@ class Departamento
      * @param string $email
      * @return Departamento
      */
-    public function setEmail($email)
-    {
+    public function setEmail($email) {
         $this->email = $email;
 
         return $this;
@@ -499,10 +485,9 @@ class Departamento
     /**
      * Get email
      *
-     * @return string 
+     * @return string
      */
-    public function getEmail()
-    {
+    public function getEmail() {
         return $this->email;
     }
 
@@ -512,8 +497,7 @@ class Departamento
      * @param string $observaciones
      * @return Departamento
      */
-    public function setObservaciones($observaciones)
-    {
+    public function setObservaciones($observaciones) {
         $this->observaciones = $observaciones;
 
         return $this;
@@ -522,17 +506,16 @@ class Departamento
     /**
      * Get observaciones
      *
-     * @return string 
+     * @return string
      */
-    public function getObservaciones()
-    {
+    public function getObservaciones() {
         return $this->observaciones;
     }
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->pisos = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -542,8 +525,7 @@ class Departamento
      * @param \ConfigBundle\Entity\Piso $pisos
      * @return Departamento
      */
-    public function addPiso(\ConfigBundle\Entity\Piso $pisos)
-    {
+    public function addPiso(\ConfigBundle\Entity\Piso $pisos) {
         $this->pisos[] = $pisos;
 
         return $this;
@@ -554,18 +536,16 @@ class Departamento
      *
      * @param \ConfigBundle\Entity\Piso $pisos
      */
-    public function removePiso(\ConfigBundle\Entity\Piso $pisos)
-    {
+    public function removePiso(\ConfigBundle\Entity\Piso $pisos) {
         $this->pisos->removeElement($pisos);
     }
 
     /**
      * Get pisos
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getPisos()
-    {
+    public function getPisos() {
         return $this->pisos;
     }
 
@@ -575,8 +555,7 @@ class Departamento
      * @param \AppBundle\Entity\EquipoUbicacion $equipos
      * @return Departamento
      */
-    public function addEquipo(\AppBundle\Entity\EquipoUbicacion $equipos)
-    {
+    public function addEquipo(\AppBundle\Entity\EquipoUbicacion $equipos) {
         $this->equipos[] = $equipos;
 
         return $this;
@@ -587,18 +566,16 @@ class Departamento
      *
      * @param \AppBundle\Entity\EquipoUbicacion $equipos
      */
-    public function removeEquipo(\AppBundle\Entity\EquipoUbicacion $equipos)
-    {
+    public function removeEquipo(\AppBundle\Entity\EquipoUbicacion $equipos) {
         $this->equipos->removeElement($equipos);
     }
 
     /**
      * Get equipos
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getEquipos()
-    {
+    public function getEquipos() {
         return $this->equipos;
     }
 
@@ -608,8 +585,7 @@ class Departamento
      * @param boolean $inicial
      * @return Departamento
      */
-    public function setInicial($inicial)
-    {
+    public function setInicial($inicial) {
         $this->inicial = $inicial;
 
         return $this;
@@ -618,10 +594,9 @@ class Departamento
     /**
      * Get inicial
      *
-     * @return boolean 
+     * @return boolean
      */
-    public function getInicial()
-    {
+    public function getInicial() {
         return $this->inicial;
     }
 
@@ -631,8 +606,7 @@ class Departamento
      * @param string $ipPrincipal
      * @return Departamento
      */
-    public function setIpPrincipal($ipPrincipal)
-    {
+    public function setIpPrincipal($ipPrincipal) {
         $this->ipPrincipal = $ipPrincipal;
 
         return $this;
@@ -641,10 +615,9 @@ class Departamento
     /**
      * Get ipPrincipal
      *
-     * @return string 
+     * @return string
      */
-    public function getIpPrincipal()
-    {
+    public function getIpPrincipal() {
         return $this->ipPrincipal;
     }
 
@@ -654,8 +627,7 @@ class Departamento
      * @param string $ipRespaldo
      * @return Departamento
      */
-    public function setIpRespaldo($ipRespaldo)
-    {
+    public function setIpRespaldo($ipRespaldo) {
         $this->ipRespaldo = $ipRespaldo;
 
         return $this;
@@ -664,13 +636,11 @@ class Departamento
     /**
      * Get ipRespaldo
      *
-     * @return string 
+     * @return string
      */
-    public function getIpRespaldo()
-    {
+    public function getIpRespaldo() {
         return $this->ipRespaldo;
     }
-
 
     /**
      * Set proveedor
@@ -678,8 +648,7 @@ class Departamento
      * @param \ConfigBundle\Entity\DepartamentoProveedor $proveedor
      * @return Departamento
      */
-    public function setProveedor(\ConfigBundle\Entity\DepartamentoProveedor $proveedor = null)
-    {
+    public function setProveedor(\ConfigBundle\Entity\DepartamentoProveedor $proveedor = null) {
         $proveedor->setDepartamento($this);
         $this->proveedor = $proveedor;
         return $this;
@@ -688,10 +657,10 @@ class Departamento
     /**
      * Get proveedor
      *
-     * @return \ConfigBundle\Entity\DepartamentoProveedor 
+     * @return \ConfigBundle\Entity\DepartamentoProveedor
      */
-    public function getProveedor()
-    {
+    public function getProveedor() {
         return $this->proveedor;
     }
+
 }

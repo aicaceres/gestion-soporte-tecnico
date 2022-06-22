@@ -19,8 +19,19 @@
     </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function() {      
-   $('#ubicacion-nueva').find('.ubicacion_selector').val(0).trigger('change');    
+$(document).ready(function() {     
+   const lista = {{ app.user.ubicacionesPermitidas|json_encode() }};
+   //$('#ubicacion-nueva').find('.ubicacion_selector').val(0).trigger('change');
+   let ubics = $('#ubicacion-nueva').find(".ubicacion_selector option").length;
+   $('#ubicacion-nueva').find(".ubicacion_selector option").each( function(i){
+        item = parseInt($(this).val())
+        if( $.inArray( item , lista) == -1 ){
+            $(this).remove();
+        } 
+        if( ubics == i+1 ){
+            $('#ubicacion-nueva').find(".ubicacion_selector").val(0).trigger('change');
+        }
+    });  
 }); 
 </script>
          
