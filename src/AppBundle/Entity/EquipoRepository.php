@@ -205,6 +205,7 @@ class EquipoRepository extends EntityRepository {
                 ->innerJoin('e.estado', 'es')
                 ->innerJoin('e.ubicaciones', 'eu')
                 ->innerJoin('eu.departamento', 'd')
+                ->innerJoin('eu.piso', 'p')
                 ->innerJoin('d.edificio', 'ed')
                 ->innerJoin('ed.ubicacion', 'u')
                 ->where('eu.actual=1')
@@ -235,6 +236,21 @@ class EquipoRepository extends EntityRepository {
         if ($tabla != 'ubicacion') {
             if ($data['idUbicacion']) {
                 $query->andWhere('u.id=' . $data['idUbicacion']);
+                if ($tabla != 'edificio') {
+                    if ($data['idEdificio']) {
+                        $query->andWhere('ed.id=' . $data['idEdificio']);
+                        if ($tabla != 'departamento') {
+                            if ($data['idDepartamento']) {
+                                $query->andWhere('d.id=' . $data['idDepartamento']);
+                            }
+                        }
+                        if ($tabla != 'piso') {
+                            if ($data['idPiso']) {
+                                $query->andWhere('p.id=' . $data['idPiso']);
+                            }
+                        }
+                    }
+                }
             }
         }
         return $query->getQuery()->getArrayResult();
@@ -268,6 +284,16 @@ class EquipoRepository extends EntityRepository {
                     ->innerJoin('ed.ubicacion', 'u')
                     ->andWhere('eu.actual=1')
                     ->andWhere('u.id=' . $data['idUbicacion']);
+            if ($data['idEdificio']) {
+                $query->andWhere('ed.id=' . $data['idEdificio']);
+                if ($data['idDepartamento']) {
+                    $query->andWhere('d.id=' . $data['idDepartamento']);
+                }
+                if ($data['idPiso']) {
+                    $query->innerJoin('eu.piso', 'p')
+                            ->andWhere('p.id=' . $data['idPiso']);
+                }
+            }
         }
         return $query->getQuery()->getResult();
     }
@@ -470,6 +496,9 @@ class EquipoRepository extends EntityRepository {
                 $query->andWhere('ed.id=' . $data['idEdificio']);
                 if ($data['idDepartamento']) {
                     $query->andWhere('d.id=' . $data['idDepartamento']);
+                }
+                if ($data['idPiso']) {
+                    $query->andWhere('p.id=' . $data['idPiso']);
                 }
             }
         }

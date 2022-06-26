@@ -402,9 +402,9 @@ class EquipoController extends Controller {
     public function editAction($id) {
         UtilsController::haveAccess($this->getUser(), 'equipo_edit');
         $em = $this->getDoctrine()->getManager();
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $em->getFilters()->disable('softdeleteable');
-        }
+        //if ($this->getUser()->getRol()->getAdmin()) {
+        $em->getFilters()->disable('softdeleteable');
+        //}
         $entity = $em->getRepository('AppBundle:Equipo')->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el equipo.');
@@ -885,6 +885,7 @@ class EquipoController extends Controller {
         $ubicacion = $em->getRepository('ConfigBundle:Ubicacion')->find($filtro['idUbicacion']);
         $edificio = $em->getRepository('ConfigBundle:Edificio')->find($filtro['idEdificio']);
         $departamento = $em->getRepository('ConfigBundle:Departamento')->find($filtro['idDepartamento']);
+        $piso = $em->getRepository('ConfigBundle:Piso')->find($filtro['idPiso']);
         $verificado = ($filtro['verificado'] == 'T') ? 'Todos' : ($filtro['verificado'] == '1') ? 'Si' : 'No';
         $adicionales = array('CÓDIGO DE BARRA', 'PROVEEDOR', 'FECHA DE COMPRA', 'N° ORDEN COMPRA', 'N° FACTURA', 'N° REMITO');
         $opAdicional = $adicionales[$filtro['opAdicional']];
@@ -893,7 +894,7 @@ class EquipoController extends Controller {
             $modelo ? $modelo->getNombre() : 'Todos', $estado ? $estado->getNombre() : 'Todos',
             $ubicacion ? $ubicacion->getAbreviatura() : 'Todas', $edificio ? $edificio->getNombre() : 'Todos',
             $departamento ? $departamento->getNombre() : 'Todos', $verificado,
-            $opAdicional, $filtro['txtAdicional'], $filtro['fechaDesde'], $filtro['fechaHasta']);
+            $opAdicional, $filtro['txtAdicional'], $filtro['fechaDesde'], $filtro['fechaHasta'], $piso ? $piso->getNombre() : 'Todos');
 
         $hoy = new \DateTime();
         $userId = $this->getUser()->getId();
@@ -1342,8 +1343,8 @@ class EquipoController extends Controller {
 
         switch ($request->get('_opFiltro')) {
             case 'limpiar':
-                $filtro = array('tipoReporte' => 'detalle', 'selTipos' => NULL,
-                    'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'cotizacion' => 1);
+                $filtro = array('tipoReporte' => 'detalle', 'selTipos' => NULL, 'cotizacion' => 1,
+                    'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'idPiso' => 0);
                 break;
             case 'buscar':
                 $filtro = array(
@@ -1352,6 +1353,9 @@ class EquipoController extends Controller {
                     'idMarca' => $request->get('idMarca'),
                     'idModelo' => $request->get('idModelo'),
                     'idUbicacion' => $request->get('idUbicacion'),
+                    'idEdificio' => $request->get('idEdificio'),
+                    'idDepartamento' => $request->get('idDepartamento'),
+                    'idPiso' => $request->get('idPiso'),
                     'cotizacion' => $request->get('cotizacion'),
                 );
                 break;
@@ -1364,12 +1368,15 @@ class EquipoController extends Controller {
                         'idMarca' => $sessionFiltro['idMarca'],
                         'idModelo' => $sessionFiltro['idModelo'],
                         'idUbicacion' => $sessionFiltro['idUbicacion'],
+                        'idEdificio' => $sessionFiltro['idEdificio'],
+                        'idDepartamento' => $sessionFiltro['idDepartamento'],
+                        'idPiso' => $sessionFiltro['idPiso'],
                         'cotizacion' => $sessionFiltro['cotizacion'],
                     );
                 }
                 else {
-                    $filtro = array('tipoReporte' => 'detalle', 'selTipos' => NULL,
-                        'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'cotizacion' => 1);
+                    $filtro = array('tipoReporte' => 'detalle', 'selTipos' => NULL, 'cotizacion' => 1,
+                        'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'idPiso' => 0);
                 }
                 break;
         }
@@ -1400,6 +1407,14 @@ class EquipoController extends Controller {
         }
 
         $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+        $edificios = $departamentos = $pisos = NULL;
+        if ($filtro['idUbicacion']) {
+            $edificios = $em->getRepository('AppBundle:Equipo')->valorizadoCombosByCriteria($filtro, 'DISTINCT ed.id,ed.nombre', 'ed.nombre', 'edificio', $userId);
+            if ($filtro['idEdificio']) {
+                $departamentos = $em->getRepository('AppBundle:Equipo')->valorizadoCombosByCriteria($filtro, 'DISTINCT d.id,d.nombre', 'd.nombre', 'departamento', $userId);
+                $pisos = $em->getRepository('AppBundle:Equipo')->valorizadoCombosByCriteria($filtro, 'DISTINCT p.id,p.nombre', 'p.nombre', 'piso', $userId);
+            }
+        }
 
         return $this->render('AppBundle:Equipo:informe-valorizado.html.twig', array(
                     'entities' => $entities,
@@ -1407,6 +1422,9 @@ class EquipoController extends Controller {
                     'marcas' => $marcas,
                     'modelos' => $modelos,
                     'ubicaciones' => $ubicaciones,
+                    'edificios' => $edificios,
+                    'departamentos' => $departamentos,
+                    'pisos' => $pisos,
         ));
     }
 

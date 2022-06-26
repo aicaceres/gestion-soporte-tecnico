@@ -45,19 +45,7 @@
                         </div>    
                     </div>
                     <div class="col-md-12 no-padding">
-                        <fieldset>
-                            <div class="col-md-2">
-                                <div class="form-group ">
-                                    <label class="required">Ubic:</label>
-                                    <select class="select2 form-control" name="idUbicacion" id="selectUbicacion">
-                                        <option value="0">Todos</option>
-                                        {%for ubic in ubicaciones %}                                                
-                                            <option {%if ubic.id==filtro['idUbicacion']%} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>                                                
-                                        {% endfor %} 
-                                    </select> 
-                                </div>
-                            </div>
-
+                        <fieldset>                            
                             <div class="col-md-4">
                                 <div class="form-group ">
                                     <label class="required">Tipos:</label>
@@ -92,6 +80,56 @@
                                 </div>
                             </div>
                         </fieldset>
+                        <fieldset>
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    <label class="required">Ubic:</label>
+                                    <select class="select2 form-control" name="idUbicacion" id="selectUbicacion">
+                                        <option value="0">Todos</option>
+                                        {%for ubic in ubicaciones %}                                                
+                                            <option {%if ubic.id==filtro['idUbicacion']%} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>                                                
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group ">
+                                    <label class="required">Edificio:</label>
+                                    <select class="select2 form-control" name="idEdificio" id="selectEdificio">
+                                        <option value="0">Todos</option>
+                                        {%for ed in edificios %}                                                
+                                            <option {%if ed.id==filtro['idEdificio']%} selected="selected" {%endif%} value="{{ed.id}}">{{ed.nombre}}</option>                                                
+                                        {% endfor %}  
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    <label class="required">Piso:</label>
+                                    <select class="select2 form-control" name="idPiso" id="selectPiso">
+                                        <option value="0">Todos</option>
+                                        {%for piso in pisos %}
+                                            <option {%if piso.id==filtro['idPiso']%} selected="selected" {%endif%} value="{{piso.id}}">{{piso.nombre}}</option>
+                                        {% endfor %}                                          
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group ">
+                                    <label class="required">Depto:</label>
+                                    <select class="select2 form-control" name="idDepartamento" id="selectDepartamento">
+                                        <option value="0">Todos</option>
+                                        {%for dep in departamentos %}
+                                            <option {%if dep.id==filtro['idDepartamento']%} selected="selected" {%endif%} value="{{dep.id}}">{{dep.nombre}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div> 
+
+
+                        </fieldset>
+                                    
                     </div>     
                     <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
                 </form>               
@@ -127,7 +165,7 @@ $(document).ready(function() {
     let ubics = $('#selectUbicacion option').length;
    $("#selectUbicacion option").each( function(i){
         item = parseInt($(this).val())
-        if( $.inArray( item , lista) == -1 ){
+        if( $.inArray( item , lista) == -1 && item!=0 ){
             $(this).remove();
         } 
         if( ubics == i+1 ){
