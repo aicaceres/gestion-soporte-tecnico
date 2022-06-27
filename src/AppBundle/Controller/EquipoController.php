@@ -476,9 +476,9 @@ class EquipoController extends Controller {
     public function updateAction(Request $request, $id) {
         UtilsController::haveAccess($this->getUser(), 'equipo_edit');
         $em = $this->getDoctrine()->getManager();
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $em->getFilters()->disable('softdeleteable');
-        }
+        //if ($this->getUser()->getRol()->getAdmin()) {
+        $em->getFilters()->disable('softdeleteable');
+        //}
         $entity = $em->getRepository('AppBundle:Equipo')->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el equipo.');
@@ -1389,11 +1389,60 @@ class EquipoController extends Controller {
 
         if ($filtro['tipoReporte'] == 'detalle') {
             // informe detallado de equipos valorizados
-            $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoByCriteria($filtro);
+            $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($filtro, $userId);
         }
         else {
             // informe sumariado por filtro: tipo - marca - modelo
+            $group = $em->getRepository('AppBundle:Equipo')->findValorizadoResumenByCriteria($filtro, $userId);
             $entities = null;
+            foreach ($group as $ent) {
+                $data = array(
+                    'selTipos' => array($ent['tipoId']),
+                    'idMarca' => $ent['marcaId'],
+                    'idModelo' => $ent['modeloId'],
+                    'idUbicacion' => $filtro['idUbicacion'],
+                    'idEdificio' => $filtro['idEdificio'],
+                    'idDepartamento' => $filtro['idDepartamento'],
+                    'idPiso' => $filtro['idPiso'],
+                );
+                $sub = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($data, $userId);
+
+                /* if ($ent['cantidad'] != count($sub)) {
+                  var_dump($ent['tipoId']);
+                  var_dump($ent['marcaId']);
+                  var_dump($ent['modeloId']);
+                  var_dump($ent['cantidad']);
+                  var_dump(count($sub));
+                  die;
+                  } */
+                //$dolares = [];
+                foreach ($sub as $item) {
+                    //$dolares[] = $item->getPrecioDolares($filtro['cotizacion']);
+                    $tipo = $item->getTipo()->getNombre();
+                    $marca = $item->getMarca()->getNombre();
+                    $modelo = $item->getModelo()->getNombre();
+                    $totalDolares = ($item->getMonedaEquipo() == '$') ? $item->getPrecioEquipo() / $filtro['cotizacion'] : $item->getPrecioEquipo();
+                    $totalPesos = ($item->getMonedaEquipo() == 'U$S') ? $item->getPrecioEquipo() * $filtro['cotizacion'] : $item->getPrecioEquipo();
+                }
+                $precioDolares = $totalDolares / $ent['cantidad'];
+                //$totalDolares = $precioDolares * $ent['cantidad'];
+                $entities[] = [
+                    'tipo' => $tipo,
+                    'marca' => $marca,
+                    'modelo' => $modelo,
+                    'cantidad' => $ent['cantidad'],
+                    'precioDolares' => $precioDolares,
+                    'totalDolares' => $totalDolares,
+                    'totalPesos' => $totalPesos
+                ];
+                /* if ($precioDolares > 1) {
+                  echo $sub[0]->getTipo()->getNombre() . ' - ' . $sub[0]->getMarca()->getNombre() . ' - ' . $sub[0]->getModelo()->getNombre() . '<br>';
+                  var_dump($dolares);
+
+                  echo '<br>';
+                  echo 'preciodolares=' . $precioDolares . '<br>';
+                  } */
+            }
         }
 
         $tipos = $em->getRepository('AppBundle:Equipo')->valorizadoCombosByCriteria($filtro, 'DISTINCT t.id,t.nombre', 't.nombre', 'tipo', $userId);

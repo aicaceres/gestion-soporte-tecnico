@@ -2,10 +2,9 @@
     <table id="tablelist" class="table table-bordered table-hover" style="font-size:11px;">
         <thead>
             <tr>
-                <th class="no-sort">Tipo {{ filtro['tipoReporte'] }}</th>
+                <th class="no-sort">Tipo</th>
                 <th class="no-sort">Marca</th>
                 <th class="no-sort">Modelo</th>
-                <th class="no-sort">Ubicación</th>
                 <th class="no-sort">Cantidad</th>
                 <th class="no-sort">Valor Unitario USD</th>
                 <th class="no-sort">Total USD</th>
@@ -13,8 +12,18 @@
             </tr>
         </thead>
         <tbody>
+            {% set usd, pes = 0,0 %}
             {% for entity in entities %}
-
+                
+                <tr>    
+                    <td>{{ entity.tipo }}</td>
+                    <td>{{ entity.marca }}</td>
+                    <td>{{ entity.modelo }}</td>                      
+                    <td>{{ entity.cantidad }}</td>                    
+                    <td style="text-align:right;padding-right: 10px" > {{ entity.precioDolares|number_format(2,'.',',') }} </td>
+                    <td style="text-align:right;padding-right: 10px" > {{ entity.totalDolares|number_format(2,'.',',') }} </td>
+                    <td style="text-align:right;padding-right: 10px"> {{ entity.totalPesos|number_format(2,'.',',') }} </td>
+                </tr>    
             {% endfor %}
         </tbody>
     </table>

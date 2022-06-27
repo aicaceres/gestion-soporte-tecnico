@@ -256,13 +256,21 @@ class EquipoRepository extends EntityRepository {
         return $query->getQuery()->getArrayResult();
     }
 
-    public function findValorizadoByCriteria($data) {
+    public function findValorizadoDetalladoByCriteria($data, $userId = null) {
         $query = $this->_em->createQueryBuilder();
         $query->select('e')
                 ->from('AppBundle\Entity\Equipo', 'e')
+                ->innerJoin('e.ubicaciones', 'eu')
+                ->innerJoin('eu.departamento', 'd')
+                ->innerJoin('d.edificio', 'ed')
+                ->innerJoin('ed.ubicacion', 'u')
                 ->innerJoin('e.estado', 'es')
-                ->where("es.abreviatura IN ('OP','STS') ");
-
+                ->where("es.abreviatura IN ('OP','STS') ")
+                ->andWhere('eu.actual=1');
+        if ($userId) {
+            $query->innerJoin('ed.usuarios', 'us')
+                    ->andWhere('us.id=' . $userId);
+        }
         if ($data['selTipos']) {
             $query->innerJoin('e.tipo', 't')
                     ->andWhere(' t.id IN (:tipos)')
@@ -278,12 +286,53 @@ class EquipoRepository extends EntityRepository {
             }
         }
         if ($data['idUbicacion']) {
-            $query->innerJoin('e.ubicaciones', 'eu')
-                    ->innerJoin('eu.departamento', 'd')
-                    ->innerJoin('d.edificio', 'ed')
-                    ->innerJoin('ed.ubicacion', 'u')
-                    ->andWhere('eu.actual=1')
-                    ->andWhere('u.id=' . $data['idUbicacion']);
+            $query->andWhere('u.id=' . $data['idUbicacion']);
+            if ($data['idEdificio']) {
+                $query->andWhere('ed.id=' . $data['idEdificio']);
+                if ($data['idDepartamento']) {
+                    $query->andWhere('d.id=' . $data['idDepartamento']);
+                }
+                if ($data['idPiso']) {
+                    $query->innerJoin('eu.piso', 'p')
+                            ->andWhere('p.id=' . $data['idPiso']);
+                }
+            }
+        }
+        return $query->getQuery()->getResult();
+    }
+
+    public function findValorizadoResumenByCriteria($data, $userId = null) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('COUNT(e.id) cantidad, t.id tipoId, ma.id marcaId, mo.id modeloId')
+                ->from('AppBundle\Entity\Equipo', 'e')
+                ->innerJoin('e.tipo', 't')
+                ->innerJoin('e.marca', 'ma')
+                ->innerJoin('e.modelo', 'mo')
+                ->innerJoin('e.ubicaciones', 'eu')
+                ->innerJoin('eu.departamento', 'd')
+                ->innerJoin('d.edificio', 'ed')
+                ->innerJoin('ed.ubicacion', 'u')
+                ->innerJoin('e.estado', 'es')
+                ->where("es.abreviatura IN ('OP','STS') ")
+                ->andWhere('eu.actual=1')
+                ->groupBy('t.id, ma.id, mo.id');
+        if ($userId) {
+            $query->innerJoin('ed.usuarios', 'us')
+                    ->andWhere('us.id=' . $userId);
+        }
+        if ($data['selTipos']) {
+            $query->andWhere(' t.id IN (:tipos)')
+                    ->setParameter('tipos', $data['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+        }
+
+        if ($data['idMarca']) {
+            $query->andWhere('ma.id=' . $data['idMarca']);
+            if ($data['idModelo']) {
+                $query->andWhere('mo.id=' . $data['idModelo']);
+            }
+        }
+        if ($data['idUbicacion']) {
+            $query->andWhere('u.id=' . $data['idUbicacion']);
             if ($data['idEdificio']) {
                 $query->andWhere('ed.id=' . $data['idEdificio']);
                 if ($data['idDepartamento']) {
