@@ -118,8 +118,8 @@
         </tr>
         <tr>
             <td colspan="4" border.type="none" height="10px" vertical-align="top"  padding-left="0.5 cm">
-                <div width="100%">Ubicación: <b>{{ubic.departamento.edificio.ubicacion.abreviatura}}</b> 
-                                 |  Edificio: <b>{{ubic.departamento.edificio.nombre}}</b>
+                <div width="100%">Ubicación: <b>{% if ubic.departamento.edificio %}  {{ ubic.departamento.edificio.ubicacion.abreviatura}} {% endif %}</b> 
+                                 |  Edificio: <b> {% if ubic.departamento.edificio %} {{ ubic.departamento.edificio.nombre}} {% endif %}</b>
                                  |  Departamento: <b>{{ubic.departamento.nombre}}</b>
                                  |  Piso: <b>{{ubic.piso.nombre}}</b>
                 </div>
@@ -248,9 +248,9 @@
                                     {% endif %}
                                 </td>
                             </tr> 
-                        {% endfor %}                                         
-                    </table>                      
+                        {% endfor %}                                                                                  
                 {% endif %}
+                </table> 
                 {% if app.user.rol.admin %}
                 <table extends="table_admin_info">
                     {% set table = ot %}

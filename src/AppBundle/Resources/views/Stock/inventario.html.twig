@@ -20,15 +20,41 @@
             </div><!-- /.box-header -->
             <div class='box-body'>
     <form id="searchform" action="{{ path('insumo_inventario') }}" method="get"  style="margin-bottom: 10px;">        
-        <div class="col-md-6">     
-            <label>TIPO INSUMO:</label>
-            <select class="select2 col-md-8" id="selectTipo" name="tipoId">
-                <option value="0">Todos</option>
-            {% for tipo in tipos %}
-                <option value="{{tipo.id}}" {% if tipo.id==tipoId %} selected="selected" {% endif %} {% if tipo.insumosEnStock %} disabled="disabled" {% endif %}> {{tipo.nombre}}</option>
-            {% endfor %}
-            </select>  
-        </div>            
+        <fieldset>                            
+            <div class="col-md-4">
+                <div class="form-group ">
+                    <label class="required">Tipos:</label>
+                    <select class="select2 form-control" name="idTipo" id="selectTipo">
+                        <option value="0">Todos</option>
+                        {%for tipo in tipos %}
+                            <option {%if tipo.id in filtro['idTipo']%} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                        {% endfor %} 
+                    </select> 
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group ">
+                    <label class="required">Marca:</label>
+                    <select class="select2 form-control" name="idMarca" id="selectMarca" >
+                        <option value="0">Todas</option>
+                        {%for marca in marcas %}
+                            <option {%if marca.id==filtro['idMarca']%} selected="selected" {%endif%} value="{{marca.id}}">{{marca.nombre}}</option>
+                        {% endfor %}  
+                    </select> 
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group ">
+                    <label class="required">Modelo:</label>
+                    <select class="select2 form-control" name="idModelo" id="selectModelo">
+                        <option value="0">Todos</option>
+                        {%for modelo in modelos %}
+                            <option {%if modelo.id==filtro['idModelo']%} selected="selected" {%endif%} value="{{modelo.id}}">{{modelo.nombre}}</option>
+                        {% endfor %} 
+                    </select> 
+                </div>
+            </div>
+        </fieldset>          
     </form>                                
                 <div class="box-body table-responsive" style="padding: 15px" >
                     <table id="tablelist" class="table table-bordered table-hover">
@@ -70,7 +96,7 @@
     {{parent()}}
 <script type="text/javascript">
 $(document).ready(function() {    
-    $('#selectTipo').change(function(){
+    $('.select2').change(function(){
         $('#searchform').submit();
     });
     var oTable = $('#tablelist').dataTable();

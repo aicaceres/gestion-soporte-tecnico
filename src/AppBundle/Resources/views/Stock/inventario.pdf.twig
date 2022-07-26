@@ -22,7 +22,7 @@
             </footer>
         </placeholders>
         <h2 text-align="center"> Inventario de Insumos</h2>              
-        <h4><strong>Tipo:</strong> {{ filtro[0] }}</h4>
+        <h4><strong>Tipo:</strong> {{ filtro['tipo'] }} - <strong>Marca:</strong> {{ filtro['marca'] }} - <strong>Modelo:</strong> {{ filtro['modelo'] }} </h4>
         <div height="10px"></div>
         {% if search %}
             <h4> Término de Búsqueda: "{{search}}" </h4>

@@ -22,16 +22,14 @@
             </footer>
         </placeholders>
         <h2 text-align="center"> Histórico de Insumos</h2>              
-        <h4><strong>Insumo:</strong> {{ filtro[0] }}</h4>
-        <h4><strong>Periodo:</strong> {{ filtro[1] }} al {{ filtro[2] }}</h4>
+        <h4><strong>Tipo:</strong> {{ filtro['tipo'] }} - <strong>Marca:</strong> {{ filtro['marca'] }} - <strong>Modelo:</strong> {{ filtro['modelo'] }} </h4>
+        <h4><strong>Periodo:</strong> {{ filtro['desde'] }} al {{ filtro['hasta'] }}</h4>
         <div height="10px"></div>        
         <table font-size="9px">
             <tr>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.8 cm"><strong>I/E</strong></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.2 cm"><strong>Fecha hora</strong></td>                
-                {% if filtro[0] != 'Todos' %}
-                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="4 cm"><strong>Insumo</strong></td>
-                {% endif %}
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.2 cm"><strong>Fecha hora</strong></td>        
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="4 cm"><strong>Insumo</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm" ><strong>Depósito</strong></td>                
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Tipo Movimiento</strong></td>                
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>N° Comprob.</strong></td>
@@ -44,9 +42,7 @@
                     <tr>
                         <td height="20px" vertical-align="middle" text-align="center" font-size="16px">{{entity.signo}}</td>
                         <td height="20px" vertical-align="middle" padding-left="5px">{{entity.created|date('d-m-Y H:i')}}</td>
-                        {% if filtro[0] != 'Todos' %}
-                        <td height="20px" vertical-align="middle" padding-left="5px">{{entity.insumo}}</td>
-                        {% endif %}                        
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{entity.insumo}}</td>                   
                         <td height="20px" vertical-align="middle" padding-left="5px">{{entity.deposito}}</td>
                         <td height="20px" vertical-align="middle" padding-left="5px">{{entity.tipo|capitalize}}</td>
                         <td height="20px" vertical-align="middle" padding-left="5px">

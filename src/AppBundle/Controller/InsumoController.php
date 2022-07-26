@@ -501,6 +501,7 @@ class InsumoController extends Controller {
     public function solicitudAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), 'insumo_solicitud');
         $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
         $estado = ( is_null($request->get('estado')) ) ? 1 : $request->get('estado');
         $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
         $entities = $em->getRepository('AppBundle:Insumo')->findSolicitudes($periodo, $estado);

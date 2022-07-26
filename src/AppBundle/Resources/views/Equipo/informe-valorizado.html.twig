@@ -3,6 +3,17 @@
 {% block page_content %}
 {% include "notification.html.twig" %}    
 {% set filtro = app.session.get('filtro_equipo_valorizado') %}
+<style>
+    #summaryData span{
+        font-size: 16px;
+        padding: 3px 10px;
+        display: block;        
+        text-align: center;
+    }
+    #tablelist tr th{
+        padding-right: 10px !important;
+    }
+</style>
 <div class='row'>
     <div class='col-md-12'>
         <div class='box box-solid {{ box_color }}'>

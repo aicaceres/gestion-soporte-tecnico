@@ -993,7 +993,7 @@ class CompraController extends Controller {
         $tiposEquipo = $em->getRepository('ConfigBundle:Tipo')->findBy(array(), array('nombre' => 'ASC'));
 
         $datos = $this->getBienesEnStock($filtro, $em);
-
+        //$em->getFilters()->disable('softdeleteable');
         return $this->render('AppBundle:Compra:bienes-en-stock.html.twig', array(
                     'datos' => $datos,
                     'proveedores' => $proveedores,

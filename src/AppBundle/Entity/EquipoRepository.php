@@ -1161,4 +1161,19 @@ class EquipoRepository extends EntityRepository {
         return $query->getQuery()->getOneOrNullResult();
     }
 
+    public function findByTipoMarcaModelo($tipo, $marca, $modeloId) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('e')
+                ->from('AppBundle\Entity\Equipo', 'e')
+                ->innerJoin('e.tipo', 't')
+                ->innerJoin('e.marca', 'm')
+                ->innerJoin('e.modelo', 'mo')
+                ->innerJoin('e.estado', 'es')
+                ->where("t.nombre='" . $tipo . "'")
+                ->andWhere("m.nombre ='" . $marca . "'")
+                ->andWhere("mo.id =" . $modeloId)
+                ->andWhere("es.abreviatura IN ('OP','STS') ");
+        return $query->getQuery()->getResult();
+    }
+
 }

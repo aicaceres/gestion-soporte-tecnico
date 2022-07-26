@@ -19,38 +19,68 @@
                 </div>
             </div><!-- /.box-header -->
             <div class='box-body'>
-                <form id="searchform" action="{{ path('insumo_historico') }}" method="get" class="form-horizontal" style="margin-bottom: 10px;">
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">INSUMO:</label>
-                        <div class="col-sm-4">
-                            <select class="select2 form-control" id="selectInsumo" name="insumoId">
-                                <option value="0">Todos</option>
-                                {% for dep in insumos %}
-                                    <option value="{{dep.id}}" {% if dep.id==insumoId %} selected="selected" {% endif %}> {{dep.textoCompleto}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                <form id="searchform" action="{{ path('insumo_historico') }}" method="get" >
+                    <div class="col-md-12">
+                        <fieldset>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label class="required">Tipos:</label>
+                                    <select class="select2 form-control" name="idTipo" id="selectTipo">
+                                        <option value="0">Todos</option>
+                                        {%for tipo in tipos %}
+                                            <option {%if tipo.id in filtro['idTipo']%} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label class="required">Marca:</label>
+                                    <select class="select2 form-control" name="idMarca" id="selectMarca" >
+                                        <option value="0">Todas</option>
+                                        {%for marca in marcas %}
+                                            <option {%if marca.id==filtro['idMarca']%} selected="selected" {%endif%} value="{{marca.id}}">{{marca.nombre}}</option>
+                                        {% endfor %}  
+                                    </select> 
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group ">
+                                    <label class="required">Modelo:</label>
+                                    <select class="select2 form-control" name="idModelo" id="selectModelo">
+                                        <option value="0">Todos</option>
+                                        {%for modelo in modelos %}
+                                            <option {%if modelo.id==filtro['idModelo']%} selected="selected" {%endif%} value="{{modelo.id}}">{{modelo.nombre}}</option>
+                                        {% endfor %} 
+                                    </select> 
+                                </div>
+                            </div>
+                        </fieldset>    
+                    </div>
+                    <div class="col-md-12">                
+                        <fieldset>
+                            <label class="col-sm-1 col-sm-offset-3 control-label">PERÍODO:</label>
+                            <div class="col-sm-2">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{filtro['desde']}}">
+                                </div>   
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{filtro['hasta']}}">
+                                </div>   
+                            </div>
+                            <div class="col-sm-1">
+                                <button type="submit"> <i class="fa fa-search"></i>  </button>
+                            </div>   
 
-                        <label class="col-sm-1 control-label">PERÍODO:</label>
-                        <div class="col-sm-2">
-                            <div class="input-group">
-                                <div class="input-group-addon">
-                                    <i class="fa fa-calendar"></i>
-                                </div>
-                                <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{desde}}">
-                            </div>   
-                        </div>
-                        <div class="col-sm-2">
-                            <div class="input-group">
-                                <div class="input-group-addon">
-                                    <i class="fa fa-calendar"></i>
-                                </div>
-                                <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{hasta}}">
-                            </div>   
-                        </div>
-                        <div class="col-sm-1">
-                            <button type="submit"> <i class="fa fa-search"></i>  </button>
-                        </div>   
+                        </fieldset>
                     </div>
                 </form>             
                      
@@ -61,9 +91,7 @@
                             <tr>
                                 <th class='no-sort' style="text-align:center;width:5%">I/E</th>
                                 <th>Fecha hora</th>
-                                {% if not insumoId %}
-                                    <th>Insumo <span style="font-weight:normal">[ Tipo | Marca | Modelo ]</span></th>
-                                {%endif%}
+                                <th>Insumo <span style="font-weight:normal">[ Tipo | Marca | Modelo ]</span></th>
                                 <th>Depósito</th>
                                 <th>Tipo Movimiento</th>
                                 <th>N° Comprob.</th>
@@ -81,10 +109,8 @@
                                         <i class="fa fa-minus"></i>
                                         {%endif%}
                                     </td>
-                                    <td><span class="hidden">{{ entity.created|date('YmdH:i')~entity.id }}</span>{{ entity.created|date('d-m-Y H:i') }}</td>                                    
-                                {% if not insumoId %}
+                                    <td><span class="hidden">{{ entity.created|date('YmdH:i')~entity.id }}</span>{{ entity.created|date('d-m-Y H:i') }}</td>
                                     <td>{{ entity.insumo }}</td>
-                                {%endif%}
                                     <td>{{ entity.deposito }}</td>
                                     <td>{{entity.tipoMovimiento}}</td>
                                     <td>{% if entity.tipo=='SOPORTE' and entity.equipo %}
@@ -110,7 +136,7 @@
     {{parent()}}
 <script type="text/javascript">
 $(document).ready(function() {    
-    $('#selectInsumo').change(function(){
+    $('.select2').change(function(){
         $('#searchform').submit();
     });
     var oTable = $('#tablelist').dataTable();

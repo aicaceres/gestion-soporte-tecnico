@@ -9,7 +9,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
-//use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\ArrayCollection;
 use ConfigBundle\Controller\UtilsController;
 use AppBundle\Entity\Equipo;
 use AppBundle\Form\EquipoType;
@@ -710,6 +710,7 @@ class EquipoController extends Controller {
      */
     public function pdfFichaEquipoAction($id) {
         $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
         $eq = $em->getRepository('AppBundle:Equipo')->find($id);
         $requerimientos = $em->getRepository('AppBundle:Requerimiento')->getReqyOts($id);
         $logo1 = __DIR__ . '/../../../web/bundles/app/img/home_logo.png';
@@ -717,7 +718,7 @@ class EquipoController extends Controller {
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
-        $em->getFilters()->disable('softdeleteable');
+
         if ($eq->getModelo()->getAbsolutePath()) {
             $foto = $eq->getModelo()->getAbsolutePath();
         }
@@ -1393,6 +1394,7 @@ class EquipoController extends Controller {
         }
         else {
             // informe sumariado por filtro: tipo - marca - modelo
+            $cotiz = floatval($filtro['cotizacion']);
             $group = $em->getRepository('AppBundle:Equipo')->findValorizadoResumenByCriteria($filtro, $userId);
             $entities = null;
             foreach ($group as $ent) {
@@ -1416,16 +1418,21 @@ class EquipoController extends Controller {
                   die;
                   } */
                 //$dolares = [];
+                $cant = 0;
+                $totalDolares = $totalPesos = 0;
                 foreach ($sub as $item) {
                     //$dolares[] = $item->getPrecioDolares($filtro['cotizacion']);
                     $tipo = $item->getTipo()->getNombre();
                     $marca = $item->getMarca()->getNombre();
                     $modelo = $item->getModelo()->getNombre();
-                    $totalDolares = ($item->getMonedaEquipo() == '$') ? $item->getPrecioEquipo() / $filtro['cotizacion'] : $item->getPrecioEquipo();
-                    $totalPesos = ($item->getMonedaEquipo() == 'U$S') ? $item->getPrecioEquipo() * $filtro['cotizacion'] : $item->getPrecioEquipo();
+                    $dolares = ($item->getMonedaEquipo() == '$') ? $item->getPrecioEquipo() / $cotiz : $item->getPrecioEquipo();
+                    $pesos = ($item->getMonedaEquipo() == 'U$S') ? $item->getPrecioEquipo() * $cotiz : $item->getPrecioEquipo();
+                    $totalDolares += $dolares;
+                    $totalPesos += $pesos;
+                    $cant++;
                 }
-                $precioDolares = $totalDolares / $ent['cantidad'];
-                //$totalDolares = $precioDolares * $ent['cantidad'];
+
+                $precioDolares = $totalDolares / $cant;
                 $entities[] = [
                     'tipo' => $tipo,
                     'marca' => $marca,
@@ -1560,6 +1567,59 @@ class EquipoController extends Controller {
             $msg = 'ERROR';
         }
         return new Response($msg);
+    }
+
+    /**
+     * @Route("/actualizarValoresEquipos", name="equipo-update-valorizado")
+     * @Method("GET")
+     */
+    public function actualizarValoresAction() {
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+        $valorizados = $em->getRepository('ConfigBundle:Valorizados')->findAll();
+        // arraycollection
+        $resultado = new ArrayCollection();
+        //$total = 0;
+        try {
+            $em->getConnection()->beginTransaction();
+
+            foreach ($valorizados as $item) {
+                $cotiz = $item->getCotizacion();
+                $usd = $item->getValorusd();
+                $modelo = $em->getRepository('ConfigBundle:Modelo')->findOneByNombre($item->getModelo());
+                $equipos = $em->getRepository('AppBundle:Equipo')->findByTipoMarcaModelo($item->getTipo(), $item->getMarca(), $modelo->getId());
+                //echo 'Equipos: ' . count($equipos) . '<br>';
+                foreach ($equipos as $eq) {
+
+                    //$aux = clone($eq);
+                    //$eq->setVerificado(0);
+                    if ($eq->getPrecioEquipo() == 0 && $eq->getPrecio() == 0 && $item->getEdifId() == $eq->getUbicacionActual()->getEdificio()->getId()) {
+                        //echo ' - ' . $eq->getId() . ' ' . $eq->getPrecioEquipo() . ' ' . $eq->getPrecioDolares() . ' ' . $eq->getUbicacionActual()->getTextoParaBienes() . ' Edif:' . $eq->getUbicacionActual()->getEdificio()->getId() . '<br>';
+                        $eq->setPrecio($usd);
+                        $eq->setCotizacionDolar($cotiz);
+                        $moneda = $em->getRepository('ConfigBundle:Moneda')->find(2);
+                        $eq->setMoneda($moneda);
+                        $em->persist($eq);
+                        $em->flush();
+                        //echo $eq->getId() . '<br>';
+                        //$total++;
+                        //$aux->setVerificado(1);
+                        $resultado->add($eq);
+                    }
+                }
+            }
+            $em->getConnection()->commit();
+            //echo 'fin';
+            return $this->render('AppBundle:Equipo:valorizados.html.twig', array(
+                        'resultado' => $resultado
+            ));
+        }
+        catch (Exception $ex) {
+            $em->getConnection()->rollback();
+            return $this->render('AppBundle:Equipo:valorizados.html.twig', array(
+                        'resultado' => $ex->getMessage()
+            ));
+        }
     }
 
 }

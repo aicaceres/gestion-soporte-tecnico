@@ -281,7 +281,11 @@ class Equipo {
     }
 
     public function getPrecioEquipo() {
-        return ($this->getOC()) ? $this->getOC()->getPrecio() : $this->getPrecio();
+        $precio = $this->getPrecio();
+        if ($this->getOC()) {
+            $precio = ($this->getOC()->getPrecio() > 0) ? $this->getOC()->getPrecio() : $this->getPrecio();
+        }
+        return $precio;
     }
 
     public function getMonedaEquipo() {

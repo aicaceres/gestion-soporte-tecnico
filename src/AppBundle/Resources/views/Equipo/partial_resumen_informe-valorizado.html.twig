@@ -12,9 +12,9 @@
             </tr>
         </thead>
         <tbody>
-            {% set usd, pes = 0,0 %}
+            {% set usd, pes, cant = 0,0,0 %}
             {% for entity in entities %}
-                
+                {% set usd, pes, cant = usd + entity.totalDolares , pes+entity.totalPesos, cant + entity.cantidad %}
                 <tr>    
                     <td>{{ entity.tipo }}</td>
                     <td>{{ entity.marca }}</td>
@@ -27,4 +27,8 @@
             {% endfor %}
         </tbody>
     </table>
+        <br>
+    <div class="col-md-12" id="summaryData" style="padding:0">           
+        <span class="bg-red"> {{ cant }} Equipos: &nbsp;&nbsp; USD {{ usd|number_format(2,'.',',') }} &nbsp;&nbsp;-&nbsp;&nbsp; $ {{ pes|number_format(2,'.',',') }} </span> 
+    </div> 
 </div>

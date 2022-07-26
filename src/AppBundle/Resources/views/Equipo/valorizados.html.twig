@@ -1,0 +1,52 @@
+{% extends "dataTableList.html.twig" %}
+{% block avanzu_admin_menumode %}sidebar-collapse sidebar-open {% endblock %}
+{% block page_content %}
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; Equipos Actualizados {{ resultado|length }}</h3>               
+            </div><!-- /.box-header -->
+                                    
+            <div class='box-body' >
+                <table id="equipos_table" class="table table-bordered table-hover equipolist">
+                        <thead>
+                            <tr>
+                                <th class="no-sort" style="width:5px">&nbsp;</th>
+                                <th>Tipo</th>
+                                <th>N° Serie</th>
+                                <th>Descripción</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th>Precio</th>
+                                <th>Cotizacion USD</th>                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for res in resultado  %}
+                                <tr>    
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ res.tipo }}</td>
+                                    <td>{{ res.nroSerie }}</td>
+                                    <td>{{ res.nombre }}</td>
+                                    <td>{{ res.marca }}</td>
+                                    <td>{{ res.modelo }}</td>                      
+                                    <td>{{ res.estado }}</td>                    
+                                    <td>{{ res.ubicacionActual.texto }}</td>                    
+                                    <td>{{ res.precio }}</td>                    
+                                    <td>{{ res.cotizacionDolar }}</td>                    
+                                </tr>  
+                                                               
+                            {% endfor %}   
+                        </tbody>                        
+                    </table>
+         
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}

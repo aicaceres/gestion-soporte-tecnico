@@ -9,6 +9,54 @@ use ConfigBundle\Controller\UtilsController;
  */
 class InsumoRepository extends EntityRepository {
 
+    public function findByCriteria($data) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('i')
+                ->from('AppBundle\Entity\Insumo', 'i')
+                ->innerJoin('i.tipo', 't')
+                ->innerJoin('i.marca', 'ma')
+                ->innerJoin('i.modelo', 'mo')
+                ->where("t.clase = 'I'");
+        if ($data['idTipo']) {
+            $query->andWhere('t.id=' . $data['idTipo']);
+        }
+        if ($data['idMarca']) {
+            $query->andWhere('ma.id=' . $data['idMarca']);
+            if ($data['idModelo']) {
+                $query->andWhere('mo.id=' . $data['idModelo']);
+            }
+        }
+        return $query->getQuery()->getResult();
+    }
+
+    public function combosByCriteria($data, $select, $order, $tabla = '') {
+        $query = $this->_em->createQueryBuilder();
+        $query->select($select)
+                ->from('AppBundle\Entity\Insumo', 'i')
+                ->innerJoin('i.tipo', 't')
+                ->innerJoin('i.marca', 'ma')
+                ->innerJoin('i.modelo', 'mo')
+                ->where("t.clase = 'I'")
+                ->orderBy($order);
+
+        if ($tabla != 'tipo') {
+            if ($data['idTipo']) {
+                $query->andWhere('t.id=' . $data['idTipo']);
+            }
+        }
+        if ($tabla != 'marca') {
+            if ($data['idMarca']) {
+                $query->andWhere('ma.id=' . $data['idMarca']);
+                if ($tabla != 'modelo') {
+                    if ($data['idModelo']) {
+                        $query->andWhere('mo.id=' . $data['idModelo']);
+                    }
+                }
+            }
+        }
+        return $query->getQuery()->getArrayResult();
+    }
+
     public function findInsumoArray($list) {
         $query = $this->_em->createQueryBuilder();
         $query->select('i.id,i.nombre')

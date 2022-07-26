@@ -618,52 +618,52 @@ class OrdenTrabajoController extends Controller {
                     $tarea->setTipoTarea($tipo);
                     // restaurar ubicación a equipos
                     $ubic_nueva = null;
-                    foreach ($ot->getDetalles() as $det) {
-                        if (!$det->getEntregado()) {
-                            $reubicar = true;
-                            $equipo = $det->getEquipo();
-                            if ($det->getEstadoOriginal()) {
-                                $equipo->setEstado($det->getEstadoOriginal());
-                            }
-                            RequerimientoController::unsetUbicaciones($em, $equipo->getId());
-                            $ubic_nueva = new EquipoUbicacion();
-                            $ubic_nueva->setFechaEntrega(new \DateTime());
-                            $ubic_nueva->setConceptoEntrega($em->getRepository('ConfigBundle:ConceptoEntrega')->findOneByAbreviatura('ST'));
-                            if ($det->getEquipoUbicacionOriginal()) {
-                                $departamento = $det->getEquipoUbicacionOriginal()->getDepartamento();
-                                $piso = $det->getEquipoUbicacionOriginal()->getPiso();
-                                $redIp = $det->getEquipoUbicacionOriginal()->getRedIp();
-                            }
-                            else {
-                                // buscar solicitante del requerimiento
-                                $departamento = $ot->getRequerimiento()->getSolicitante();
-                                $piso = $departamento->getPisos()[0];
-                                $redIp = null;
-                            }
-                            $ubic_nueva->setDepartamento($departamento);
-                            $ubic_nueva->setEdificio($departamento->getEdificio());
-                            $ubic_nueva->setUbicacion($departamento->getEdificio()->getUbicacion());
-                            $ubic_nueva->setPiso($piso);
-                            $ubic_nueva->setRedIp($redIp);
-                            $ubic_nueva->setActual(1);
-                            $equipo->addUbicacion($ubic_nueva);
-                            $em->persist($equipo);
-                            // ver si hace falta dejar sin entregar para volver a reubicar al reabrir la ot
-                            $det->setEntregado(1);
-                            $em->persist($det);
-                            // agregar equipo en tarea de reubicación
-                            $tarea->addOrdenTrabajoDetalle($det);
-                        }
-                    }
-                    if ($reubicar) {
-                        // si se reubicaron equipos guardar tarea
-                        $tarea->setEquipoUbicacionFinal($ubic_nueva->getDepartamento());
-                        $tarea->setDescripcion('Reubicación a <strong>' . $ubic_nueva->getTexto() . '</strong> Estado: <strong>' . $det->getEstadoOriginal() . '</strong>');
-                        $em->persist($tarea);
-                    }
+                    /* foreach ($ot->getDetalles() as $det) {
+                      if (!$det->getEntregado()) {
+                      //$reubicar = true;
+                      $equipo = $det->getEquipo();
+                      if ($det->getEstadoOriginal()) {
+                      $equipo->setEstado($det->getEstadoOriginal());
+                      }
+                      RequerimientoController::unsetUbicaciones($em, $equipo->getId());
+                      $ubic_nueva = new EquipoUbicacion();
+                      $ubic_nueva->setFechaEntrega(new \DateTime());
+                      $ubic_nueva->setConceptoEntrega($em->getRepository('ConfigBundle:ConceptoEntrega')->findOneByAbreviatura('ST'));
+                      if ($det->getEquipoUbicacionOriginal()) {
+                      $departamento = $det->getEquipoUbicacionOriginal()->getDepartamento();
+                      $piso = $det->getEquipoUbicacionOriginal()->getPiso();
+                      $redIp = $det->getEquipoUbicacionOriginal()->getRedIp();
+                      }
+                      else {
+                      // buscar solicitante del requerimiento
+                      $departamento = $ot->getRequerimiento()->getSolicitante();
+                      $piso = $departamento->getPisos()[0];
+                      $redIp = null;
+                      }
+                      $ubic_nueva->setDepartamento($departamento);
+                      $ubic_nueva->setEdificio($departamento->getEdificio());
+                      $ubic_nueva->setUbicacion($departamento->getEdificio()->getUbicacion());
+                      $ubic_nueva->setPiso($piso);
+                      $ubic_nueva->setRedIp($redIp);
+                      $ubic_nueva->setActual(1);
+                      $equipo->addUbicacion($ubic_nueva);
+                      $em->persist($equipo);
+                      // ver si hace falta dejar sin entregar para volver a reubicar al reabrir la ot
+                      $det->setEntregado(1);
+                      $em->persist($det);
+                      // agregar equipo en tarea de reubicación
+                      $tarea->addOrdenTrabajoDetalle($det);
+                      }
+                      } */
+                    /* if ($reubicar) {
+                      // si se reubicaron equipos guardar tarea
+                      $tarea->setEquipoUbicacionFinal($ubic_nueva->getDepartamento());
+                      $tarea->setDescripcion('Reubicación a <strong>' . $ubic_nueva->getTexto() . '</strong> Estado: <strong>' . $det->getEstadoOriginal() . '</strong>');
+                      $em->persist($tarea);
+                      } */
                     $em->persist($ot);
-                    if ($ubic_nueva)
-                        $entity->setEquipoUbicacionFinal($ubic_nueva->getDepartamento());
+                    //if ($ubic_nueva)
+                    //    $entity->setEquipoUbicacionFinal($ubic_nueva->getDepartamento());
                     if ($ot->getRequerimiento()) {
                         $req = $ot->getRequerimiento();
                         $cerrar = true;
