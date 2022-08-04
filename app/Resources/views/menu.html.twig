@@ -101,28 +101,11 @@
     </li>
     {% endif %}    
     {% if app.user.access('equipo') %}
-    <li id="equipo" class="treeview">
-        <a href="#">
+    <li id="equipo">
+        <a href="{{ path('equipo')}}">
             <i class="fa fa-desktop"></i>
             <span>Equipos</span>
-            <i class="fa fa-angle-left pull-right"></i>
         </a>
-        <ul class="treeview-menu">    
-            <li id="equipo1">
-                <a href="{{path('equipo')}}">
-                    <i class="fa fa-circle-o"></i>
-                    <span>Administración</span>
-                </a>
-            </li>
-            {% if app.user.access('equipo_valorizado') %}
-            <li id="valorizado">
-                <a href="{{path('equipo_valorizado')}}">
-                    <i class="fa fa-circle-o"></i>
-                    <span>Informe Valorizado</span>
-                </a>
-            </li>
-            {% endif %}
-        </ul>
     </li>      
     {% endif %}
     {% if app.user.access('insumo') %}
@@ -214,6 +197,14 @@
                         Bienes en Stock
                     </a>
                 </li>
+                {% if app.user.access('compra_valorizado') %}
+                <li id="valorizado">
+                    <a href="{{path('compra_valorizado')}}">
+                        <i class="fa fa-circle-o"></i>
+                        <span>Informe Valorizado</span>
+                    </a>
+                </li>
+                {% endif %}
             {% endif %}
 
         </ul>        

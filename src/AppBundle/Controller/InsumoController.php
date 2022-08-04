@@ -323,9 +323,9 @@ class InsumoController extends Controller {
     public function editAction($id) {
         UtilsController::haveAccess($this->getUser(), 'insumo_edit');
         $em = $this->getDoctrine()->getManager();
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $em->getFilters()->disable('softdeleteable');
-        }
+        //if ($this->getUser()->getRol()->getAdmin()) {
+        $em->getFilters()->disable('softdeleteable');
+        //}
         $entity = $em->getRepository('AppBundle:Insumo')->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el insumo.');
@@ -391,9 +391,9 @@ class InsumoController extends Controller {
     public function updateAction(Request $request, $id) {
         UtilsController::haveAccess($this->getUser(), 'insumo_edit');
         $em = $this->getDoctrine()->getManager();
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $em->getFilters()->disable('softdeleteable');
-        }
+        //if ($this->getUser()->getRol()->getAdmin()) {
+        $em->getFilters()->disable('softdeleteable');
+        //}
         $entity = $em->getRepository('AppBundle:Insumo')->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el insumo.');
@@ -422,9 +422,9 @@ class InsumoController extends Controller {
     public function deleteAction(Request $request, $id) {
         UtilsController::haveAccess($this->getUser(), 'insumo_delete');
         $em = $this->getDoctrine()->getManager();
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $em->getFilters()->disable('softdeleteable');
-        }
+        //if ($this->getUser()->getRol()->getAdmin()) {
+        $em->getFilters()->disable('softdeleteable');
+        //}
         $form = $this->createDeleteForm($id);
         $form->handleRequest($request);
         if ($form->isValid()) {
@@ -475,9 +475,9 @@ class InsumoController extends Controller {
     public function movimientoAction() {
         UtilsController::haveAccess($this->getUser(), 'insumo_movimiento');
         $em = $this->getDoctrine()->getManager();
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $em->getFilters()->disable('softdeleteable');
-        }
+        //if ($this->getUser()->getRol()->getAdmin()) {
+        $em->getFilters()->disable('softdeleteable');
+        //}
         $entities = $em->getRepository('AppBundle:Insumo')->findAll();
         $deleteForms = array();
         foreach ($entities as $entity) {
@@ -789,114 +789,107 @@ class InsumoController extends Controller {
      * @Route("/XupdateSolicitud", name="Xupdate_solicitud")
      * @Method("POST")
      */
-    public function XupdateSolicitudAction(Request $request) {
-        die;
-        $em = $this->getDoctrine()->getManager();
-        $id = $request->get('id');
-        $tipo = $request->get('tipo');
-        var_dump($request->get('cantidad'));
-        $cant = number_format($request->get('cantidad'), 2, '.', '');
-        var_dump($cant);
-        die;
-        $insumoId = $request->get('insumo');
-        $depositoId = $request->get('dep');
-        $entity = $em->getRepository('AppBundle:InsumoxTarea')->find($id);
-        $entity->setFechaAutorizado(new \DateTime());
-        $entity->setAutorizante($this->getUser());
-        if ($tipo) {
-            $entity->setCantidadAprobada(($tipo == 'APROBAR') ? $entity->getCantidad() : 0 );
-            $insumo = ($entity->getInsumo()) ? $entity->getInsumo() : null;
-        }
-        else {
-            $insumo = $em->getRepository('AppBundle:Insumo')->find($insumoId);
-            $entity->setInsumo($insumo);
-            $entity->setCantidadAprobada($cant);
-        }
-        try {
-            $em->getConnection()->beginTransaction();
-            $em->persist($entity);
-            $em->flush();
-            if ($entity->getCantidadAprobada() > 0) {
-                // actualizar stock
-                $deposito = $em->getRepository('ConfigBundle:Departamento')->find($depositoId);
-                $stock = $em->getRepository('AppBundle:Stock')->findInsumoDeposito($entity->getInsumo()->getId(), $deposito->getId());
-                if ($stock) {
-                    $saldo = $stock->getCantidad() - $entity->getCantidadAprobada();
-                    // controlar que no quede en negativo el stock
-                    if ($saldo < 0) {
-                        // no hay stock.
-                        $em->getConnection()->rollback();
-                        return new Response(json_encode('SINSTOCK'));
-                    }
-                    else {
-                        $stock->setCantidad($stock->getCantidad() - $entity->getCantidadAprobada());
-                        $em->persist($stock);
-                        // Cargar movimiento
-                        $movim = new StockHistorico();
-                        $movim->setFecha(new \DateTime());
-                        $movim->setTipo('SOPORTE');
-                        $movim->setSigno('-');
-                        $movim->setMovimiento($entity->getId());
-                        $movim->setInsumo($insumo);
-                        $movim->setStock($insumo->getStockTotal());
-                        $movim->setCantidad($entity->getCantidadAprobada());
-                        $movim->setDeposito($deposito);
-                        $em->persist($movim);
-                        $em->flush();
-                    }
-                }
-                /*
-                  if (!$stock) {
-                  $stock = new Stock();
-                  $stock->setInsumo($insumo);
-                  $stock->setDeposito($deposito);
-                  $stock->setCantidad( 0 );
-                  } */
-            }
-            // generar mensajería
-            $textoMensaje = 'Solicitud del ' . $entity->getCreated()->format('d/m/Y') .
-                    ' por "' . $entity->getCantidad() . '" de "';
-            if ($insumo)
-                $insumoTxt = $insumo->getTexto();
-            else
-                $insumoTxt = $entity->getDescripcion();
-            $textoMensaje = $textoMensaje . $insumoTxt . '"';
-            $asunto = 'Insumo Aprobado';
-            switch ($entity->getEstado()) {
-                case 'R':
-                    $span = '<span style="font-weight:normal;" class="badge bg-red">Rechazado</span>';
-                    $respuesta = ' se ha rechazado.';
-                    $asunto = 'Insumo Rechazado';
-                    break;
-                case 'AP':
-                    $span = '<span style="font-weight:normal;" class="badge bg-orange">Aprobación Parcial</span>';
-                    $respuesta = ' se ha aprobado parcialmente.';
-                    break;
-                case 'AT':
-                    $span = '<span style="font-weight:normal;" class="badge bg-green">Aprobado</span>';
-                    $respuesta = ' se ha aprobado en su totalidad.';
-                    break;
-            }
-            $textoMensaje = $textoMensaje . $respuesta;
-            $mensaje = new Mensajeria();
-            $mensaje->setDestinatario($entity->getCreatedBy());
-            $mensaje->setAsunto($asunto);
-            $mensaje->setMensaje($textoMensaje);
-            $em->persist($mensaje);
-            $em->flush();
+    /* public function XupdateSolicitudAction(Request $request) {
+      die;
+      $em = $this->getDoctrine()->getManager();
+      $id = $request->get('id');
+      $tipo = $request->get('tipo');
+      var_dump($request->get('cantidad'));
+      $cant = number_format($request->get('cantidad'), 2, '.', '');
+      var_dump($cant);
+      die;
+      $insumoId = $request->get('insumo');
+      $depositoId = $request->get('dep');
+      $entity = $em->getRepository('AppBundle:InsumoxTarea')->find($id);
+      $entity->setFechaAutorizado(new \DateTime());
+      $entity->setAutorizante($this->getUser());
+      if ($tipo) {
+      $entity->setCantidadAprobada(($tipo == 'APROBAR') ? $entity->getCantidad() : 0 );
+      $insumo = ($entity->getInsumo()) ? $entity->getInsumo() : null;
+      }
+      else {
+      $insumo = $em->getRepository('AppBundle:Insumo')->find($insumoId);
+      $entity->setInsumo($insumo);
+      $entity->setCantidadAprobada($cant);
+      }
+      try {
+      $em->getConnection()->beginTransaction();
+      $em->persist($entity);
+      $em->flush();
+      if ($entity->getCantidadAprobada() > 0) {
+      // actualizar stock
+      $deposito = $em->getRepository('ConfigBundle:Departamento')->find($depositoId);
+      $stock = $em->getRepository('AppBundle:Stock')->findInsumoDeposito($entity->getInsumo()->getId(), $deposito->getId());
+      if ($stock) {
+      $saldo = $stock->getCantidad() - $entity->getCantidadAprobada();
+      // controlar que no quede en negativo el stock
+      if ($saldo < 0) {
+      // no hay stock.
+      $em->getConnection()->rollback();
+      return new Response(json_encode('SINSTOCK'));
+      }
+      else {
+      $stock->setCantidad($stock->getCantidad() - $entity->getCantidadAprobada());
+      $em->persist($stock);
+      // Cargar movimiento
+      $movim = new StockHistorico();
+      $movim->setFecha(new \DateTime());
+      $movim->setTipo('SOPORTE');
+      $movim->setSigno('-');
+      $movim->setMovimiento($entity->getId());
+      $movim->setInsumo($insumo);
+      $movim->setStock($insumo->getStockTotal());
+      $movim->setCantidad($entity->getCantidadAprobada());
+      $movim->setDeposito($deposito);
+      $em->persist($movim);
+      $em->flush();
+      }
+      }
 
-            $data = array(
-                'span' => $span,
-                'nombre' => ($insumo) ? $insumo->getTexto() : null,
-                'stock' => ($insumo) ? $insumo->getStockByDeposito($deposito->getId()) : null);
-            $em->getConnection()->commit();
-            return new Response(json_encode($data));
-        }
-        catch (\Exception $ex) {
-            $em->getConnection()->rollback();
-            //var_dump($ex->getMessage());
-            return new Response(json_encode('ERROR'));
-        }
-    }
+      }
+      // generar mensajería
+      $textoMensaje = 'Solicitud del ' . $entity->getCreated()->format('d/m/Y') .
+      ' por "' . $entity->getCantidad() . '" de "';
+      if ($insumo)
+      $insumoTxt = $insumo->getTexto();
+      else
+      $insumoTxt = $entity->getDescripcion();
+      $textoMensaje = $textoMensaje . $insumoTxt . '"';
+      $asunto = 'Insumo Aprobado';
+      switch ($entity->getEstado()) {
+      case 'R':
+      $span = '<span style="font-weight:normal;" class="badge bg-red">Rechazado</span>';
+      $respuesta = ' se ha rechazado.';
+      $asunto = 'Insumo Rechazado';
+      break;
+      case 'AP':
+      $span = '<span style="font-weight:normal;" class="badge bg-orange">Aprobación Parcial</span>';
+      $respuesta = ' se ha aprobado parcialmente.';
+      break;
+      case 'AT':
+      $span = '<span style="font-weight:normal;" class="badge bg-green">Aprobado</span>';
+      $respuesta = ' se ha aprobado en su totalidad.';
+      break;
+      }
+      $textoMensaje = $textoMensaje . $respuesta;
+      $mensaje = new Mensajeria();
+      $mensaje->setDestinatario($entity->getCreatedBy());
+      $mensaje->setAsunto($asunto);
+      $mensaje->setMensaje($textoMensaje);
+      $em->persist($mensaje);
+      $em->flush();
 
+      $data = array(
+      'span' => $span,
+      'nombre' => ($insumo) ? $insumo->getTexto() : null,
+      'stock' => ($insumo) ? $insumo->getStockByDeposito($deposito->getId()) : null);
+      $em->getConnection()->commit();
+      return new Response(json_encode($data));
+      }
+      catch (\Exception $ex) {
+      $em->getConnection()->rollback();
+      //var_dump($ex->getMessage());
+      return new Response(json_encode('ERROR'));
+      }
+      } */
 }

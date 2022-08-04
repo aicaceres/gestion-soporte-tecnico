@@ -22,7 +22,7 @@
                 
                 <div class="pull-right box-tools">                
                     <form id="printform" name="printform" target="_blank" style="display: {% if filtro['tipoReporte']== 'detalle' %} inline-block {% else %} none {% endif %};" 
-                          action="{{ path('print_equipo_valorizado') }}" method="post">                        
+                          action="{{ path('print_compra_valorizado') }}" method="post">                        
                         <input type="hidden" id="searchterm" name="searchterm"/>
                         <input type="hidden" id="datalist" name="datalist"/>
                         <input type="hidden" id="option" name="option"/>
@@ -33,7 +33,7 @@
             </div><!-- /.box-header -->
                                     
             <div class='box-body' >
-                <form id="searchform" action="{{ path('equipo_valorizado') }}" method="get" >
+                <form id="searchform" action="{{ path('compra_valorizado') }}" method="get" >
                     <div class="col-md-12">
                         <h4 class="pull-left"  style="display:inline-block">Criterios de Filtro: </h4>                        
                     
@@ -144,7 +144,7 @@
                     <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
                 </form>               
 
-                {% include "AppBundle:Equipo:partial_"~ filtro['tipoReporte'] ~"_informe-valorizado.html.twig" %}   
+                {% include "AppBundle:Compra:partial_"~ filtro['tipoReporte'] ~"_informe-valorizado.html.twig" %}   
 
             </div>
         </div><!-- /.box -->

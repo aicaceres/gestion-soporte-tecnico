@@ -1337,6 +1337,7 @@ class EquipoController extends Controller {
      * @Method("GET")
      */
     public function valorizadoAction(Request $request) {
+        die;
         UtilsController::haveAccess($this->getUser(), 'equipo_valorizado');
         $em = $this->getDoctrine()->getManager();
         $session = $this->get('session');
@@ -1490,7 +1491,7 @@ class EquipoController extends Controller {
      * @Template()
      */
     public function printValorizadoEquipos(Request $request) {
-
+        die;
         $op = $request->get('option');
         $em = $this->getDoctrine()->getManager();
         $session = $this->get('session');
@@ -1593,18 +1594,20 @@ class EquipoController extends Controller {
 
                     //$aux = clone($eq);
                     //$eq->setVerificado(0);
-                    if ($eq->getPrecioEquipo() == 0 && $eq->getPrecio() == 0 && $item->getEdifId() == $eq->getUbicacionActual()->getEdificio()->getId()) {
-                        //echo ' - ' . $eq->getId() . ' ' . $eq->getPrecioEquipo() . ' ' . $eq->getPrecioDolares() . ' ' . $eq->getUbicacionActual()->getTextoParaBienes() . ' Edif:' . $eq->getUbicacionActual()->getEdificio()->getId() . '<br>';
-                        $eq->setPrecio($usd);
-                        $eq->setCotizacionDolar($cotiz);
-                        $moneda = $em->getRepository('ConfigBundle:Moneda')->find(2);
-                        $eq->setMoneda($moneda);
-                        $em->persist($eq);
-                        $em->flush();
-                        //echo $eq->getId() . '<br>';
-                        //$total++;
-                        //$aux->setVerificado(1);
-                        $resultado->add($eq);
+                    if ($eq->getUbicacionActual()->getEdificio()) {
+                        if ($eq->getPrecioEquipo() == 0 && $eq->getPrecio() == 0 && $item->getEdifId() == $eq->getUbicacionActual()->getEdificio()->getId()) {
+                            //echo ' - ' . $eq->getId() . ' ' . $eq->getPrecioEquipo() . ' ' . $eq->getPrecioDolares() . ' ' . $eq->getUbicacionActual()->getTextoParaBienes() . ' Edif:' . $eq->getUbicacionActual()->getEdificio()->getId() . '<br>';
+                            $eq->setPrecio($usd);
+                            $eq->setCotizacionDolar($cotiz);
+                            $moneda = $em->getRepository('ConfigBundle:Moneda')->find(2);
+                            $eq->setMoneda($moneda);
+                            $em->persist($eq);
+                            $em->flush();
+                            //echo $eq->getId() . '<br>';
+                            //$total++;
+                            //$aux->setVerificado(1);
+                            $resultado->add($eq);
+                        }
                     }
                 }
             }
