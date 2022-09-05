@@ -39,12 +39,12 @@
                     
                         <div style="display:inline-block; margin-left:30px">
                             <label style="padding-right:30px">
-                                <input type="radio" name="tipoReporte" class="detalle" {% if filtro['tipoReporte']== 'detalle' %} checked {% endif %} >
-                                DETALLE
-                            </label>
-                            <label style="padding-right:30px">
                                 <input type="radio" name="tipoReporte" class="resumen" {% if filtro['tipoReporte']== 'resumen' %} checked {% endif %} >
                                 RESUMEN
+                            </label>
+                            <label style="padding-right:30px">
+                                <input type="radio" name="tipoReporte" class="detalle" {% if filtro['tipoReporte']== 'detalle' %} checked {% endif %} >
+                                DETALLE
                             </label>
                         </div>
                         <button type="button" id="limpiarfiltros" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Limpiar Filtros"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>

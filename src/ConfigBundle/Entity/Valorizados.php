@@ -67,14 +67,17 @@ class Valorizados {
      */
     protected $edifId;
 
+    /**
+     * @ORM\Column(name="process", type="boolean", nullable=true)
+     */
+    protected $process = false;
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -84,8 +87,7 @@ class Valorizados {
      * @param string $tipo
      * @return Valorizados
      */
-    public function setTipo($tipo)
-    {
+    public function setTipo($tipo) {
         $this->tipo = $tipo;
 
         return $this;
@@ -94,10 +96,9 @@ class Valorizados {
     /**
      * Get tipo
      *
-     * @return string 
+     * @return string
      */
-    public function getTipo()
-    {
+    public function getTipo() {
         return $this->tipo;
     }
 
@@ -107,8 +108,7 @@ class Valorizados {
      * @param string $marca
      * @return Valorizados
      */
-    public function setMarca($marca)
-    {
+    public function setMarca($marca) {
         $this->marca = $marca;
 
         return $this;
@@ -117,10 +117,9 @@ class Valorizados {
     /**
      * Get marca
      *
-     * @return string 
+     * @return string
      */
-    public function getMarca()
-    {
+    public function getMarca() {
         return $this->marca;
     }
 
@@ -130,8 +129,7 @@ class Valorizados {
      * @param string $modelo
      * @return Valorizados
      */
-    public function setModelo($modelo)
-    {
+    public function setModelo($modelo) {
         $this->modelo = $modelo;
 
         return $this;
@@ -140,10 +138,9 @@ class Valorizados {
     /**
      * Get modelo
      *
-     * @return string 
+     * @return string
      */
-    public function getModelo()
-    {
+    public function getModelo() {
         return $this->modelo;
     }
 
@@ -153,8 +150,7 @@ class Valorizados {
      * @param string $ubicacion
      * @return Valorizados
      */
-    public function setUbicacion($ubicacion)
-    {
+    public function setUbicacion($ubicacion) {
         $this->ubicacion = $ubicacion;
 
         return $this;
@@ -163,10 +159,9 @@ class Valorizados {
     /**
      * Get ubicacion
      *
-     * @return string 
+     * @return string
      */
-    public function getUbicacion()
-    {
+    public function getUbicacion() {
         return $this->ubicacion;
     }
 
@@ -176,8 +171,7 @@ class Valorizados {
      * @param string $cantidad
      * @return Valorizados
      */
-    public function setCantidad($cantidad)
-    {
+    public function setCantidad($cantidad) {
         $this->cantidad = $cantidad;
 
         return $this;
@@ -186,10 +180,9 @@ class Valorizados {
     /**
      * Get cantidad
      *
-     * @return string 
+     * @return string
      */
-    public function getCantidad()
-    {
+    public function getCantidad() {
         return $this->cantidad;
     }
 
@@ -199,8 +192,7 @@ class Valorizados {
      * @param string $valorusd
      * @return Valorizados
      */
-    public function setValorusd($valorusd)
-    {
+    public function setValorusd($valorusd) {
         $this->valorusd = $valorusd;
 
         return $this;
@@ -209,10 +201,9 @@ class Valorizados {
     /**
      * Get valorusd
      *
-     * @return string 
+     * @return string
      */
-    public function getValorusd()
-    {
+    public function getValorusd() {
         return $this->valorusd;
     }
 
@@ -222,8 +213,7 @@ class Valorizados {
      * @param string $cotizacion
      * @return Valorizados
      */
-    public function setCotizacion($cotizacion)
-    {
+    public function setCotizacion($cotizacion) {
         $this->cotizacion = $cotizacion;
 
         return $this;
@@ -232,10 +222,9 @@ class Valorizados {
     /**
      * Get cotizacion
      *
-     * @return string 
+     * @return string
      */
-    public function getCotizacion()
-    {
+    public function getCotizacion() {
         return $this->cotizacion;
     }
 
@@ -245,8 +234,7 @@ class Valorizados {
      * @param string $archivo
      * @return Valorizados
      */
-    public function setArchivo($archivo)
-    {
+    public function setArchivo($archivo) {
         $this->archivo = $archivo;
 
         return $this;
@@ -255,10 +243,9 @@ class Valorizados {
     /**
      * Get archivo
      *
-     * @return string 
+     * @return string
      */
-    public function getArchivo()
-    {
+    public function getArchivo() {
         return $this->archivo;
     }
 
@@ -268,8 +255,7 @@ class Valorizados {
      * @param integer $ubicId
      * @return Valorizados
      */
-    public function setUbicId($ubicId)
-    {
+    public function setUbicId($ubicId) {
         $this->ubicId = $ubicId;
 
         return $this;
@@ -278,10 +264,9 @@ class Valorizados {
     /**
      * Get ubicId
      *
-     * @return integer 
+     * @return integer
      */
-    public function getUbicId()
-    {
+    public function getUbicId() {
         return $this->ubicId;
     }
 
@@ -291,8 +276,7 @@ class Valorizados {
      * @param integer $edifId
      * @return Valorizados
      */
-    public function setEdifId($edifId)
-    {
+    public function setEdifId($edifId) {
         $this->edifId = $edifId;
 
         return $this;
@@ -301,10 +285,33 @@ class Valorizados {
     /**
      * Get edifId
      *
-     * @return integer 
+     * @return integer
      */
-    public function getEdifId()
-    {
+    public function getEdifId() {
         return $this->edifId;
+    }
+
+
+    /**
+     * Set process
+     *
+     * @param boolean $process
+     * @return Valorizados
+     */
+    public function setProcess($process)
+    {
+        $this->process = $process;
+
+        return $this;
+    }
+
+    /**
+     * Get process
+     *
+     * @return boolean 
+     */
+    public function getProcess()
+    {
+        return $this->process;
     }
 }

@@ -104,10 +104,10 @@
 
 <h3 id="subtitle" border.color="#333333" border.type="bottom" padding-bottom="3px" height="1px"> Ubicaciones del Equipo </h3> 
 {% if eq.ubicaciones|length>0 %}
-{% for ubic in eq.ubicaciones %}
+  {% for ubic in eq.ubicaciones %}
     {% if ubic.actual==1 %}
-    <div padding="5px" font-size="8px" font-style="bold" border.color="#DDDDDD" border.type="bottom" height="1px"> UBICACIÓN ACTUAL</div>
-{% endif %}        
+        <div padding="5px" font-size="8px" font-style="bold" border.color="#DDDDDD" border.type="bottom" height="1px"> UBICACIÓN ACTUAL</div>
+    {% endif %}        
 
     <table font-size="10px" padding="5px">
         <tr>
@@ -146,7 +146,7 @@
         </tr>                                
     </table>
     {% endif %}        
-{% endfor %}              
+  {% endfor %}              
     
 {% else %}
     <div font-size="10px">Equipo sin ubicación asignada.</div>
@@ -156,7 +156,7 @@
 
 {% if requerimientos|length>0 %} 
     <h3 extends="subtitle"> Requerimientos de Soporte </h3> 
-    {% for req in requerimientos %}
+  {% for req in requerimientos %}
     <table font-size="10px">
         <tr>
             <td extends="tdstd" padding="5px" width="8%" font-style="bold" background.color="#EEEEEE" >#{{ "%06d" | format(req.id) }}</td>
@@ -196,7 +196,8 @@
             {% endif %}
         </tr>                                
     </table> 
-    {% endif %}    
+    {% endif %}
+    
     {# ORDENES DE TRABAJO #}   
     {% if req.ordentrabajoAsociadas|length>0 %}
         <h4 font-style="bold" font-size="10px" margin-left="10px" margin-top="5px" border.color="#666666" border.type="bottom" padding-bottom="3px" height="1px"> Órdenes de Trabajo </h4>     
@@ -248,9 +249,10 @@
                                     {% endif %}
                                 </td>
                             </tr> 
-                        {% endfor %}                                                                                  
+                        {% endfor %}
+                    </table>    
                 {% endif %}
-                </table> 
+                 
                 {% if app.user.rol.admin %}
                 <table extends="table_admin_info">
                     {% set table = ot %}

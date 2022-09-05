@@ -6,7 +6,7 @@
                     <table>
                         <tr>
                             <td border.type="none" vertical-align="middle">
-                                <img ignore-error="true" src="{{logo}}" width="42px" height="30px" margin-bottom="10px"/>
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
                             </td>
                         </tr>
                     </table>                                        
@@ -22,8 +22,7 @@
             </footer>
         </placeholders>
                     
-        <h2 text-align="center" > Ficha del Equipo </h2> 
-        
+        <h2 text-align="center" > Ficha del Equipo </h2>         
         <table font-size="10px">
             <tr>
                 <td border.type="none" >
@@ -58,7 +57,7 @@
                 </td>
                 <td width="10%" border.type="none" >
                     <div id="foto" text-align="center" margin-left="10px">
-                        <img ignore-error="true" keep-ratio="true" src="{{foto}}" width="70px" height="60px" border.color="#CCCCCC" border.size="4px" />
+                        <img ignore-error="true" keep-ratio="true" src="{{foto}}" width="70px" height="70px" border.color="#CCCCCC" border.size="4px" />
                     </div>
                 </td>
             </tr>
@@ -119,8 +118,8 @@
         </tr>
         <tr>
             <td colspan="4" border.type="none" height="10px" vertical-align="top"  padding-left="0.5 cm">
-                <div width="100%">Ubicación: <b>{{ubic.departamento.edificio.ubicacion.abreviatura}}</b> 
-                                 |  Edificio: <b>{{ubic.departamento.edificio.nombre}}</b>
+                <div width="100%">Ubicación: <b>{% if ubic.departamento.edificio %}  {{ ubic.departamento.edificio.ubicacion.abreviatura}} {% endif %}</b> 
+                                 |  Edificio: <b> {% if ubic.departamento.edificio %} {{ ubic.departamento.edificio.nombre}} {% endif %}</b>
                                  |  Departamento: <b>{{ubic.departamento.nombre}}</b>
                                  |  Piso: <b>{{ubic.piso.nombre}}</b>
                 </div>
@@ -130,6 +129,7 @@
             </td>
         </tr>
     </table>
+    {% if app.user.rol.admin %}        
     <table extends="table_admin_info">
         {% set table = ubic %}
         <tr>
@@ -144,7 +144,8 @@
                 {% endif %}
             {% endif %}
         </tr>                                
-    </table>              
+    </table>
+    {% endif %}        
 {% endfor %}              
     
 {% else %}
@@ -153,11 +154,9 @@
 
 {# REQUERIMIENTOS Y ORDENES DE TRABAJO #}
 
-{% if eq.requerimientos|length>0 or eq.ordenesdetrabajo|length>0 %}
+{% if requerimientos|length>0 %} 
     <h3 extends="subtitle"> Requerimientos de Soporte </h3> 
-    {% for reqdet in eq.requerimientos if reqdet.requerimiento.deletedAt is null %}
-        {% set req = reqdet.requerimiento %}
-
+    {% for req in requerimientos %}
     <table font-size="10px">
         <tr>
             <td extends="tdstd" padding="5px" width="8%" font-style="bold" background.color="#EEEEEE" >#{{ "%06d" | format(req.id) }}</td>
@@ -175,11 +174,13 @@
         <tr>
             <td colspan="2" extends="tdstd" padding-left="0">Descripción: {{ req.descripcion }}</td>
         </tr>
+        {% for det in req.detalles if det.equipo.id==eq.id %}
         <tr>
-            <td colspan="2" extends="tdstd" padding-left="0" margin="0">Obs. adicionales: {{ reqdet.descripcion }}</td>
+            <td colspan="2" extends="tdstd" padding-left="0" margin="0">Obs. adicionales: {{ det.descripcion }}</td>
         </tr>
+        {% endfor %}
     </table>    
-        
+    {% if app.user.rol.admin %}    
     <table extends="table_admin_info">
         {% set table = req %}
         <tr>
@@ -195,20 +196,21 @@
             {% endif %}
         </tr>                                
     </table> 
-        
-    {# ORDENES DE TRABAJO #}    
-    
-    {% if reqdet.ordenTrabajoDetalle|length>0 %}
+    {% endif %}    
+    {# ORDENES DE TRABAJO #}   
+    {% if req.ordentrabajoAsociadas|length>0 %}
         <h4 font-style="bold" font-size="10px" margin-left="10px" margin-top="5px" border.color="#666666" border.type="bottom" padding-bottom="3px" height="1px"> Órdenes de Trabajo </h4>     
-        {% for otdet in reqdet.ordenTrabajoDetalle %}
-            {% set ot = otdet.ordenTrabajo %}
+    
+    {% for ot in req.ordentrabajoAsociadas  %}
+        {% for det in ot.detalles if det.equipo.id==eq.id %}
+            
             <div margin-left="10px">
                 <table font-size="10px">
                     <tr>
-                        <td extends="tdstd" padding="5px" width="8%" font-style="bold" background.color="#EEEEEE" >#{{ "%06d" | format(ot.id) }}</td>
+                        <td extends="tdstd" padding="5px" width="10%" font-style="bold" background.color="#EEEEEE" >#{{ ot.nroOT }}</td>
                         <td extends="tdstd" padding="5px" width="20%">Fecha:{% if ot.fechaOrden %} {{ ot.fechaOrden|date('d-m-Y [H:i]') }} {% endif %} </td>
                         <td extends="tdstd" width="50%">Técnico asigando:<b> {{ ot.tecnico }} </b></td>
-                        <td extends="tdstd" width="18%">Estado: <b>{{ ot.estado }} </b></td>
+                        <td extends="tdstd" width="16%">Estado: <b>{{ ot.estado }} </b></td>
                     </tr>
                 </table>    
                 <table font-size="10px">    
@@ -216,7 +218,7 @@
                         <td extends="tdstd" padding-left="2px">Descripción de la OT: {{ ot.descripcion }}</td>
                     </tr>
                 </table>
-                {% if ot.tareas|length>0 %}
+                {% if det.tareas|length>0 %}
                     <div padding="5px" font-size="8px" font-style="bold" border.color="#DDDDDD" border.type="bottom" height="1px"> TAREAS REALIZADAS</div>    
                     <table font-size="8px"> 
                         <tr>
@@ -225,35 +227,31 @@
                             <td width="17%" vertical-align="middle" padding="3px 5px" border.type="bottom+left" border.color="#888888" font-style="bold">TIPO</td>
                             <td width="55%" vertical-align="middle" padding="3px 5px" border.type="bottom+left" border.color="#888888" font-style="bold">DESCRIPCIóN</td>
                         </tr>
-                        {% for item in otdet.tareas %}     
+                        {% for item in det.tareas %}     
                             <tr>
                                 <td height="10px" vertical-align="middle" padding="3px 5px" border.type="none">{{ item.fecha|date('d/m/Y H:i') }} </td>
                                 <td height="10px" vertical-align="middle" padding="3px 5px" border.type="left" border.color="#888888">{{ item.createdBy.username }} </td>
                                 <td height="10px" vertical-align="middle" padding="3px 5px" border.type="left" border.color="#888888">{{ item.tipoTarea }} </td>
                                 <td height="10px" vertical-align="middle" padding="3px 5px" border.type="left" border.color="#888888">
-                                    {% if item.tipoTarea.abreviatura == 'RI' %}
+                                    {% if item.tipoTarea.abreviatura == 'SI' %}
                                         {% for insxtarea in item.insumos  %}
-                                            <span> {{ insxtarea.cantidad }} {{ insxtarea.cantidadAprobadaTxt }} - {{ insxtarea.descripcionTxt }} </span> 
-                                            {% if insxtarea.fechaAutorizado %}
-                                                {% if insxtarea.cantidadAprobada==0 %}
-                                                    [R]
-                                                {% else %}
-                                                    [A]
-                                                {% endif %}    
-                                            {% else %}    
-                                                [P]
-                                            {% endif %}
-                                            {% if not loop.last %}<br></br>{% endif %}&nbsp;
+                                            <span> {{ insxtarea.cantidad }} - {{ insxtarea.descripcion }} </span> 
+                                            <b>[{{ insxtarea.estado }}]</b>
+                                            {% if not loop.last %}<br></br>{% endif %}
                                         {% endfor %}
+                                    {% elseif item.tipoTarea.abreviatura == 'CE' %} 
+                                        {% set txt = item.descripcion|split('|')  %}
+                                        {{ txt[0] }}<br></br>
+                                        {{ (det.tipoRecambio=='OUT') ? txt[1]|raw : txt[2]|raw }}    
                                     {% else %}
                                         {{ item.descripcion|raw }}                         
                                     {% endif %}
                                 </td>
                             </tr> 
-                        {% endfor %}                                         
-                    </table>                      
+                        {% endfor %}                                                                                  
                 {% endif %}
-
+                </table> 
+                {% if app.user.rol.admin %}
                 <table extends="table_admin_info">
                     {% set table = ot %}
                     <tr>
@@ -269,12 +267,15 @@
                         {% endif %}
                     </tr>                                
                 </table>
-            </div>
+                {% endif %}    
+            </div>                                    
             
-
         {% endfor %}
-    {% endif %}    
-        
+    {% endfor %}
+    
+    {% endif %}
+    
+                          
     {% endfor %}
 {% endif %}
 

@@ -25,6 +25,9 @@ $(document).ready(function() {
     {% if not entity.insumo %}
     $('.searchInsumo').click();
     {% endif %} 
+    if( parseInt($('#label-stock small span').text()) === 0 ){
+        $('.btn-success').hide();
+    }
     $('body').on('click','.ckItem',function(){ 
         ck = $(this);
         item = $(this).data('id');
@@ -32,7 +35,14 @@ $(document).ready(function() {
             var insumo = data;
             $('#insumoId').val(insumo.id);
             $('#insumoDescripcion').html(insumo.nombre);
-            var neg = (insumo.stock<0)?'style="color:red"':'';
+            
+            if( insumo.stock <=0 ){
+                var neg = 'style="color:red"';
+                $('.btn-success').hide();
+            }else{
+                var neg = '';
+                $('.btn-success').show();
+            }
             var lblstock = '<small>STOCK: <span '+ neg +'>'+insumo.stock+'</span> </small>';
             $('#label-stock').html( lblstock );
         });

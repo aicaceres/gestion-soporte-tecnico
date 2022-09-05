@@ -1577,13 +1577,9 @@ class EquipoController extends Controller {
     public function actualizarValoresAction() {
         $em = $this->getDoctrine()->getManager();
         $em->getFilters()->disable('softdeleteable');
-        $valorizados = $em->getRepository('ConfigBundle:Valorizados')->findAll();
-        // arraycollection
+        $valorizados = $em->getRepository('ConfigBundle:Valorizados')->findByProcess(0);
         $resultado = new ArrayCollection();
-        //$total = 0;
         try {
-            $em->getConnection()->beginTransaction();
-
             foreach ($valorizados as $item) {
                 $cotiz = $item->getCotizacion();
                 $usd = $item->getValorusd();
@@ -1591,9 +1587,6 @@ class EquipoController extends Controller {
                 $equipos = $em->getRepository('AppBundle:Equipo')->findByTipoMarcaModelo($item->getTipo(), $item->getMarca(), $modelo->getId());
                 //echo 'Equipos: ' . count($equipos) . '<br>';
                 foreach ($equipos as $eq) {
-
-                    //$aux = clone($eq);
-                    //$eq->setVerificado(0);
                     if ($eq->getUbicacionActual()->getEdificio()) {
                         if ($eq->getPrecioEquipo() == 0 && $eq->getPrecio() == 0 && $item->getEdifId() == $eq->getUbicacionActual()->getEdificio()->getId()) {
                             //echo ' - ' . $eq->getId() . ' ' . $eq->getPrecioEquipo() . ' ' . $eq->getPrecioDolares() . ' ' . $eq->getUbicacionActual()->getTextoParaBienes() . ' Edif:' . $eq->getUbicacionActual()->getEdificio()->getId() . '<br>';
@@ -1601,24 +1594,26 @@ class EquipoController extends Controller {
                             $eq->setCotizacionDolar($cotiz);
                             $moneda = $em->getRepository('ConfigBundle:Moneda')->find(2);
                             $eq->setMoneda($moneda);
+
+                            $item->setProcess(true);
+                            //$em->getConnection()->beginTransaction();
                             $em->persist($eq);
+                            $em->persist($item);
                             $em->flush();
-                            //echo $eq->getId() . '<br>';
-                            //$total++;
-                            //$aux->setVerificado(1);
+                            //$em->getConnection()->commit();
                             $resultado->add($eq);
                         }
                     }
                 }
             }
-            $em->getConnection()->commit();
+            //$em->getConnection()->commit();
             //echo 'fin';
             return $this->render('AppBundle:Equipo:valorizados.html.twig', array(
                         'resultado' => $resultado
             ));
         }
         catch (Exception $ex) {
-            $em->getConnection()->rollback();
+            //$em->getConnection()->rollback();
             return $this->render('AppBundle:Equipo:valorizados.html.twig', array(
                         'resultado' => $ex->getMessage()
             ));

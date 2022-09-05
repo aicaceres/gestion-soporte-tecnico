@@ -987,13 +987,13 @@ class CompraController extends Controller {
                 }
                 break;
         }
+        //$em->getFilters()->disable('softdeleteable');
         $session->set('filtro_compras_bienes', $filtro);
         $proveedores = $em->getRepository('AppBundle:Proveedor')->findBy(array(), array('nombre' => 'ASC'));
         $razonesSociales = $em->getRepository('ConfigBundle:Ubicacion')->findBy(array('razonSocial' => '1'), array('abreviatura' => 'ASC'));
         $tiposEquipo = $em->getRepository('ConfigBundle:Tipo')->findBy(array(), array('nombre' => 'ASC'));
 
         $datos = $this->getBienesEnStock($filtro, $em);
-        $em->getFilters()->disable('softdeleteable');
         return $this->render('AppBundle:Compra:bienes-en-stock.html.twig', array(
                     'datos' => $datos,
                     'proveedores' => $proveedores,
@@ -1058,6 +1058,7 @@ class CompraController extends Controller {
 
     private function getBienesEnStock($filtro, $em) {
         $entities = $em->getRepository('AppBundle:Compra')->getBienesEnStock($filtro);
+        $em->getFilters()->disable('softdeleteable');
         $desde = ($filtro['movDesde']) ? date('Ymd', strtotime($filtro['movDesde'])) : '';
         $hasta = ($filtro['movHasta']) ? date('Ymd', strtotime($filtro['movHasta'])) : '';
         $datos = array();
@@ -1135,7 +1136,7 @@ class CompraController extends Controller {
 
         switch ($request->get('_opFiltro')) {
             case 'limpiar':
-                $filtro = array('tipoReporte' => 'detalle', 'selTipos' => NULL, 'cotizacion' => 1,
+                $filtro = array('tipoReporte' => 'resumen', 'selTipos' => NULL, 'cotizacion' => 1,
                     'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'idPiso' => 0);
                 break;
             case 'buscar':
@@ -1167,7 +1168,7 @@ class CompraController extends Controller {
                     );
                 }
                 else {
-                    $filtro = array('tipoReporte' => 'detalle', 'selTipos' => NULL, 'cotizacion' => 1,
+                    $filtro = array('tipoReporte' => 'resumen', 'selTipos' => NULL, 'cotizacion' => 1,
                         'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'idPiso' => 0);
                 }
                 break;
