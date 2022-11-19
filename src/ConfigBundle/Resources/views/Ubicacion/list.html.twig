@@ -1,8 +1,8 @@
 {% if table == 'Departamento' %}
     {% set filtro = app.session.get('filtro_ubicacion') %}
-<div class="col-md-12">    
-<form id="searchform" class="form-horizontal" action="{{ path('configuracion_ubicacion',{ 'table': 'Departamento' }) }}" method="get" >    
-    <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/>        
+<div class="col-md-12">
+<form id="searchform" class="form-horizontal" action="{{ path('configuracion_ubicacion',{ 'table': 'Departamento' }) }}" method="get" >
+    <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/>
     <div class="form-group">
         <label class="col-sm-1 control-label">Ubicación:</label>
         <div class="col-sm-3">
@@ -10,41 +10,43 @@
                 <option value="0">Todos</option>
                 {%for ubic in ubicaciones %}
                     <option {%if ubic.id==filtro['idUbicacion']%} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>
-                {% endfor %} 
+                {% endfor %}
             </select>
-        </div>                          
+        </div>
         <label class="col-sm-1 control-label">Edificio:</label>
         <div class="col-sm-4">
             <select class="select2 form-control" name="idEdificio" id="selectEdificio">
                 <option value="0">Todos</option>
                 {%for ed in edificios %}
                     <option {%if ed.id==filtro['idEdificio']%} selected="selected" {%endif%} value="{{ed.id}}">{{ed.nombre}}</option>
-                {% endfor %}  
+                {% endfor %}
             </select>
-        </div>                          
-    </div>   
-</form>       
-</div>                
-{% endif %}   
+        </div>
+    </div>
+</form>
+</div>
+{% endif %}
 <table id="tablelist" class="table table-bordered table-hover">
     <thead>
         <tr>
-            <th class="no-sort">#</th>            
-            {% if table == 'Ubicacion' %}  
+            <th class="no-sort">#</th>
+            {% if table == 'Ubicacion' %}
                 <th>Nombre</th>
-                <th>Abreviatura</th> 
+                <th>Abreviatura</th>
             {% endif %}
-            {% if table == 'Edificio' %}  
-                <th>Ubicación</th> 
-                <th>Edificio</th> 
+            {% if table == 'Edificio' %}
+                <th>Ubicación</th>
+                <th>Edificio</th>
             {% endif %}
-            {% if table =='Departamento' %} 
-            <th>Ubicación</th> 
-            <th>Edificio</th>
-            <th>Departamento</th>
-            <th>Dirección</th> 
-            <th>Localidad</th>             
-            <th>Equipos Asignados</th>             
+            {% if table =='Departamento' %}
+                <th>Ubicación</th>
+                <th>Edificio</th>
+                <th>Departamento</th>
+                <th>Dirección</th>
+                <th>Localidad</th>
+                {% if app.user.rol.admin %}
+                    <th>Equipos Asignados</th>
+                {% endif %}
             {% endif %}
             <th class="no-sort thactions">
                 {% if app.user.access('configuracion_ubicacion') %}
@@ -57,21 +59,23 @@
         {% for entity in entities %}
             <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }} ">
                 <td>{{ entity.id }}</td>
-                {% if table == 'Ubicacion' %}  
+                {% if table == 'Ubicacion' %}
                     <td>{{ entity.nombre }}</td>
                     <td> {{ entity.abreviatura }}</td>
                 {% endif %}
-                {% if table == 'Edificio' %}  
-                    <td> {{ entity.ubicacion }}</td> 
-                    <td>{{ entity.nombre }}</td> 
+                {% if table == 'Edificio' %}
+                    <td> {{ entity.ubicacion }}</td>
+                    <td>{{ entity.nombre }}</td>
                 {% endif %}
-                {% if table =='Departamento' %} 
-                    <td> {{ entity.edificio.ubicacion }}</td> 
+                {% if table =='Departamento' %}
+                    <td> {{ entity.edificio.ubicacion }}</td>
                     <td> {{ entity.edificio}}</td>
-                    <td>{{ entity.nombre }}</td> 
-                    <td> {{ entity.direccion}}</td> 
-                    <td> {{ entity.localidad}}</td> 
-                    <td> {{ entity.cantidadEquipos}}</td>             
+                    <td>{{ entity.nombre }}</td>
+                    <td> {{ entity.direccion}}</td>
+                    <td> {{ entity.localidad}}</td>
+                    {% if app.user.rol.admin %}
+                        <td> {{ entity.cantidadEquipos}}</td>
+                    {% endif %}
                 {% endif %}
                 <td class="link-actions" {% if table=='Departamento' %} style="width:62px;text-align:center;"{% endif %}>
                     {% if app.user.access('configuracion_ubicacion') %}
@@ -94,4 +98,4 @@
             </tr>
         {% endfor %}
     </tbody>
-</table>    
+</table>
