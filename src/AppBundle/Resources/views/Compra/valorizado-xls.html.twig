@@ -70,7 +70,7 @@ table tr td, table tfoot th{ text-align: right;}
     {% endfor %}
 
     <tr>
-        <td colspan="9" height="20px" vertical-align="middle" text-align="right"> {{ items|length }} Equipos: </td>
+        <td colspan="9" height="20px" vertical-align="middle" text-align="right"> Equipos: {{ items|length }} </td>
         <td height="20px" vertical-align="middle" text-align="right"> {{ usd|number_format(2,'.',',') }}</td>
         <td height="20px" vertical-align="middle" text-align="right">  </td>
         <td height="20px" vertical-align="middle" text-align="right"> $ {{ pes|number_format(2,'.',',') }} </td>
@@ -89,8 +89,9 @@ table tr td, table tfoot th{ text-align: right;}
                 <th>Marca</th>
                 <th>Modelo</th>
                 <th>Cantidad</th>
-                <th>Valor Unitario USD</th>
+                <th>Unitario USD</th>
                 <th>Total USD</th>
+                <th>Unitario $</th>
                 <th>Total $</th>
         </tr>
         </thead>
@@ -106,15 +107,18 @@ table tr td, table tfoot th{ text-align: right;}
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.cantidad}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioDolares|number_format(2,'.',',') }}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{ item.totalDolares|number_format(2,'.',',') }}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioPesos|number_format(2,'.',',') }}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{ item.totalPesos|number_format(2,'.',',') }}</td>
         </tr>
     {% endfor %}
 
     <tr>
-        <td colspan="5" height="20px" vertical-align="middle" text-align="right"> {{ items|length }} Equipos: </td>
+        <td colspan="4" height="20px" vertical-align="middle" text-align="right"> Equipos: </td>
+        <td height="20px" vertical-align="middle" text-align="right"> {{ items|length }} </td>
+        <td height="20px" vertical-align="middle" text-align="right"> </td>
         <td height="20px" vertical-align="middle" text-align="right"> </td>
         <td height="20px" vertical-align="middle" text-align="right"> {{ usd|number_format(2,'.',',') }} </td>
-        <td height="20px" vertical-align="middle" text-align="right"> $ {{ pes|number_format(2,'.',',') }} </td>
+        <td height="20px" vertical-align="middle" text-align="right"> {{ pes|number_format(2,'.',',') }} </td>
     </tr>
 
         </tbody>

@@ -1331,11 +1331,13 @@ class CompraController extends Controller {
                 }
 
                 $precioDolares = $totalDolares / $cant;
+                $precioPesos = $totalPesos / $cant;
                 $entities[] = [
                     'tipo' => $tipo,
                     'marca' => $marca,
                     'modelo' => $modelo,
                     'cantidad' => $ent['cantidad'],
+                    'precioPesos' => $precioPesos,
                     'precioDolares' => $precioDolares,
                     'totalDolares' => $totalDolares,
                     'totalPesos' => $totalPesos
