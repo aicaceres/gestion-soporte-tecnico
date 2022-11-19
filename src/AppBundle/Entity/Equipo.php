@@ -100,6 +100,13 @@ class Equipo {
     private $fechaCompra;
 
     /**
+     * @var date $inicioVidaUtil
+     * @ORM\Column(name="inicio_vida_util", type="date", nullable=true)
+     * @Gedmo\Versioned()
+     */
+    private $inicioVidaUtil;
+
+    /**
      * @var string $nroOrdenCompra
      * @ORM\Column(name="nro_orden_compra", type="string", nullable=true)
      * @Gedmo\Versioned()
@@ -313,6 +320,8 @@ class Equipo {
         $fecha = '';
         if ($this->getOrdenesdetrabajo()) {
             foreach ($this->getOrdenesdetrabajo() as $ord) {
+                if ($fecha)
+                    break;
                 if ($ord->getTareas()) {
                     foreach ($ord->getTareas() as $tar) {
                         if (strpos($tar->getDescripcion(), '<strong>Operativo</strong>') !== false) {
@@ -1108,6 +1117,69 @@ class Equipo {
      */
     public function getMoneda() {
         return $this->moneda;
+    }
+
+    /**
+     * Set inicioVidaUtil
+     *
+     * @param \DateTime $inicioVidaUtil
+     * @return Equipo
+     */
+    public function setInicioVidaUtil($inicioVidaUtil) {
+        $this->inicioVidaUtil = $inicioVidaUtil;
+
+        return $this;
+    }
+
+    /**
+     * Get inicioVidaUtil
+     *
+     * @return \DateTime
+     */
+    public function getInicioVidaUtil() {
+        return $this->inicioVidaUtil;
+    }
+
+    /**
+     * Add ubicaciones
+     *
+     * @param \AppBundle\Entity\EquipoUbicacion $ubicaciones
+     * @return Equipo
+     */
+    public function addUbicacione(\AppBundle\Entity\EquipoUbicacion $ubicaciones) {
+        $this->ubicaciones[] = $ubicaciones;
+
+        return $this;
+    }
+
+    /**
+     * Remove ubicaciones
+     *
+     * @param \AppBundle\Entity\EquipoUbicacion $ubicaciones
+     */
+    public function removeUbicacione(\AppBundle\Entity\EquipoUbicacion $ubicaciones) {
+        $this->ubicaciones->removeElement($ubicaciones);
+    }
+
+    /**
+     * Add detcompra
+     *
+     * @param \AppBundle\Entity\RecepcionCompraDetalle $detcompra
+     * @return Equipo
+     */
+    public function addDetcompra(\AppBundle\Entity\RecepcionCompraDetalle $detcompra) {
+        $this->detcompra[] = $detcompra;
+
+        return $this;
+    }
+
+    /**
+     * Remove detcompra
+     *
+     * @param \AppBundle\Entity\RecepcionCompraDetalle $detcompra
+     */
+    public function removeDetcompra(\AppBundle\Entity\RecepcionCompraDetalle $detcompra) {
+        $this->detcompra->removeElement($detcompra);
     }
 
 }

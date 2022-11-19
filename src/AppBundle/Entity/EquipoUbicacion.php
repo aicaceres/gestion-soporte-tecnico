@@ -140,7 +140,17 @@ class EquipoUbicacion {
 
     public function getTexto() {
         if ($this->getDepartamento()) {
-            $cadena = $this->getDepartamento()->getEdificio()->getUbicacion()->getAbreviatura() . ' - ' . $this->getDepartamento()->getEdificio() . ' - ' . $this->getDepartamento() . ' - ' . $this->getPiso();
+            if ($this->getDepartamento()->getEdificio()) {
+                if ($this->getDepartamento()->getEdificio()->getUbicacion()) {
+                    $cadena = $this->getDepartamento()->getEdificio()->getUbicacion()->getAbreviatura() . ' - ' . $this->getDepartamento()->getEdificio() . ' - ' . $this->getDepartamento() . ' - ' . $this->getPiso();
+                }
+                else {
+                    $cadena = "Sin ubicacion - verificar!";
+                }
+            }
+            else {
+                $cadena = "Sin edificio - verificar!";
+            }
         }
         else {
             $cadena = 'Sin Departamento asignado';

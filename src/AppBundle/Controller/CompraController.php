@@ -317,7 +317,7 @@ class CompraController extends Controller {
     public function showAction($id) {
         UtilsController::haveAccess($this->getUser(), 'compra');
         $em = $this->getDoctrine()->getManager();
-        //$em->getFilters()->disable('softdeleteable');
+        $em->getFilters()->disable('softdeleteable');
         $entity = $em->getRepository('AppBundle:Compra')->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el registro de compra.');
@@ -1201,15 +1201,6 @@ class CompraController extends Controller {
                 );
                 $sub = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($data, $userId);
 
-                /* if ($ent['cantidad'] != count($sub)) {
-                  var_dump($ent['tipoId']);
-                  var_dump($ent['marcaId']);
-                  var_dump($ent['modeloId']);
-                  var_dump($ent['cantidad']);
-                  var_dump(count($sub));
-                  die;
-                  } */
-                //$dolares = [];
                 $cant = 0;
                 $totalDolares = $totalPesos = 0;
                 foreach ($sub as $item) {
@@ -1306,11 +1297,57 @@ class CompraController extends Controller {
         $em->getFilters()->disable('softdeleteable');
         if ($filtro['tipoReporte'] == 'detalle') {
             // informe detallado de equipos valorizados
-            $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoByCriteria($filtro);
+            $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($filtro, $userId);
         }
         else {
-            // informe sumariado por filtro: tipo - marca - modelo
+            $cotiz = floatval($filtro['cotizacion']);
+            $group = $em->getRepository('AppBundle:Equipo')->findValorizadoResumenByCriteria($filtro, $userId);
+
             $entities = null;
+            foreach ($group as $ent) {
+                $data = array(
+                    'selTipos' => array($ent['tipoId']),
+                    'idMarca' => $ent['marcaId'],
+                    'idModelo' => $ent['modeloId'],
+                    'idUbicacion' => $filtro['idUbicacion'],
+                    'idEdificio' => $filtro['idEdificio'],
+                    'idDepartamento' => $filtro['idDepartamento'],
+                    'idPiso' => $filtro['idPiso'],
+                );
+                $sub = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($data, $userId);
+
+                $cant = 0;
+                $totalDolares = $totalPesos = 0;
+                foreach ($sub as $item) {
+                    //$dolares[] = $item->getPrecioDolares($filtro['cotizacion']);
+                    $tipo = $item->getTipo()->getNombre();
+                    $marca = $item->getMarca()->getNombre();
+                    $modelo = $item->getModelo()->getNombre();
+                    $dolares = ($item->getMonedaEquipo() == '$') ? $item->getPrecioEquipo() / $cotiz : $item->getPrecioEquipo();
+                    $pesos = ($item->getMonedaEquipo() == 'U$S') ? $item->getPrecioEquipo() * $cotiz : $item->getPrecioEquipo();
+                    $totalDolares += $dolares;
+                    $totalPesos += $pesos;
+                    $cant++;
+                }
+
+                $precioDolares = $totalDolares / $cant;
+                $entities[] = [
+                    'tipo' => $tipo,
+                    'marca' => $marca,
+                    'modelo' => $modelo,
+                    'cantidad' => $ent['cantidad'],
+                    'precioDolares' => $precioDolares,
+                    'totalDolares' => $totalDolares,
+                    'totalPesos' => $totalPesos
+                ];
+                /* if ($precioDolares > 1) {
+                  echo $sub[0]->getTipo()->getNombre() . ' - ' . $sub[0]->getMarca()->getNombre() . ' - ' . $sub[0]->getModelo()->getNombre() . '<br>';
+                  var_dump($dolares);
+
+                  echo '<br>';
+                  echo 'preciodolares=' . $precioDolares . '<br>';
+                  } */
+            }
         }
         switch ($op) {
             /* case 'pdf':
@@ -1339,6 +1376,20 @@ class CompraController extends Controller {
                 $response->setContent($partial);
                 return $response;
         }
+    }
+
+    private function getTextoFiltro($em, $datos) {
+        $cadena = '';
+        if ($datos) {
+            foreach ($datos as $i => $dato) {
+                $texto = $em->getRepository('ConfigBundle:Tipo')->find($dato);
+                $cadena = $cadena . $texto;
+                if ($i < count($datos) - 1) {
+                    $cadena = $cadena . ' - ';
+                }
+            }
+        }
+        return $cadena;
     }
 
 }

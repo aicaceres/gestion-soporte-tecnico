@@ -21,7 +21,7 @@
                 <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Informe Valorizado de Equipos</h3>
                 
                 <div class="pull-right box-tools">                
-                    <form id="printform" name="printform" target="_blank" style="display: {% if filtro['tipoReporte']== 'detalle' %} inline-block {% else %} none {% endif %};" 
+                    <form id="printform" name="printform" target="_blank" style="display: {% if filtro['tipoReporte']== 'detalle' %} inline-block {% else %} inline-block {% endif %};" 
                           action="{{ path('print_compra_valorizado') }}" method="post">                        
                         <input type="hidden" id="searchterm" name="searchterm"/>
                         <input type="hidden" id="datalist" name="datalist"/>

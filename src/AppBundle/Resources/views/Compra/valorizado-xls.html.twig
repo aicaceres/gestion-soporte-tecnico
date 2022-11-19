@@ -40,8 +40,7 @@ table tr td, table tfoot th{ text-align: right;}
                 <th>Marca</th>                
                 <th>Modelo</th>                
                 <th>N° Serie</th>                
-                <th>Proveedor</th>
-                <th>Cod. Barra</th>                
+                <th>Proveedor</th>              
                 <th>Ubicación</th>                
                 <th>Estado</th>                
                 <th>Inicio Vida Útil</th>                
@@ -61,7 +60,6 @@ table tr td, table tfoot th{ text-align: right;}
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.modelo}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.nroSerie}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.proveedor}}</td>
-            <td height="20px" vertical-align="middle" padding-left="5px">{{item.barcode}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.ubicacionActual.texto}}</td>            
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.estado}}</td>            
             <td height="20px" vertical-align="middle" padding-left="5px">{% if item.fechaInstalacion %} {{ item.fechaInstalacion|date('d/m/Y') }} {% endif %}</td>            
@@ -81,6 +79,47 @@ table tr td, table tfoot th{ text-align: right;}
         </tbody>              
     </table>    
         
+        {% else %}
+    
+    <table cellspacing="0">
+        <thead>
+        <tr>
+                <th>#</th>
+                <th>Tipo</th>                
+                <th>Marca</th>                
+                <th>Modelo</th>                
+                <th>Cantidad</th>                
+                <th>Valor Unitario USD</th>
+                <th>Total USD</th>                
+                <th>Total $</th>                                    
+        </tr>        
+        </thead>
+        <tbody>
+        {% set usd, pes = 0,0 %}
+    {% for item in items %}
+        {% set usd, pes = usd + item.totalDolares , pes + item.totalPesos %}
+        <tr>
+            <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.tipo}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.marca}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.modelo}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{item.cantidad}}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioDolares|number_format(2,'.',',') }}</td>            
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.totalDolares|number_format(2,'.',',') }}</td>            
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.totalPesos|number_format(2,'.',',') }}</td>            
+        </tr>        
+    {% endfor %}
+    
+    <tr>
+        <td colspan="5" height="20px" vertical-align="middle" text-align="right"> {{ items|length }} Equipos: </td>
+        <td height="20px" vertical-align="middle" text-align="right"> {{ usd|number_format(2,'.',',') }} </td>
+        <td height="20px" vertical-align="middle" text-align="right"> </td>
+        <td height="20px" vertical-align="middle" text-align="right"> $ {{ pes|number_format(2,'.',',') }} </td>
+    </tr>
+    
+        </tbody>              
+    </table>            
+            
         {% endif %}
 
    </body>

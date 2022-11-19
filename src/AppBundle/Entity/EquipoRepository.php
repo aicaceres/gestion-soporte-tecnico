@@ -1139,8 +1139,8 @@ class EquipoRepository extends EntityRepository {
                 ->innerJoin('t.ordenTrabajoDetalles', 'otd')
                 ->innerJoin('otd.equipo', 'e')
                 ->where('e.id=' . $id)
-                ->andWhere('tt.abreviatura=' . "'RE'")
-                ->andWhere("t.descripcion LIKE '%Estado: <strong>Operativo</strong>%' ")
+                //->andWhere('tt.abreviatura=' . "'RE'")
+                ->andWhere("t.descripcion LIKE '%Operativo%' ")
                 ->orderBy('t.id', 'ASC')
                 ->setMaxResults(1);
         return $query->getQuery()->getOneOrNullResult();

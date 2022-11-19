@@ -7,7 +7,6 @@
                 <th class="no-sort">Modelo</th>
                 <th class="no-sort">N° Serie</th>
                 <th class="no-sort">Proveedor</th>
-                <th class="no-sort">Cod. Barra</th>
                 <th class="no-sort">Ubicación</th>
                 <th class="no-sort">Estado</th>
                 <th class="no-sort">Inicio Vida Útil</th>
@@ -26,7 +25,6 @@
                 <td>{{ entity.modelo }}</td>
                 <td>{{ entity.nroSerie }}</td>
                 <td>{{ entity.proveedor }}</td>
-                <td>{{ entity.barcode }}</td>
                 <td>{{ entity.ubicacionActual.texto }}</td>
                 <td>{{ entity.estado }}</td>
                 <td>{% if entity.fechaInstalacion %} {{ entity.fechaInstalacion|date('d/m/Y') }} {% endif %}</td>

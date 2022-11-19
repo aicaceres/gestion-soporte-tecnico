@@ -69,12 +69,12 @@ class InsumoReportesController extends Controller {
                 break;
         }
         $session->set('filtro_reportes_insumo', $filtro);
-        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findByDeletedAt(null);
         $edificios = null;
         $departamentos = null;
         $sectores = $em->getRepository('ConfigBundle:Departamento')->findAllOrdenados();
         if ($filtro['selUbicaciones']) {
-            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones']);
+            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $this->getUser()->getId());
             $sectores = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByUbicaciones($filtro['selUbicaciones']);
             if ($filtro['selEdificios']) {
                 $sectores = $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
@@ -104,12 +104,12 @@ class InsumoReportesController extends Controller {
         $filtro = $session->get('filtro_reportes_insumo');
         $tipoSalida = $request->get('tiposalida');
         $nombreReporte = $request->get('reporte');
-        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findAll();
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findByDeletedAt(null);
         $edificios = null;
         $departamentos = null;
         $sectores = $em->getRepository('ConfigBundle:Departamento')->findAllOrdenados();
         if ($filtro['selUbicaciones']) {
-            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones']);
+            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $this->getUser()->getId());
             $sectores = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByUbicaciones($filtro['selUbicaciones']);
             if ($filtro['selEdificios']) {
                 $sectores = $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
@@ -171,6 +171,9 @@ class InsumoReportesController extends Controller {
 
     private function getDatosReporteInsumoxSector($em, $filtro, $tiposInsumos, $sectores) {
         // Reporte por Sector, tipo incidencia y tipo de equipos
+        if ($em->getFilters()->isEnabled('softdeleteable')) {
+            $em->getFilters()->disable('softdeleteable');
+        }
         $movimientos = $em->getRepository('AppBundle:Stock')->getMovimientosInsumosParaSoporte($filtro);
 
         $recuento = $i = 0;
