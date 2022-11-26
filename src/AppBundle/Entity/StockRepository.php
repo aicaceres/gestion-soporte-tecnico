@@ -242,8 +242,8 @@ class StockRepository extends EntityRepository {
                     ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
-            $query->innerJoin('it.tarea', 't')
-                    ->innerJoin('t.ordenTrabajo', 'ot')
+            $query->innerJoin('it.tarea', 'ta')
+                    ->innerJoin('ta.ordenTrabajo', 'ot')
                     ->innerJoin('ot.requerimiento', 'r')
                     ->innerJoin('r.solicitante', 's')
                     ->innerJoin('s.edificio', 'e')
@@ -253,7 +253,7 @@ class StockRepository extends EntityRepository {
             if ($filtro['selEdificios']) {
                 $query->andWhere('e.id IN (:edificios)')
                         ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
-                ;
+
                 if ($filtro['selDepartamento']) {
                     $query->andWhere(' s.id IN (:deptos)')
                             ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);

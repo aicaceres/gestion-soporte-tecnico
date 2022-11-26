@@ -1,0 +1,93 @@
+{% extends "dataTableList.html.twig" %}
+{% block avanzu_admin_menumode %}sidebar-collapse sidebar-open {% endblock %}
+{% block page_content %}
+{% include "notification.html.twig" %}    
+<style>
+    table.equipolist tbody td:not(.tdnormal){
+        font-size: 12px !important ;
+    }
+    #filterData span, #summaryData span{
+        font-size: 12px;
+        padding: 3px 10px;
+    }
+    .periodo-compra{
+        display:inline-block;
+    }
+    table.equipolist tbody td.plus,table.equipolist tbody th.plus{
+        vertical-align: middle;
+        text-align: center;
+        color: gray;
+        padding:0;
+    }
+</style>
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; Listado Completo de Equipos </h3>                         
+            </div><!-- /.box-header -->
+            <div class='box-body'>   
+                <div class="box-body table-responsive" style="padding: 15px" >
+                    <table id="tablelist" class="table table-bordered table-hover adminlist" style="font-size:12px">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>N° Serie</th>
+                                <th>Cod. Barra</th>
+                                <th>Descripción</th>
+                                <th>Marca</th>
+                                <th>Modelo</th>
+                                <th>Estado</th>
+                                <th>Ubicación</th>
+                                <th>Edificio - Dpto - Piso</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for eq in equipos %}    
+                                {% set actual = eq.ubicacionActual %}
+                            <tr class="{{ eq.deletedAt is null ? "" : "deleted" }}" >
+                                <td>{{ eq.tipo }}</td>
+                                <td>{{ eq.nroSerie }}</td>
+                                <td>{{ eq.barcode }}</td>
+                                <td>{{ eq.nombre }}</td>
+                                <td>{{ eq.marca }}</td>
+                                <td>{{ eq.modelo }}</td>
+                                <td>{{ eq.estado }}</td>
+                                <td>{% if actual.ubicacion and actual.ubicacion.deletedAt is null %} {{ actual.ubicacion }} {% endif %}</td>
+                                <td>
+                                    {% if actual.ubicacion and actual.ubicacion.deletedAt is null %}
+                                        {% if actual.departamento and actual.departamento.deletedAt is null %}
+                                            {% if actual.departamento.edificio and actual.departamento.edificio.deletedAt is null %}
+                                                {{ actual.departamento.edificio }} -
+                                            {% endif %}    
+                                            {{ actual.departamento }} -
+                                            {{ actual.piso }}
+                                        {% endif %}    
+                                     
+                                    {% endif %}
+                                
+                                </td>
+                                <td> 
+                                    <a href="{{ path('equipo_edit', { 'id': eq.id }) }}" target='_blank' data-toggle="tooltip" title="Ver"><i class="fa fa-edit"></i></a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>                        
+                    </table>
+                    <br>
+                    
+                </div>
+
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">         
+$(document).ready(function() {    
+   
+</script>    
+{% endblock %}

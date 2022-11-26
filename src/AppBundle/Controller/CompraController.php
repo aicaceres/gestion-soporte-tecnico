@@ -1136,7 +1136,7 @@ class CompraController extends Controller {
 
         switch ($request->get('_opFiltro')) {
             case 'limpiar':
-                $filtro = array('tipoReporte' => 'resumen', 'selTipos' => NULL, 'cotizacion' => 1,
+                $filtro = array('tipoReporte' => 'resumen', 'selTipos' => NULL, 'cotizacion' => 1, 'antiguedad' => NULL,
                     'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'idPiso' => 0);
                 break;
             case 'buscar':
@@ -1150,6 +1150,7 @@ class CompraController extends Controller {
                     'idDepartamento' => $request->get('idDepartamento'),
                     'idPiso' => $request->get('idPiso'),
                     'cotizacion' => $request->get('cotizacion'),
+                    'antiguedad' => $request->get('antiguedad'),
                 );
                 break;
             default:
@@ -1165,10 +1166,11 @@ class CompraController extends Controller {
                         'idDepartamento' => $sessionFiltro['idDepartamento'],
                         'idPiso' => $sessionFiltro['idPiso'],
                         'cotizacion' => $sessionFiltro['cotizacion'],
+                        'antiguedad' => $sessionFiltro['antiguedad'],
                     );
                 }
                 else {
-                    $filtro = array('tipoReporte' => 'resumen', 'selTipos' => NULL, 'cotizacion' => 1,
+                    $filtro = array('tipoReporte' => 'resumen', 'selTipos' => NULL, 'cotizacion' => 1, 'antiguedad' => NULL,
                         'idMarca' => 0, 'idModelo' => 0, 'idUbicacion' => 0, 'idEdificio' => 0, 'idDepartamento' => 0, 'idPiso' => 0);
                 }
                 break;
@@ -1183,6 +1185,14 @@ class CompraController extends Controller {
         if ($filtro['tipoReporte'] == 'detalle') {
             // informe detallado de equipos valorizados
             $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($filtro, $userId);
+            if ($filtro['antiguedad'] !== '') {
+                foreach ($entities as $key => $entity) {
+                    $antig = explode(' ', $entity->getAntiguedad());
+                    if ($filtro['antiguedad'] !== $antig[0]) {
+                        unset($entities[$key]);
+                    }
+                }
+            }
         }
         else {
             // informe sumariado por filtro: tipo - marca - modelo
@@ -1290,6 +1300,7 @@ class CompraController extends Controller {
             'modelo' => $modelo ? $modelo->getNombre() : 'Todos',
             'ubicacion' => $ubicacion ? $ubicacion->getAbreviatura() : 'Todas',
             'cotizacion' => $filtro['cotizacion'],
+            'antiguedad' => $filtro['antiguedad'],
             'tipoReporte' => $filtro['tipoReporte']);
 
         $hoy = new \DateTime();
@@ -1298,6 +1309,14 @@ class CompraController extends Controller {
         if ($filtro['tipoReporte'] == 'detalle') {
             // informe detallado de equipos valorizados
             $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($filtro, $userId);
+            if ($filtro['antiguedad'] !== '') {
+                foreach ($entities as $key => $entity) {
+                    $antig = explode(' ', $entity->getAntiguedad());
+                    if ($filtro['antiguedad'] !== $antig[0]) {
+                        unset($entities[$key]);
+                    }
+                }
+            }
         }
         else {
             $cotiz = floatval($filtro['cotizacion']);

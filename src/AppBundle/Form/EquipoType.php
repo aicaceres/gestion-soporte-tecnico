@@ -36,6 +36,8 @@ class EquipoType extends AbstractType {
                   'attr' => array('class' => 'datepicker'))) */
                 ->add('fechaCompra', 'date', array('widget' => 'single_text', 'label' => 'Fecha Compra:',
                     'format' => 'dd-MM-yyyy', 'required' => false))
+                ->add('inicioVidaUtil', 'date', array('widget' => 'single_text', 'label' => 'Vida Útil:',
+                    'format' => 'dd-MM-yyyy', 'required' => false))
                 ->add('nroOrdenCompra', null, array('label' => 'N° O.C.:'))
                 ->add('nroFactura', null, array('label' => 'N° Factura:'))
                 ->add('nroRemito', null, array('label' => 'N° Remito:'))

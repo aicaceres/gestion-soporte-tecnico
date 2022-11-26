@@ -409,6 +409,10 @@ class EquipoController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el equipo.');
         }
+        if (!$entity->getInicioVidaUtil()) {
+            $entity->setInicioVidaUtil($entity->getVidaUtil());
+        }
+
         // Si no tiene ubicaciÃ³n actual
         $reubicacion = ( count($entity->getUbicaciones()) > 0 ) ? TRUE : FALSE;
 
@@ -1618,6 +1622,21 @@ class EquipoController extends Controller {
                         'resultado' => $ex->getMessage()
             ));
         }
+    }
+
+    /**
+     * @Route("/getAdminList", name="get_admin_list")
+     * @Method("GET")
+     */
+    public function getAdminListAction() {
+        if (!$this->getUser()->getRol()->getAdmin()) {
+            throw new AccessDeniedException('No posee permiso para acceder a esta página!');
+        }
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+        //$equipos = $em->getRepository('AppBundle:Equipo')->findBy($criteria, $orderBy = null, $limit = null, $offset = null);
+        $equipos = $em->getRepository('AppBundle:Equipo')->findAll();
+        return $this->render('AppBundle:Equipo:admin-list.html.twig', array('equipos' => $equipos));
     }
 
 }

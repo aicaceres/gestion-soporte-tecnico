@@ -9,7 +9,7 @@
                 <th class="no-sort">Proveedor</th>
                 <th class="no-sort">Ubicación</th>
                 <th class="no-sort">Estado</th>
-                <th class="no-sort">Inicio Vida Útil</th>
+                <th class="no-sort">Antigüedad</th>
                 <th class="no-sort">Valor USD</th>
                 <th class="no-sort">Cotiz. USD</th>
                 <th class="no-sort">Valor $</th>
@@ -27,7 +27,11 @@
                 <td>{{ entity.proveedor }}</td>
                 <td>{{ entity.ubicacionActual.texto }}</td>
                 <td>{{ entity.estado }}</td>
-                <td>{% if entity.fechaInstalacion %} {{ entity.fechaInstalacion|date('d/m/Y') }} {% endif %}</td>
+                <td style="text-align:center;padding-right: 10px">
+                    {% if entity.antiguedad %} {{ entity.antiguedad }} {% endif %}
+                    {% if entity.vidaUtil  %} <i class="fa fa-calendar-o pull-right" title="{{ entity.vidaUtil|date('d/m/Y') }}"></i> {% endif %}
+                
+                </td>
                 <td style="text-align:right;padding-right: 10px" > {{ entity.precioDolares(filtro['cotizacion'])|number_format(2,'.',',') }} </td>
                 <td style="text-align:right;padding-right: 10px" > {{ entity.cotizacionEquipo(filtro['cotizacion'])|number_format(2,'.',',') }} </td>
                 <td style="text-align:right;padding-right: 10px">{{ entity.precioPesos|number_format(2,'.',',') }}</td>

@@ -36,14 +36,14 @@ class UtilsController extends Controller {
     }
 
     /// PARA FECHAS
-    public static function toAnsiDate($value) {
+    public static function toAnsiDate($value, $sep = '-') {
         if (is_array($value)) {
             $value = isset($value['text']) ? $value['text'] : null;
         }
-        if (strpos($value, '-') === false) {
+        if (strpos($value, $sep) === false) {
             return $value;
         }
-        $date = UtilsController::toArray($value);
+        $date = UtilsController::toArray($value, $sep);
 
         $ansi = $date['Y'] . '-' . $date['m'] . '-' . $date['d'];
         //$ansi .= isset($date['H']) ? ' '.$date['H'].':'.$date['i'].':'.$date['s'] : '';
@@ -107,11 +107,11 @@ class UtilsController extends Controller {
         return $fecha;
     }
 
-    public static function toArray($value) {
-        if (strpos($value, '-') === false) {
+    public static function toArray($value, $sep = '-') {
+        if (strpos($value, $sep) === false) {
             return array('Y' => '1969', 'm' => '01', 'd' => '01');
         }
-        $parts = explode('-', $value);
+        $parts = explode($sep, $value);
         $years = explode(' ', $parts[2]);
         //    $hours = isset($years[1]) ? explode(':',$years[1]) : null;
 
@@ -291,6 +291,13 @@ class UtilsController extends Controller {
         $salida = array('text' => utf8_decode('Test IP ' . $ip . chr(13) . ' ' . $resultado), 'estado' => $estado, 'bg' => $bg,
             'paquetesRecibidos' => $recibidos, 'tiempo' => $ms, 'resultado' => $resultado, 'salidaPing' => $salidaPing);
         return $salida;
+    }
+
+    public static function calculaAntiguedad($fecha) {
+        list($Y, $m, $d) = explode("-", $fecha->format("Y-m-d"));
+        $edad = date("md") < $m . $d ? date("Y") - $Y - 1 : date("Y") - $Y;
+        $txt = $edad . ($edad === 1 ? ' año' : ' años');
+        return $txt;
     }
 
 }

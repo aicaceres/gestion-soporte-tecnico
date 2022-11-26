@@ -24,8 +24,15 @@
     <div class='col-md-12'>
         <div class='box box-solid {{ box_color }}'>
             <div class='box-header'>
-                <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; Equipos</h3>
+                <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; Equipos  
+                    
+                </h3>
                 <div class="pull-right box-tools">
+                    
+                    {% if app.user.rol.admin %}
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ path('get_admin_list') }}" style="margin-right:30px"> LISTADO ADMIN</a>
+                    {% endif %}
+                                      
                     {% if app.user.access('view_logs') and entities|length>0 %}
                         <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
                                 data-id="" data-url="{{path('get_equipo_logs')}}"  >      <i class="fa fa-history"></i></button>  
@@ -67,8 +74,7 @@
                         <div class="col-md-12">
                         <h4 class="pull-left"  style="display:inline-block">Criterios de Filtro: </h4>                        
                         <button type="button" id="closefilter" style="margin-left: 10px" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Ocultar Filtros"> <i class="fa fa-chevron-up"></i> Ocultar </button>
-
-                        <button type="button" id="limpiarfiltros" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Limpiar Filtros"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                        <button type="button" id="limpiarfiltros" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Limpiar Filtros"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>                    
                         </div>
                         <div class="col-md-12 no-padding">
                             <fieldset>

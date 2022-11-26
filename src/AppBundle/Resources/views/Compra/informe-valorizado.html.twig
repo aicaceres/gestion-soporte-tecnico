@@ -89,6 +89,20 @@
                                     </select> 
                                 </div>
                             </div>
+                            <div class="col-md-2">
+                                <div class="form-group ">
+                                    <label class="required">Antigüedad:</label>
+                                    <select class="select2 form-control" name="antiguedad" id="selectAntiguedad">
+                                        <option value="" {%if filtro['antiguedad']== '' %} selected="selected" {%endif%}>Todos</option>
+                                        <option value="0" {%if filtro['antiguedad'] == '0' %} selected="selected" {%endif%}>Menos de 1 año</option>
+                                        <option value="1" {%if filtro['antiguedad'] == '1' %} selected="selected" {%endif%}>1 año</option>
+                                        {% for  i in 2..15 %}
+                                            <option value="{{ i }}" {%if i==filtro['antiguedad']%} selected="selected" {%endif%} >{{ i }} años</option>
+                                        {% endfor %} 
+                                    </select>                                 
+                                </div>
+                            </div>
+                           
                         </fieldset>
                         <fieldset>
                             <div class="col-md-2">

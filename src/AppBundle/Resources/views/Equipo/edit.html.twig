@@ -111,10 +111,8 @@
                                 <div class="col-md-3">
                                     {{ form_row(form.estado, { 'attr': {'class' : 'select2' } }) }}
                                     
-                                    {% if fechaInstalacion is defined %}
-                                        <small style="font-size:10px;">
-                                            <label>Inicio de vida útil: </label>{% if fechaInstalacion %} {{ fechaInstalacion|date('d/m/Y') }} {% endif %}
-                                        </small>
+                                    {% if entity.vidaUtil is defined %}           
+                                       {{ form_row(form.inicioVidaUtil) }}                                    
                                     {% endif %}                                    
                                 </div>
                             </fieldset>  
@@ -159,7 +157,8 @@
                                         <label>Precio ARG:</label> {{ entity.precioPesos|number_format(2,'.',',')}}  [ Cotiz U$S: {{ entity.cotizacionEquipo|number_format(2,'.',',') }} ]
                                         <label style="padding-left:10px;">Valorizado USD:</label> {{ entity.precioDolares|number_format(2,'.',',') }}
                                     </div>                                    
-                                {% endif %}    
+                                {% endif %}  
+                                
                             </fieldset>  
                         </div>  
                         <div class="col-md-2 no-padding">

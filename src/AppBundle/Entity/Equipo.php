@@ -6,6 +6,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use ConfigBundle\Controller\UtilsController;
 
 /**
  * AppBundle\Entity\Equipo
@@ -219,6 +220,21 @@ class Equipo {
 
     public function __toString() {
         return $this->nombre;
+    }
+
+    public function getAntiguedad() {
+        $adq = $this->getFechaAdquisicion() ? new \DateTime(UtilsController::toAnsiDate($this->getFechaAdquisicion(), '/')) : null;
+        $fecha = $this->getInicioVidaUtil() ? $this->getInicioVidaUtil() : $this->getFechaInstalacion() ? $this->getFechaInstalacion() : $adq;
+        if ($fecha) {
+            return UtilsController::calculaAntiguedad($fecha);
+        }
+        return null;
+    }
+
+    public function getVidaUtil() {
+        $adq = $this->getFechaAdquisicion() ? new \DateTime(UtilsController::toAnsiDate($this->getFechaAdquisicion(), '/')) : null;
+        $fecha = $this->getInicioVidaUtil() ? $this->getInicioVidaUtil() : $this->getFechaInstalacion() ? $this->getFechaInstalacion() : $adq;
+        return $fecha;
     }
 
     public function getTexto() {

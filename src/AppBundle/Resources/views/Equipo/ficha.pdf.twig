@@ -68,6 +68,13 @@
                     Proveedor: <strong>{{ eq.proveedor}}</strong>
                 </td>
                 <td extends="tdstd" width="15%">
+                    Inicio Vida Útil: <strong>{% if eq.vidaUtil %} {{ eq.vidaUtil|date('d-m-Y') }} {% endif %}</strong>
+                </td>                                                                        
+            </tr>                           
+        </table>
+        <table font-size="10px">
+            <tr>
+                <td extends="tdstd" width="15%">
                     Fecha compra: <strong>{% if eq.fechaCompra %} {{ eq.fechaCompra|date('d-m-Y') }} {% endif %}</strong>
                 </td>                            
                 <td extends="tdstd" width="15%">
