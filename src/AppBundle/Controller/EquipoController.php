@@ -1628,15 +1628,69 @@ class EquipoController extends Controller {
      * @Route("/getAdminList", name="get_admin_list")
      * @Method("GET")
      */
-    public function getAdminListAction() {
+    public function getAdminListAction(Request $request) {
         if (!$this->getUser()->getRol()->getAdmin()) {
             throw new AccessDeniedException('No posee permiso para acceder a esta página!');
         }
         $em = $this->getDoctrine()->getManager();
         $em->getFilters()->disable('softdeleteable');
-        //$equipos = $em->getRepository('AppBundle:Equipo')->findBy($criteria, $orderBy = null, $limit = null, $offset = null);
-        $equipos = $em->getRepository('AppBundle:Equipo')->findAll();
-        return $this->render('AppBundle:Equipo:admin-list.html.twig', array('equipos' => $equipos));
+        $estados = $em->getRepository('ConfigBundle:Estado')->findBy(array(), array('nombre' => 'ASC'));
+        $tipos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'E'), array('nombre' => 'ASC'));
+        $session = $this->get('session');
+        //$estadoDefault = $em->getRepository('ConfigBundle:Estado')->findOneByNombre('Operativo')->getId();
+        $sessionFiltro = $session->get('filtro_admin_list');
+        switch ($request->get('_opFiltro')) {
+            case 'limpiar':
+                $filtro = array('tipo' => 0, 'estado' => 0);
+                break;
+            case 'buscar':
+                $filtro = array(
+                    'tipo' => $request->get('tipo'),
+                    'estado' => ($request->get('estado') ? $request->get('estado') : 'T' ),
+                );
+                break;
+            default:
+                //desde paginacion, se usa session
+                if ($sessionFiltro) {
+                    $filtro = array(
+                        'tipo' => $sessionFiltro['tipo'],
+                        'estado' => ($sessionFiltro['estado']) ? $sessionFiltro['estado'] : 'T',
+                    );
+                }
+                else {
+                    $filtro = array('tipo' => 0, 'estado' => 'T');
+                }
+                break;
+        }
+        $array = array();
+        $session->set('filtro_admin_list', $filtro);
+        if ($filtro['tipo']) {
+            $array['tipo'] = $filtro['tipo'];
+        }
+        if ($filtro['estado'] !== 'T') {
+            $array['estado'] = $filtro['estado'];
+        }
+        $equipos = $em->getRepository('AppBundle:Equipo')->findBy($array);
+        return $this->render('AppBundle:Equipo:admin-list.html.twig', array('equipos' => $equipos, 'estados' => $estados, 'tipos' => $tipos));
+    }
+
+    /**
+     * @Route("/{id}/updateVidautil", name="update_vidautil")
+     * @Method("POST")
+     * @Template()
+     */
+    public function updateVidautilAction(Request $request, $id) {
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+        $fecha = $request->get('fecha');
+        $equipo = $em->getRepository('AppBundle:Equipo')->find($id);
+        if (!$equipo) {
+            return new JsonResponse('No se encuentra el equipo');
+        }
+        $equipo->setInicioVidaUtil(new \DateTime($fecha));
+        $em->persist($equipo);
+        $em->flush();
+        return new JsonResponse('OK');
     }
 
 }

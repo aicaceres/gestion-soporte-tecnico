@@ -233,7 +233,7 @@ class Equipo {
 
     public function getVidaUtil() {
         $adq = $this->getFechaAdquisicion() ? new \DateTime(UtilsController::toAnsiDate($this->getFechaAdquisicion(), '/')) : null;
-        $fecha = $this->getInicioVidaUtil() ? $this->getInicioVidaUtil() : $this->getFechaInstalacion() ? $this->getFechaInstalacion() : $adq;
+        $fecha = $this->getInicioVidaUtil() ? $this->getInicioVidaUtil() : ($this->getFechaInstalacion() ? $this->getFechaInstalacion() : $adq);
         return $fecha;
     }
 

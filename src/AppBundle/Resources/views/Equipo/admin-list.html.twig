@@ -1,93 +1,158 @@
 {% extends "dataTableList.html.twig" %}
 {% block avanzu_admin_menumode %}sidebar-collapse sidebar-open {% endblock %}
 {% block page_content %}
-{% include "notification.html.twig" %}    
-<style>
-    table.equipolist tbody td:not(.tdnormal){
-        font-size: 12px !important ;
-    }
-    #filterData span, #summaryData span{
-        font-size: 12px;
-        padding: 3px 10px;
-    }
-    .periodo-compra{
-        display:inline-block;
-    }
-    table.equipolist tbody td.plus,table.equipolist tbody th.plus{
-        vertical-align: middle;
-        text-align: center;
-        color: gray;
-        padding:0;
-    }
-</style>
-<div class='row'>
-    <div class='col-md-12'>
-        <div class='box box-solid {{ box_color }}'>
-            <div class='box-header'>
-                <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; Listado Completo de Equipos </h3>                         
-            </div><!-- /.box-header -->
-            <div class='box-body'>   
-                <div class="box-body table-responsive" style="padding: 15px" >
-                    <table id="tablelist" class="table table-bordered table-hover adminlist" style="font-size:12px">
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>N° Serie</th>
-                                <th>Cod. Barra</th>
-                                <th>Descripción</th>
-                                <th>Marca</th>
-                                <th>Modelo</th>
-                                <th>Estado</th>
-                                <th>Ubicación</th>
-                                <th>Edificio - Dpto - Piso</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for eq in equipos %}    
-                                {% set actual = eq.ubicacionActual %}
-                            <tr class="{{ eq.deletedAt is null ? "" : "deleted" }}" >
-                                <td>{{ eq.tipo }}</td>
-                                <td>{{ eq.nroSerie }}</td>
-                                <td>{{ eq.barcode }}</td>
-                                <td>{{ eq.nombre }}</td>
-                                <td>{{ eq.marca }}</td>
-                                <td>{{ eq.modelo }}</td>
-                                <td>{{ eq.estado }}</td>
-                                <td>{% if actual.ubicacion and actual.ubicacion.deletedAt is null %} {{ actual.ubicacion }} {% endif %}</td>
-                                <td>
-                                    {% if actual.ubicacion and actual.ubicacion.deletedAt is null %}
-                                        {% if actual.departamento and actual.departamento.deletedAt is null %}
-                                            {% if actual.departamento.edificio and actual.departamento.edificio.deletedAt is null %}
-                                                {{ actual.departamento.edificio }} -
-                                            {% endif %}    
-                                            {{ actual.departamento }} -
-                                            {{ actual.piso }}
-                                        {% endif %}    
-                                     
-                                    {% endif %}
-                                
-                                </td>
-                                <td> 
-                                    <a href="{{ path('equipo_edit', { 'id': eq.id }) }}" target='_blank' data-toggle="tooltip" title="Ver"><i class="fa fa-edit"></i></a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>                        
-                    </table>
-                    <br>
-                    
-                </div>
+    {% include "notification.html.twig" %}    
+    <style>
+        table.equipolist tbody td:not(.tdnormal){
+            font-size: 12px !important ;
+        }
+        #filterData span, #summaryData span{
+            font-size: 12px;
+            padding: 3px 10px;
+        }
+        .periodo-compra{
+            display:inline-block;
+        }
+        table.equipolist tbody td.plus,table.equipolist tbody th.plus{
+            vertical-align: middle;
+            text-align: center;
+            color: gray;
+            padding:0;
+        }
+    </style>
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{ box_color }}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; Listado Completo de Equipos </h3>                         
+                </div><!-- /.box-header -->
+                <div class='box-body'>   
+                    {% set filtro = app.session.get('filtro_admin_list') %}
+                    <form id="searchform" action="{{ path('get_admin_list') }}" method="get" >
+                        <div class="col-md-12 no-padding">
+                            <fieldset>
+                                <div class="col-md-4">
+                                    <div class="form-group ">
+                                        <label class="required">Tipos:</label>
+                                        <select class="select2 form-control" name="tipo" id="selectTipo">
+                                            <option value="0">Todos</option>
+                                            {%for tipo in tipos %}
+                                                <option {%if tipo.id == filtro['tipo']%} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>                                
+                                <div class="col-md-4">
+                                    <div class="form-group ">
+                                        <label class="required">Estado:</label>
+                                        <select class="select2 form-control" name="estado" id="selectEstado">
+                                            <option value="T" {%if filtro['estado']=='T' %} selected="selected" {%endif%}>Todos</option>
+                                            {%for estado in estados %}
+                                                <option {%if estado.id==filtro['estado']%} selected="selected" {%endif%} value="{{estado.id}}">{{estado.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>  
+                        <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/>
+                    </form>    
+                    <div class="box-body table-responsive" style="padding: 15px" >
+                        <table id="tablelist" class="table table-bordered table-hover adminlist" style="font-size:12px">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>N° Serie</th>
+                                    <th>Cod. Barra</th>
+                                    <th>Descripción</th>
+                                    <th>Marca</th>
+                                    <th>Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Inicio Vida Útil</th>
+                                    <th>Ubicación</th>
+                                    <th>Edificio - Dpto - Piso</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos %}    
+                                    {% set actual = eq.ubicacionActual %}
+                                    <tr class="{{ eq.deletedAt is null ? "" : "deleted" }}" >
+                                        <td>{{ eq.tipo }}</td>
+                                        <td>{{ eq.nroSerie }}</td>
+                                        <td>{{ eq.barcode }}</td>
+                                        <td>{{ eq.nombre }}</td>
+                                        <td>{{ eq.marca }}</td>
+                                        <td>{{ eq.modelo }}</td>
+                                        <td>{{ eq.estado }}</td>
+                                        <td style="text-align:center;">
+                                            {% if eq.vidaUtil and not eq.deletedAt %}  
+                                                {{  eq.vidaUtil|date('d-m-Y')  }} 
+                                            {% else %} 
+                                                <input class="update-vidautil" data-id="{{ eq.id }}" data-url="{{ path('update_vidautil',{id : eq.id}) }}" value="{{ eq.vidaUtil }}" autocomplete="off" style="width:100px"/>                                       
+                                            {% endif %} </td>
+                                        <td>{% if actual.ubicacion and actual.ubicacion.deletedAt is null %} {{ actual.ubicacion }} {% endif %}</td>
+                                        <td>
+                                            {% if actual.ubicacion and actual.ubicacion.deletedAt is null %}
+                                                {% if actual.departamento and actual.departamento.deletedAt is null %}
+                                                    {% if actual.departamento.edificio and actual.departamento.edificio.deletedAt is null %}
+                                                        {{ actual.departamento.edificio }} -
+                                                    {% endif %}    
+                                                    {{ actual.departamento }} -
+                                                    {{ actual.piso }}
+                                                {% endif %}    
 
-            </div>
-        </div><!-- /.box -->
-    </div><!-- /.col-->
-</div><!-- ./row -->
+                                            {% endif %}
+
+                                        </td>
+                                        <td> 
+                                            <a href="{{ path('equipo_edit', { 'id': eq.id }) }}" target='_blank' data-toggle="tooltip" title="Ver"><i class="fa fa-edit"></i></a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>                        
+                        </table>
+                        <br>
+
+                    </div>
+
+                </div>
+            </div><!-- /.box -->
+        </div><!-- /.col-->
+    </div><!-- ./row -->
 {% endblock %}
 {% block javascripts_inline %}   
     {{parent()}}
-<script type="text/javascript">         
-$(document).ready(function() {    
-   
-</script>    
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.select2').on('select2:select', function () {
+                $('#searchform').submit();
+            });
+            $('.update-vidautil').datepicker();
+            $('.update-vidautil').on('change', function () {
+                var fecha = $(this);
+                if (fecha.val()) {
+                    var parent = $(this).parent();
+                    var data = { fecha: fecha.val() };
+                    $.ajax({
+                        type: 'POST',
+                        url: $(this).data('url'),
+                        data: data,
+                        success: function (data) {
+                            if (data === 'OK') {
+                                parent.html( fecha.val());
+                            } else {
+                                fecha.val('');
+                                alert(data);
+                            }
+                        }
+                    });
+
+                }
+
+            });
+
+
+        });
+    </script>    
 {% endblock %}
