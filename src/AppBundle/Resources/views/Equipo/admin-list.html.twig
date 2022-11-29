@@ -71,6 +71,7 @@
                                     <th>Inicio Vida Útil</th>
                                     <th>Ubicación</th>
                                     <th>Edificio - Dpto - Piso</th>
+                                    <th>Eliminar</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -89,7 +90,7 @@
                                             {% if eq.vidaUtil and not eq.deletedAt %}  
                                                 {{  eq.vidaUtil|date('d-m-Y')  }} 
                                             {% else %} 
-                                                <input class="update-vidautil" data-id="{{ eq.id }}" data-url="{{ path('update_vidautil',{id : eq.id}) }}" value="{{ eq.vidaUtil }}" autocomplete="off" style="width:100px"/>                                       
+                                                <input class="update-vidautil" data-id="{{ eq.id }}" data-url="{{ path('update_vidautil',{id : eq.id}) }}"  autocomplete="off" style="width:100px"/>                                       
                                             {% endif %} </td>
                                         <td>{% if actual.ubicacion and actual.ubicacion.deletedAt is null %} {{ actual.ubicacion }} {% endif %}</td>
                                         <td>
@@ -105,6 +106,7 @@
                                             {% endif %}
 
                                         </td>
+                                        <td><input type="checkbox" class="update-eliminar" data-id="{{ eq.id }}" data-url="{{ path('update_eliminar',{id : eq.id}) }}" {{ eq.eliminar ? 'checked="checked"' : '' }} /></td>
                                         <td> 
                                             <a href="{{ path('equipo_edit', { 'id': eq.id }) }}" target='_blank' data-toggle="tooltip" title="Ver"><i class="fa fa-edit"></i></a>
                                         </td>
@@ -133,14 +135,14 @@
                 var fecha = $(this);
                 if (fecha.val()) {
                     var parent = $(this).parent();
-                    var data = { fecha: fecha.val() };
+                    var data = {fecha: fecha.val()};
                     $.ajax({
                         type: 'POST',
                         url: $(this).data('url'),
                         data: data,
                         success: function (data) {
                             if (data === 'OK') {
-                                parent.html( fecha.val());
+                                parent.html(fecha.val());
                             } else {
                                 fecha.val('');
                                 alert(data);
@@ -151,8 +153,26 @@
                 }
 
             });
-
+            $('.update-eliminar').on('ifChecked', function (e) {
+                url = $(this).data('url');
+                changeEliminar(url, true);
+            });
+            $('.update-eliminar').on('ifUnchecked', function () {
+                url = $(this).data('url');
+                changeEliminar(url, false);
+            });
 
         });
+        function changeEliminar(url, check) {
+            var data = {eliminar: check};
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: data,
+                success: function (data) {
+                    console.log(data);
+                }
+            });
+        }
     </script>    
 {% endblock %}

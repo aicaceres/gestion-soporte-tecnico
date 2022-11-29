@@ -158,6 +158,12 @@ class Equipo {
     protected $verificado = false;
 
     /**
+     * @ORM\Column(name="eliminar", type="boolean", nullable=true)
+     * @Gedmo\Versioned()
+     */
+    protected $eliminar = false;
+
+    /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\RequerimientoDetalle", mappedBy="equipo",cascade={"remove"})
      */
     protected $requerimientos;
@@ -951,6 +957,27 @@ class Equipo {
      */
     public function getVerificado() {
         return $this->verificado;
+    }
+
+    /**
+     * Set eliminar
+     *
+     * @param boolean $eliminar
+     * @return Equipo
+     */
+    public function setEliminar($eliminar) {
+        $this->eliminar = $eliminar;
+
+        return $this;
+    }
+
+    /**
+     * Get eliminar
+     *
+     * @return boolean
+     */
+    public function getEliminar() {
+        return $this->eliminar;
     }
 
     /**

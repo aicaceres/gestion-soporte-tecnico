@@ -61,9 +61,9 @@ class UbicacionController extends Controller {
     public function indexAction(Request $request, $table) {
         UtilsController::haveAccess($this->getUser(), 'configuracion_ubicacion');
         $em = $this->getDoctrine()->getManager();
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $em->getFilters()->disable('softdeleteable');
-        }
+        /* if ($this->getUser()->getRol()->getAdmin()) {
+          $em->getFilters()->disable('softdeleteable');
+          } */
         $ubicaciones = $edificios = NULL;
         if ($table == 'Departamento') {
             $session = $this->get('session');

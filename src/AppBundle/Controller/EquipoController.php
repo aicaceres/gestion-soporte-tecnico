@@ -1637,7 +1637,7 @@ class EquipoController extends Controller {
         $estados = $em->getRepository('ConfigBundle:Estado')->findBy(array(), array('nombre' => 'ASC'));
         $tipos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'E'), array('nombre' => 'ASC'));
         $session = $this->get('session');
-        //$estadoDefault = $em->getRepository('ConfigBundle:Estado')->findOneByNombre('Operativo')->getId();
+        $estadoDefault = $em->getRepository('ConfigBundle:Estado')->findOneByNombre('Operativo')->getId();
         $sessionFiltro = $session->get('filtro_admin_list');
         switch ($request->get('_opFiltro')) {
             case 'limpiar':
@@ -1646,7 +1646,7 @@ class EquipoController extends Controller {
             case 'buscar':
                 $filtro = array(
                     'tipo' => $request->get('tipo'),
-                    'estado' => ($request->get('estado') ? $request->get('estado') : 'T' ),
+                    'estado' => ($request->get('estado') ? $request->get('estado') : $estadoDefault ),
                 );
                 break;
             default:
@@ -1654,11 +1654,11 @@ class EquipoController extends Controller {
                 if ($sessionFiltro) {
                     $filtro = array(
                         'tipo' => $sessionFiltro['tipo'],
-                        'estado' => ($sessionFiltro['estado']) ? $sessionFiltro['estado'] : 'T',
+                        'estado' => ($sessionFiltro['estado']) ? $sessionFiltro['estado'] : $estadoDefault,
                     );
                 }
                 else {
-                    $filtro = array('tipo' => 0, 'estado' => 'T');
+                    $filtro = array('tipo' => 0, 'estado' => $estadoDefault);
                 }
                 break;
         }
@@ -1691,6 +1691,24 @@ class EquipoController extends Controller {
         $em->persist($equipo);
         $em->flush();
         return new JsonResponse('OK');
+    }
+
+    /**
+     * @Route("/{id}/updateEliminar", name="update_eliminar")
+     * @Method("POST")
+     * @Template()
+     */
+    public function updateEliminarAction(Request $request, $id) {
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+        $equipo = $em->getRepository('AppBundle:Equipo')->find($id);
+        if (!$equipo) {
+            return new JsonResponse('No se encuentra el equipo');
+        }
+        $equipo->setEliminar(json_decode($request->get('eliminar')));
+        $em->persist($equipo);
+        $em->flush();
+        return new JsonResponse($request->get('eliminar'));
     }
 
 }
