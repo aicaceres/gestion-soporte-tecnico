@@ -8,6 +8,7 @@
                 <th class="no-sort">Cantidad</th>
                 <th class="no-sort">Valor Unitario USD</th>
                 <th class="no-sort">Total USD</th>
+                <th class="no-sort">Valor Unitario $</th>
                 <th class="no-sort">Total $</th>
             </tr>
         </thead>
@@ -22,6 +23,7 @@
                     <td>{{ entity.cantidad }}</td>                    
                     <td style="text-align:right;padding-right: 10px" > {{ entity.precioDolares|number_format(2,'.',',') }} </td>
                     <td style="text-align:right;padding-right: 10px" > {{ entity.totalDolares|number_format(2,'.',',') }} </td>
+                    <td style="text-align:right;padding-right: 10px" > {{ entity.precioPesos|number_format(2,'.',',') }} </td>
                     <td style="text-align:right;padding-right: 10px"> {{ entity.totalPesos|number_format(2,'.',',') }} </td>
                 </tr>    
             {% endfor %}

@@ -140,20 +140,35 @@ class EquipoUbicacion {
 
     public function getTexto() {
         if ($this->getDepartamento()) {
-            if ($this->getDepartamento()->getEdificio()) {
-                if ($this->getDepartamento()->getEdificio()->getUbicacion()) {
-                    $cadena = $this->getDepartamento()->getEdificio()->getUbicacion()->getAbreviatura() . ' - ' . $this->getDepartamento()->getEdificio() . ' - ' . $this->getDepartamento() . ' - ' . $this->getPiso();
+            if (!$this->getDepartamento()->getDeletedAt()) {
+                if ($this->getDepartamento()->getEdificio()) {
+                    if (!$this->getDepartamento()->getEdificio()->getDeletedAt()) {
+                        if ($this->getDepartamento()->getEdificio()->getUbicacion()) {
+                            if (!$this->getDepartamento()->getEdificio()->getUbicacion()->getDeletedAt()) {
+                                $cadena = $this->getDepartamento()->getEdificio()->getUbicacion()->getAbreviatura() . ' - ' . $this->getDepartamento()->getEdificio() . ' - ' . $this->getDepartamento() . ' - ' . $this->getPiso();
+                            }
+                            else {
+                                $cadena = "Sin ubicacion - verificar!";
+                            }
+                        }
+                        else {
+                            $cadena = "Sin ubicacion - verificar!";
+                        }
+                    }
+                    else {
+                        $cadena = "Sin edificio - verificar!";
+                    }
                 }
                 else {
-                    $cadena = "Sin ubicacion - verificar!";
+                    $cadena = "Sin edificio - verificar!";
                 }
             }
             else {
-                $cadena = "Sin edificio - verificar!";
+                $cadena = 'Sin departamento - verificar!';
             }
         }
         else {
-            $cadena = 'Sin Departamento asignado';
+            $cadena = 'Sin departamento - verificar!';
         }
         return $cadena;
     }

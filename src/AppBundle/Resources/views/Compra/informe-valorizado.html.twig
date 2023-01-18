@@ -1,217 +1,218 @@
 {% extends "dataTableList.html.twig" %}
 {% block avanzu_admin_menumode %}sidebar-collapse sidebar-open {% endblock %}
 {% block page_content %}
-{% include "notification.html.twig" %}    
-{% set filtro = app.session.get('filtro_equipo_valorizado') %}
-<style>
-    #summaryData span{
-        font-size: 16px;
-        padding: 3px 10px;
-        display: block;        
-        text-align: center;
-    }
-    #tablelist tr th{
-        padding-right: 10px !important;
-    }
-</style>
-<div class='row'>
-    <div class='col-md-12'>
-        <div class='box box-solid {{ box_color }}'>
-            <div class='box-header'>
-                <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Informe Valorizado de Equipos</h3>
-                
-                <div class="pull-right box-tools">                
-                    <form id="printform" name="printform" target="_blank" style="display: {% if filtro['tipoReporte']== 'detalle' %} inline-block {% else %} inline-block {% endif %};" 
-                          action="{{ path('print_compra_valorizado') }}" method="post">                        
-                        <input type="hidden" id="searchterm" name="searchterm"/>
-                        <input type="hidden" id="datalist" name="datalist"/>
-                        <input type="hidden" id="option" name="option"/>
-                        <button type="button" id="pdf" class="btn btn-default btn-sm hidden" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i></button> 
-                        <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i></button> 
-                    </form> 
-                </div>        
-            </div><!-- /.box-header -->
-                                    
-            <div class='box-body' >
-                <form id="searchform" action="{{ path('compra_valorizado') }}" method="get" >
-                    <div class="col-md-12">
-                        <h4 class="pull-left"  style="display:inline-block">Criterios de Filtro: </h4>                        
-                    
-                        <div style="display:inline-block; margin-left:30px">
-                            <label style="padding-right:30px">
-                                <input type="radio" name="tipoReporte" class="resumen" {% if filtro['tipoReporte']== 'resumen' %} checked {% endif %} >
-                                RESUMEN
-                            </label>
-                            <label style="padding-right:30px">
-                                <input type="radio" name="tipoReporte" class="detalle" {% if filtro['tipoReporte']== 'detalle' %} checked {% endif %} >
-                                DETALLE
-                            </label>
+    {% include "notification.html.twig" %}    
+    {% set filtro = app.session.get('filtro_equipo_valorizado') %}
+    <style>
+        #summaryData span{
+            font-size: 16px;
+            padding: 3px 10px;
+            display: block;        
+            text-align: center;
+        }
+        #tablelist tr th{
+            padding-right: 10px !important;
+        }
+    </style>
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{ box_color }}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-shopping-cart"></i> &nbsp; Informe Valorizado de Equipos</h3>
+
+                    <div class="pull-right box-tools">                
+                        <form id="printform" name="printform" target="_blank" style="display: {% if filtro['tipoReporte']== 'detalle' %} inline-block {% else %} inline-block {% endif %};" 
+                              action="{{ path('print_compra_valorizado') }}" method="post">                        
+                            <input type="hidden" id="searchterm" name="searchterm"/>
+                            <input type="hidden" id="datalist" name="datalist"/>
+                            <input type="hidden" id="option" name="option"/>
+                            <button type="button" id="pdf" class="btn btn-default btn-sm hidden" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i></button> 
+                            <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i></button> 
+                        </form> 
+                    </div>        
+                </div><!-- /.box-header -->
+
+                <div class='box-body' >
+                    <form id="searchform" action="{{ path('compra_valorizado') }}" method="get" >
+                        <div class="col-md-12">
+                            <h4 class="pull-left"  style="display:inline-block">Criterios de Filtro: </h4>                        
+
+                            <div style="display:inline-block; margin-left:30px">
+                                <label style="padding-right:30px">
+                                    <input type="radio" name="tipoReporte" class="resumen" {% if filtro['tipoReporte']== 'resumen' %} checked {% endif %} >
+                                    RESUMEN
+                                </label>
+                                <label style="padding-right:30px">
+                                    <input type="radio" name="tipoReporte" class="detalle" {% if filtro['tipoReporte']== 'detalle' %} checked {% endif %} >
+                                    DETALLE
+                                </label>
+                            </div>
+                            <button type="button" id="limpiarfiltros" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Limpiar Filtros"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                            <button type="submit" id="buscar" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Buscar"><i class="glyphicon glyphicon-filter"></i> Buscar</button>
+                            <div style="display:inline-block; margin-right:30px;" class="pull-right">
+                                <label style="padding-right:5px">Cotización USD: </label>
+                                <input type="text" name="cotizacion" id="cotizacion" class="number" value="{{ filtro['cotizacion'] }}" style="width:70px">    
+                            </div>    
                         </div>
-                        <button type="button" id="limpiarfiltros" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Limpiar Filtros"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
-                        <button type="submit" id="buscar" class="btn btn-default btn-sm pull-right" data-toggle="tooltip" title="Buscar"><i class="glyphicon glyphicon-filter"></i> Buscar</button>
-                        <div style="display:inline-block; margin-right:30px;" class="pull-right">
-                            <label style="padding-right:5px">Cotización USD: </label>
-                            <input type="text" name="cotizacion" id="cotizacion" class="number" value="{{ filtro['cotizacion'] }}" style="width:70px">    
-                        </div>    
-                    </div>
-                    <div class="col-md-12 no-padding">
-                        <fieldset>                            
-                            <div class="col-md-4">
-                                <div class="form-group ">
-                                    <label class="required">Tipos:</label>
-                                    <select class="select2 form-control" name="selTipos[]" id="selectTipo" multiple="multiple">
-                                        <option value="0">Todos</option>
-                                        {%for tipo in tipos %}
-                                            <option {%if tipo.id in filtro['selTipos']%} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
-                                        {% endfor %} 
-                                    </select> 
+                        <div class="col-md-12 no-padding">
+                            <fieldset>                            
+                                <div class="col-md-4">
+                                    <div class="form-group ">
+                                        <label class="required">Tipos:</label>
+                                        <select class="select2 form-control" name="selTipos[]" id="selectTipo" multiple="multiple">
+                                            <option value="0">Todos</option>
+                                            {%for tipo in tipos %}
+                                                <option {%if tipo.id in filtro['selTipos']%} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group ">
-                                    <label class="required">Marca:</label>
-                                    <select class="select2 form-control" name="idMarca" id="selectMarca" >
-                                        <option value="0">Todas</option>
-                                        {%for marca in marcas %}
-                                            <option {%if marca.id==filtro['idMarca']%} selected="selected" {%endif%} value="{{marca.id}}">{{marca.nombre}}</option>
-                                        {% endfor %}  
-                                    </select> 
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Marca:</label>
+                                        <select class="select2 form-control" name="idMarca" id="selectMarca" >
+                                            <option value="0">Todas</option>
+                                            {%for marca in marcas %}
+                                                <option {%if marca.id==filtro['idMarca']%} selected="selected" {%endif%} value="{{marca.id}}">{{marca.nombre}}</option>
+                                            {% endfor %}  
+                                        </select> 
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group ">
-                                    <label class="required">Modelo:</label>
-                                    <select class="select2 form-control" name="idModelo" id="selectModelo">
-                                        <option value="0">Todos</option>
-                                        {%for modelo in modelos %}
-                                            <option {%if modelo.id==filtro['idModelo']%} selected="selected" {%endif%} value="{{modelo.id}}">{{modelo.nombre}}</option>
-                                        {% endfor %} 
-                                    </select> 
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Modelo:</label>
+                                        <select class="select2 form-control" name="idModelo" id="selectModelo">
+                                            <option value="0">Todos</option>
+                                            {%for modelo in modelos %}
+                                                <option {%if modelo.id==filtro['idModelo']%} selected="selected" {%endif%} value="{{modelo.id}}">{{modelo.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group ">
-                                    <label class="required">Antigüedad:</label>
-                                    <select class="select2 form-control" name="antiguedad" id="selectAntiguedad">
-                                        <option value="" {%if filtro['antiguedad']== '' %} selected="selected" {%endif%}>Todos</option>
-                                        <option value="0" {%if filtro['antiguedad'] == '0' %} selected="selected" {%endif%}>Menos de 1 año</option>
-                                        <option value="1" {%if filtro['antiguedad'] == '1' %} selected="selected" {%endif%}>1 año</option>
-                                        {% for  i in 2..15 %}
-                                            <option value="{{ i }}" {%if i==filtro['antiguedad']%} selected="selected" {%endif%} >{{ i }} años</option>
-                                        {% endfor %} 
-                                    </select>                                 
+                                {% if filtro['tipoReporte']== 'detalle' %}
+                                    <div class="col-md-2">
+                                        <div class="form-group ">
+                                            <label class="required">Antigüedad:</label>
+                                            <select class="select2 form-control" name="antiguedad" id="selectAntiguedad">
+                                                <option value="" {%if filtro['antiguedad']== '' %} selected="selected" {%endif%}>Todos</option>
+                                                <option value="0" {%if filtro['antiguedad'] == '0' %} selected="selected" {%endif%}>Menos de 1 año</option>
+                                                <option value="1" {%if filtro['antiguedad'] == '1' %} selected="selected" {%endif%}>1 año</option>
+                                                {% for  i in 2..15 %}
+                                                    <option value="{{ i }}" {%if i==filtro['antiguedad']%} selected="selected" {%endif%} >{{ i }} años</option>
+                                                {% endfor %} 
+                                            </select>                                 
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </fieldset>
+                            <fieldset>
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label class="required">Ubic:</label>
+                                        <select class="select2 form-control" name="idUbicacion" id="selectUbicacion">
+                                            <option value="0">Todos</option>
+                                            {%for ubic in ubicaciones %}                                                
+                                                <option {%if ubic.id==filtro['idUbicacion']%} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>                                                
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
                                 </div>
-                            </div>
-                           
-                        </fieldset>
-                        <fieldset>
-                            <div class="col-md-2">
-                                <div class="form-group ">
-                                    <label class="required">Ubic:</label>
-                                    <select class="select2 form-control" name="idUbicacion" id="selectUbicacion">
-                                        <option value="0">Todos</option>
-                                        {%for ubic in ubicaciones %}                                                
-                                            <option {%if ubic.id==filtro['idUbicacion']%} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>                                                
-                                        {% endfor %} 
-                                    </select> 
-                                </div>
-                            </div>
 
-                            <div class="col-md-3">
-                                <div class="form-group ">
-                                    <label class="required">Edificio:</label>
-                                    <select class="select2 form-control" name="idEdificio" id="selectEdificio">
-                                        <option value="0">Todos</option>
-                                        {%for ed in edificios %}                                                
-                                            <option {%if ed.id==filtro['idEdificio']%} selected="selected" {%endif%} value="{{ed.id}}">{{ed.nombre}}</option>                                                
-                                        {% endfor %}  
-                                    </select> 
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Edificio:</label>
+                                        <select class="select2 form-control" name="idEdificio" id="selectEdificio">
+                                            <option value="0">Todos</option>
+                                            {%for ed in edificios %}                                                
+                                                <option {%if ed.id==filtro['idEdificio']%} selected="selected" {%endif%} value="{{ed.id}}">{{ed.nombre}}</option>                                                
+                                            {% endfor %}  
+                                        </select> 
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group ">
-                                    <label class="required">Piso:</label>
-                                    <select class="select2 form-control" name="idPiso" id="selectPiso">
-                                        <option value="0">Todos</option>
-                                        {%for piso in pisos %}
-                                            <option {%if piso.id==filtro['idPiso']%} selected="selected" {%endif%} value="{{piso.id}}">{{piso.nombre}}</option>
-                                        {% endfor %}                                          
-                                    </select> 
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label class="required">Piso:</label>
+                                        <select class="select2 form-control" name="idPiso" id="selectPiso">
+                                            <option value="0">Todos</option>
+                                            {%for piso in pisos %}
+                                                <option {%if piso.id==filtro['idPiso']%} selected="selected" {%endif%} value="{{piso.id}}">{{piso.nombre}}</option>
+                                            {% endfor %}                                          
+                                        </select> 
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group ">
-                                    <label class="required">Depto:</label>
-                                    <select class="select2 form-control" name="idDepartamento" id="selectDepartamento">
-                                        <option value="0">Todos</option>
-                                        {%for dep in departamentos %}
-                                            <option {%if dep.id==filtro['idDepartamento']%} selected="selected" {%endif%} value="{{dep.id}}">{{dep.nombre}}</option>
-                                        {% endfor %} 
-                                    </select> 
-                                </div>
-                            </div> 
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label class="required">Depto:</label>
+                                        <select class="select2 form-control" name="idDepartamento" id="selectDepartamento">
+                                            <option value="0">Todos</option>
+                                            {%for dep in departamentos %}
+                                                <option {%if dep.id==filtro['idDepartamento']%} selected="selected" {%endif%} value="{{dep.id}}">{{dep.nombre}}</option>
+                                            {% endfor %} 
+                                        </select> 
+                                    </div>
+                                </div> 
 
 
-                        </fieldset>
-                                    
-                    </div>     
-                    <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
-                </form>               
+                            </fieldset>
 
-                {% include "AppBundle:Compra:partial_"~ filtro['tipoReporte'] ~"_informe-valorizado.html.twig" %}   
+                        </div>     
+                        <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                    </form>               
 
-            </div>
-        </div><!-- /.box -->
-    </div><!-- /.col-->
-</div><!-- ./row -->
+                    {% include "AppBundle:Compra:partial_"~ filtro['tipoReporte'] ~"_informe-valorizado.html.twig" %}   
+
+                </div>
+            </div><!-- /.box -->
+        </div><!-- /.col-->
+    </div><!-- ./row -->
 {% endblock %}
 {% block javascripts_inline %}   
     {{parent()}}
-<script type="text/javascript">
-const lista = {{ app.user.ubicacionesPermitidas|json_encode() }};
-$(document).ready(function() {     
-   $('#cotizacion').on('change',function(){
-       $('#searchform').submit();
-   })
-  $('[name="tipoReporte"]').on('ifChecked', function(){
-     $('#searchform').submit();
+    <script type="text/javascript">
+    const lista = {{ app.user.ubicacionesPermitidas|json_encode() }};
+            $(document).ready(function () {
+        $('#cotizacion').on('change', function () {
+            $('#searchform').submit();
+        })
+        $('[name="tipoReporte"]').on('ifChecked', function () {
+            $('#searchform').submit();
+        });
+        $('.select2').on('select2:select', function () {
+            $('#searchform').submit();
+        });
+        $('.select2').on('select2:unselect', function () {
+            $('#searchform').submit();
+        });
+        $('#searchform').on('submit', function () {
+            $('[name="tipoReporte"]').val($('[name="tipoReporte"]:checked').attr('class'));
+        });
+
+        let ubics = $('#selectUbicacion option').length;
+        $("#selectUbicacion option").each(function (i) {
+            item = parseInt($(this).val())
+            if ($.inArray(item, lista) == -1 && item != 0) {
+                $(this).remove();
+            }
+            if (ubics == i + 1) {
+                $("#selectUbicacion").trigger('change');
+            }
+        });
+
+        $('#limpiarfiltros').on('click', function () {
+            $('#opFiltro').val('limpiar');
+            $('.select2').each(function () {
+                $(this).find('option:eq(0)').prop('selected', true);
+            });
+            $('#cotizacion').val(1);
+            $('#searchform').submit();
+        });
+
+        $('#pdf,#xls,#csv').on('click', function () {
+            $('#option').val($(this).attr('id'));
+            $('#searchterm').val($('#tablelist_filter input').val());
+            $('#printform').submit();
+        });
+
     });
-   $('.select2').on('select2:select', function () {   
-        $('#searchform').submit();
-    });     
-    $('.select2').on('select2:unselect', function () {   
-        $('#searchform').submit();
-    });  
-    $('#searchform').on('submit',function(){
-        $('[name="tipoReporte"]').val( $('[name="tipoReporte"]:checked').attr('class') );
-    });
-       
-    let ubics = $('#selectUbicacion option').length;
-   $("#selectUbicacion option").each( function(i){
-        item = parseInt($(this).val())
-        if( $.inArray( item , lista) == -1 && item!=0 ){
-            $(this).remove();
-        } 
-        if( ubics == i+1 ){
-            $("#selectUbicacion").trigger('change');
-        }
-    });      
-        
-    $('#limpiarfiltros').on('click',function(){
-        $('#opFiltro').val('limpiar');
-        $('.select2').each(function(){
-            $(this).find('option:eq(0)').prop('selected',true);
-        });   
-        $('#cotizacion').val(1);
-        $('#searchform').submit();
-    });
-    
-   $('#pdf,#xls,#csv').on('click',function(){   
-        $('#option').val( $(this).attr('id') );             
-        $('#searchterm').val( $('#tablelist_filter input').val() );
-        $('#printform').submit();
-    });       
-        
-});
-</script>    
+    </script>    
 {% endblock %}

@@ -251,6 +251,15 @@
                     </a>
                 </li>
                 {% endif %}
+                {% if app.user.rol.admin and (app.user.username=='RFKRAPP' or app.user.username=='ADMIN')  %}
+                    <li id="adminlist">
+                    <a href="{{ path('get_admin_list') }}">
+                        <i class="fa fa-circle-o"></i>
+                        Listado Admin
+                    </a>
+                </li>
+                {% endif %}
+                
             </ul>
         </li>
         {% endif %}

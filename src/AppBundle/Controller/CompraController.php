@@ -1185,7 +1185,7 @@ class CompraController extends Controller {
         if ($filtro['tipoReporte'] == 'detalle') {
             // informe detallado de equipos valorizados
             $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($filtro, $userId);
-            if ($filtro['antiguedad'] !== '') {
+            if ($filtro['antiguedad']) {
                 foreach ($entities as $key => $entity) {
                     $antig = explode(' ', $entity->getAntiguedad());
                     if ($filtro['antiguedad'] !== $antig[0]) {
@@ -1226,11 +1226,13 @@ class CompraController extends Controller {
                 }
 
                 $precioDolares = $totalDolares / $cant;
+                $precioPesos = $totalPesos / $cant;
                 $entities[] = [
                     'tipo' => $tipo,
                     'marca' => $marca,
                     'modelo' => $modelo,
                     'cantidad' => $ent['cantidad'],
+                    'precioPesos' => $precioPesos,
                     'precioDolares' => $precioDolares,
                     'totalDolares' => $totalDolares,
                     'totalPesos' => $totalPesos

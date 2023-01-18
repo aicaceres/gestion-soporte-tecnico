@@ -6,7 +6,6 @@
                 <th class="no-sort">Marca</th>
                 <th class="no-sort">Modelo</th>
                 <th class="no-sort">N° Serie</th>
-                <th class="no-sort">Proveedor</th>
                 <th class="no-sort">Ubicación</th>
                 <th class="no-sort">Estado</th>
                 <th class="no-sort">Antigüedad</th>
@@ -23,13 +22,12 @@
                 <td>{{ entity.tipo }}</td>
                 <td>{{ entity.marca }}</td>
                 <td>{{ entity.modelo }}</td>
-                <td>{{ entity.nroSerie }}</td>
-                <td>{{ entity.proveedor }}</td>
+                <td><a href="{{ path('equipo_edit', { 'id': entity.id }) }}" target="_blank" > {{ entity.nroSerie }} </a></td>
                 <td>{{ entity.ubicacionActual.texto }}</td>
                 <td>{{ entity.estado }}</td>
                 <td style="text-align:center;padding-right: 10px">
                     {% if entity.antiguedad %} {{ entity.antiguedad }} {% endif %}
-                    {% if entity.vidaUtil  %} <i class="fa fa-calendar-o pull-right" title="{{ entity.vidaUtil|date('d/m/Y') }}"></i> {% endif %}
+                    {% if entity.inicioVidaUtil  %} <i class="fa fa-calendar-o pull-right" title="{{ entity.inicioVidaUtil|date('d/m/Y') }}"></i> {% endif %}
                 
                 </td>
                 <td style="text-align:right;padding-right: 10px" > {{ entity.precioDolares(filtro['cotizacion'])|number_format(2,'.',',') }} </td>

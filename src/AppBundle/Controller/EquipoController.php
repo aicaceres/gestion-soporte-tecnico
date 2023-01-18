@@ -166,7 +166,7 @@ class EquipoController extends Controller {
                                 $responseTemp = $equipo->getUbicacionActual()->getTexto();
                             }
                             else {
-                                $responseTemp = 'Sin ubicación';
+                                $responseTemp = 'Sin ubicaciÃ³n';
                             }
                             break;
                         }
@@ -262,9 +262,9 @@ class EquipoController extends Controller {
         }
 
         $session->set('filtro_equipo', $filtro);
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $em->getFilters()->disable('softdeleteable');
-        }
+        //if ($this->getUser()->getRol()->getAdmin()) {
+        //    $em->getFilters()->disable('softdeleteable');
+        //}
         $userId = $this->getUser()->getId();
         $adicionales = array('CÓDIGO DE BARRA', 'PROVEEDOR', 'FECHA DE COMPRA', 'N° ORDEN COMPRA', 'N° FACTURA', 'N° REMITO');
         $entities = $em->getRepository('AppBundle:Equipo')->findByCriteria($filtro);
@@ -409,11 +409,8 @@ class EquipoController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el equipo.');
         }
-        if (!$entity->getInicioVidaUtil()) {
-            $entity->setInicioVidaUtil($entity->getVidaUtil());
-        }
 
-        // Si no tiene ubicaciÃ³n actual
+        // Si no tiene ubicaciÃƒÂ³n actual
         $reubicacion = ( count($entity->getUbicaciones()) > 0 ) ? TRUE : FALSE;
 
         if (count($entity->getUbicaciones()) == 0) {
@@ -444,13 +441,10 @@ class EquipoController extends Controller {
           str_pad($entity->getId(),5,'0',STR_PAD_LEFT) ); */
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
-        //$repo = $em->getRepository('Gedmo\Loggable\Entity\LogEntry'); // we use default log entry class
-        //$item = $em->find('AppBundle\Entity\Insumo', $id /*article id*/);
-        //$logs = $repo->getLogEntries($item);
-        $fechaInstalacion = $em->getRepository('AppBundle:Equipo')->getFechaInstalacion($id);
+        //$fechaInstalacion = $em->getRepository('AppBundle:Equipo')->getFechaInstalacion($id);
 
         return array(
-            'fechaInstalacion' => $fechaInstalacion['fecha'],
+            //'fechaInstalacion' => $fechaInstalacion['fecha'],
             'entity' => $entity,
             'form' => $editForm->createView(),
             'reubicacion' => $reubicacion,
@@ -491,7 +485,7 @@ class EquipoController extends Controller {
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
             try {
-                // dejar solo el último como actual para los casos en que guarda mal el actual.
+                // dejar solo el Ãºltimo como actual para los casos en que guarda mal el actual.
                 $actual = $entity->getUbicacionActual();
                 foreach ($entity->getUbicaciones() as $ubic) {
                     if ($ubic != $actual) {
@@ -499,7 +493,7 @@ class EquipoController extends Controller {
                     }
                 }
                 $em->flush();
-                // $this->addFlash('success','El equipo se modificó con éxito!');
+                // $this->addFlash('success','El equipo se modificÃ³ con Ã©xito!');
                 return $this->redirectToRoute('equipo');
             }
             catch (\Exception $ex) {
@@ -537,7 +531,7 @@ class EquipoController extends Controller {
                     throw $this->createNotFoundException('No existe el equipo.');
                 }
                 if (is_null($entity->getDeletedAt())) {
-                    //forzar el guardado de ultima fecha de modificaciÃ³n antes de softdelete
+                    //forzar el guardado de ultima fecha de modificaciÃƒÂ³n antes de softdelete
                     $em->getFilters()->enable('softdeleteable');
                     $entity->setUpdated(new \DateTime());
                     $em->persist($entity);
@@ -574,7 +568,7 @@ class EquipoController extends Controller {
                 throw $this->createNotFoundException('No existe el equipo.');
             }
             if (is_null($entity->getDeletedAt())) {
-                //forzar el guardado de ultima fecha de modificaciÃ³n antes de softdelete
+                //forzar el guardado de ultima fecha de modificaciÃƒÂ³n antes de softdelete
                 $em->getFilters()->enable('softdeleteable');
                 $entity->setUpdated(new \DateTime());
                 $em->persist($entity);
@@ -741,6 +735,65 @@ class EquipoController extends Controller {
     }
 
     /**
+     * SET PRIMER PASO A ESTADO OPERATIVO EN LOGS COMO INICIO VIDA UTIL
+     */
+
+    /**
+     * @Route("/setearInicioVidaUtil", name="setear_inicio_vida_util")
+     * @Method("GET")
+     * @Template("AppBundle:Default:index.html.twig")
+     */
+    public function setearPrimerEstadoOperativo(Request $request) {
+        $entity = "AppBundle\\Entity\\Equipo";
+        $em = $this->getDoctrine()->getManager();
+        $repo = $em->getRepository('Gedmo\Loggable\Entity\LogEntry');
+        // recorrer equipos
+        $estadoId = $request->get('estado');
+        $equipos = $em->getRepository('AppBundle:Equipo')->findBy(array('inicioVidaUtil' => null, 'estado' => $estadoId));
+        $inicio = new \DateTime();
+        $cantidad = count($equipos);
+        $procesados = 0;
+        foreach ($equipos as $eq) {
+            $item = $em->find($entity, $eq->getId());
+            $logs = $repo->getLogEntries($item);
+            $logsReverse = array_reverse($logs);
+            // buscar registros de pase a operativo en logs
+            foreach ($logsReverse as $log) {
+                if ($log->getData()) {
+                    if (array_key_exists('estado', $log->getData())) {
+                        $estado = $log->getData()['estado'];
+                        if ($estado['id'] == 6) {
+                            $eq->setInicioVidaUtil($log->getLoggedAt());
+                            $em->persist($eq);
+                            $em->flush();
+                            $procesados++;
+                            break;
+                        }
+                    }
+                }
+            }
+            // si no actualizÃ³ fecha de vida util y se compro antes del 2019 cargar fecha de compra
+            if (!$eq->getInicioVidaUtil() and $eq->getFechaCompra()) {
+                // verificar fecha de compra antigua
+                if ($eq->getFechaCompra()->format('Y') < 2019) {
+                    $eq->setInicioVidaUtil($eq->getFechaCompra());
+                    $em->persist($eq);
+                    $em->flush();
+                    $procesados++;
+                }
+            }
+        }
+        $fin = new \DateTime();
+        $this->addFlash('success', 'ESTADO: ' . $estadoId . ' * Inicio: ' . $inicio->format('H:i:s') . ' - Cantidad Equipos: ' . $cantidad . ' * Fin: ' . $fin->format('H:i:s') . ' - Procesados: ' . $procesados);
+        return array(
+            'inicio' => $inicio->format('H:i:s'),
+            'fin' => $fin->format('H:i:s'),
+            'cantidad' => $cantidad,
+            'procesados' => $procesados,
+        );
+    }
+
+    /**
      * @Route("/getEquipoLogs", name="get_equipo_logs")
      * @Method("GET")
      * @Template()
@@ -856,7 +909,7 @@ class EquipoController extends Controller {
                 // Action Remove
                 $data = NULL;
             }
-            $action = ($log->getAction() == 'create') ? 'Creación' : (($log->getAction() == 'update') ? 'Actualización' : 'Borrado');
+            $action = ($log->getAction() == 'create') ? 'CreaciÃ³n' : (($log->getAction() == 'update') ? 'ActualizaciÃ³n' : 'Borrado');
             $item = array('id' => $log->getObjectId(), 'action' => $action, 'loggedAt' => $log->getLoggedAt(),
                 'username' => $log->getUsername(), 'data' => $data);
             array_push($items, $item);
@@ -892,7 +945,7 @@ class EquipoController extends Controller {
         $departamento = $em->getRepository('ConfigBundle:Departamento')->find($filtro['idDepartamento']);
         $piso = $em->getRepository('ConfigBundle:Piso')->find($filtro['idPiso']);
         $verificado = ($filtro['verificado'] == 'T') ? 'Todos' : ($filtro['verificado'] == '1') ? 'Si' : 'No';
-        $adicionales = array('CÓDIGO DE BARRA', 'PROVEEDOR', 'FECHA DE COMPRA', 'N° ORDEN COMPRA', 'N° FACTURA', 'N° REMITO');
+        $adicionales = array('CÃ“DIGO DE BARRA', 'PROVEEDOR', 'FECHA DE COMPRA', 'NÂ° ORDEN COMPRA', 'NÂ° FACTURA', 'NÂ° REMITO');
         $opAdicional = $adicionales[$filtro['opAdicional']];
 
         $arrayFiltro = array($tipos ? $tipos : 'Todos', $marca ? $marca->getNombre() : 'Todas',
@@ -1142,9 +1195,9 @@ class EquipoController extends Controller {
     public function equipoListDatatablesAction(Request $request) {
         // Set up required variables
         $this->entityManager = $this->getDoctrine()->getManager();
-        if ($this->getUser()->getRol()->getAdmin()) {
-            $this->entityManager->getFilters()->disable('softdeleteable');
-        }
+        //if ($this->getUser()->getRol()->getAdmin()) {
+        //    $this->entityManager->getFilters()->disable('softdeleteable');
+        //}
         $this->repository = $this->entityManager->getRepository('AppBundle:Equipo');
         // Get the parameters from DataTable Ajax Call
         if ($request->getMethod() == 'POST') {
@@ -1272,7 +1325,7 @@ class EquipoController extends Controller {
                                 $responseTemp = $equipo->getUbicacionActual()->getTexto();
                             }
                             else {
-                                $responseTemp = 'Sin ubicación';
+                                $responseTemp = 'Sin ubicaciÃ³n';
                             }
                             break;
                         }
@@ -1630,7 +1683,7 @@ class EquipoController extends Controller {
      */
     public function getAdminListAction(Request $request) {
         if (!$this->getUser()->getRol()->getAdmin()) {
-            throw new AccessDeniedException('No posee permiso para acceder a esta página!');
+            throw new AccessDeniedException('No posee permiso para acceder a esta pÃ¡gina!');
         }
         $em = $this->getDoctrine()->getManager();
         $em->getFilters()->disable('softdeleteable');
@@ -1646,7 +1699,7 @@ class EquipoController extends Controller {
             case 'buscar':
                 $filtro = array(
                     'tipo' => $request->get('tipo'),
-                    'estado' => ($request->get('estado') ? $request->get('estado') : $estadoDefault ),
+                    'estado' => ($request->get('estado') ? $request->get('estado') : $estadoDefault )
                 );
                 break;
             default:
@@ -1654,7 +1707,7 @@ class EquipoController extends Controller {
                 if ($sessionFiltro) {
                     $filtro = array(
                         'tipo' => $sessionFiltro['tipo'],
-                        'estado' => ($sessionFiltro['estado']) ? $sessionFiltro['estado'] : $estadoDefault,
+                        'estado' => ($sessionFiltro['estado']) ? $sessionFiltro['estado'] : $estadoDefault
                     );
                 }
                 else {
@@ -1662,8 +1715,8 @@ class EquipoController extends Controller {
                 }
                 break;
         }
-        $array = array();
         $session->set('filtro_admin_list', $filtro);
+        $array = array();
         if ($filtro['tipo']) {
             $array['tipo'] = $filtro['tipo'];
         }
@@ -1671,7 +1724,158 @@ class EquipoController extends Controller {
             $array['estado'] = $filtro['estado'];
         }
         $equipos = $em->getRepository('AppBundle:Equipo')->findBy($array);
+
         return $this->render('AppBundle:Equipo:admin-list.html.twig', array('equipos' => $equipos, 'estados' => $estados, 'tipos' => $tipos));
+    }
+
+    /**
+     * @Route("/equipoAdminListDatatables", name="equipo_adminlist_datatables")
+     * @Method("POST")
+     * @Template()
+     */
+    public function equipoAdminListDatatablesAction(Request $request) {
+        if (!$this->getUser()->getRol()->getAdmin()) {
+            throw new AccessDeniedException('No posee permiso para acceder a esta pÃ¡gina!');
+        }
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+
+        $repo = $em->getRepository('AppBundle:Equipo');
+        // Get the parameters from DataTable Ajax Call
+        if ($request->getMethod() == 'POST') {
+            $draw = intval($request->request->get('draw'));
+            $start = $request->request->get('start');
+            $length = $request->request->get('length');
+            $search = $request->request->get('search');
+            $orders = $request->request->get('order');
+            $columns = $request->request->get('columns');
+
+            $session = $this->get('session');
+            $sessionFiltro = $session->get('filtro_admin_list');
+        }
+        else // If the request is not a POST one, die hard
+            die;
+
+        // Further filtering can be done in the Repository by passing necessary arguments
+        $otherConditions = "array or whatever is needed";
+        // Get results from the Repository
+        $results = $repo->getAdminListDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $sessionFiltro);
+
+        // Returned objects are of type Town
+        $objects = $results["results"];
+        // Get total number of objects
+        $total_objects_count = $repo->adminListCount();
+
+        // Get total number of results
+        $selected_objects_count = count($objects);
+        // Get total number of filtered data
+        $filtered_objects_count = $results["countResult"];
+
+        // Construct response
+        $response = '{
+            "draw": ' . $draw . ',
+            "recordsTotal": ' . $total_objects_count . ',
+            "recordsFiltered": ' . $filtered_objects_count . ',
+            "data": [';
+
+        $i = 0;
+
+        foreach ($objects as $key => $equipo) {
+            $response .= '["';
+
+            $j = 0;
+            $nbColumn = count($columns);
+            foreach ($columns as $key => $column) {
+                // In all cases where something does not exist or went wrong, return -
+                $responseTemp = "-";
+
+                switch ($column['name']) {
+                    case 'tipo': {
+                            $tipo = $equipo->getTipo();
+                            if ($tipo !== null) {
+                                $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $tipo->getNombre()));
+                            }
+                            break;
+                        }
+                    case 'nroSerie': {
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $equipo->getNroSerie()));
+                            break;
+                        }
+                    case 'barcode': {
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $equipo->getBarcode()));
+                            break;
+                        }
+                    case 'nombre': {
+                            $name = $equipo->getNombre();
+                            // Do this kind of treatments if you suspect that the string is not JS compatible
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $name));
+                            break;
+                        }
+                    case 'marca': {
+                            $marca = $equipo->getMarca();
+                            if ($marca !== null) {
+                                $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $marca->getNombre()));
+                            }
+                            break;
+                        }
+                    case 'modelo': {
+                            $modelo = $equipo->getModelo();
+                            if ($modelo !== null) {
+                                $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $modelo->getNombre()));
+                            }
+                            break;
+                        }
+                    case 'estado': {
+                            $estado = $equipo->getEstado();
+                            if ($estado !== null) {
+                                $responseTemp = $estado->getNombre();
+                            }
+                            break;
+                        }
+                    case 'vidaUtil': {
+                            if ($equipo->getDeletedAt() == null) {
+                                if ($equipo->getInicioVidaUtil()) {
+                                    $responseTemp = $equipo->getInicioVidaUtil()->format('d-m-Y');
+                                }
+                                else {
+                                    $responseTemp = "<input class='update-vidautil' data-id='" . $equipo->getId() . "' data-url='" . $this->generateUrl('update_vidautil', array('id' => $equipo->getId())) . "'  autocomplete='off' style='width:100px'/>";
+                                }
+                            }
+                            break;
+                        }
+                    case 'ubicacion': {
+                            $responseTemp = $equipo->getUbicacionActual()->getTexto();
+                            break;
+                        }
+                    case 'eliminar': {
+                            $check = $equipo->getEliminar() ? "checked='checked'" : "";
+                            $responseTemp = "<input type='checkbox' class='update-eliminar' data-id='" . $equipo->getId() . "' data-url='" . $this->generateUrl('update_eliminar', array('id' => $equipo->getId())) . "' " . $check . " />";
+                            break;
+                        }
+                    case 'actions': {
+                            $deleted = ($equipo->getDeletedAt()) ? 1 : 0;
+                            $responseTemp = "<a target='_blank' href='" . $this->generateUrl('equipo_edit', array('id' => $equipo->getId())) . "' data-toggle='tooltip' style='font-size:14px' class='edit-equipo' data-deleted='" . $deleted . "' title='Editar' ><i class='fa fa-edit'></i> </a>";
+                        }
+                }
+
+                // Add the found data to the json
+                $response .= $responseTemp;
+
+                if (++$j !== $nbColumn)
+                    $response .= '","';
+            }
+
+            $response .= '"]';
+
+            // Not on the last item
+            if (++$i !== $selected_objects_count)
+                $response .= ',';
+        }
+
+        $response .= ']}';
+
+        // Send all this stuff back to DataTables
+        return new Response($response);
     }
 
     /**

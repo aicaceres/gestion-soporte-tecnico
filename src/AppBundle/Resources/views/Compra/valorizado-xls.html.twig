@@ -66,17 +66,17 @@ table tr td, table tfoot th{ text-align: right;}
                  {% if item.antiguedad %} {{ item.antiguedad }} - {% endif %}
                  {% if item.vidaUtil  %} {{ item.vidaUtil|date('d/m/Y') }} {% endif %}
             </td>
-            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioDolares(filtro['cotizacion'])|number_format(2,'.','') }}</td>
-            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.cotizacionEquipo(filtro['cotizacion'])|number_format(2,'.','') }}</td>
-            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioPesos|number_format(2,'.','') }}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioDolares(filtro['cotizacion'])|number_format(2,',','') }}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.cotizacionEquipo(filtro['cotizacion'])|number_format(2,',','') }}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioPesos|number_format(2,',','') }}</td>
         </tr>
     {% endfor %}
 
     <tr>
         <td colspan="9" height="20px" vertical-align="middle" text-align="right"> Equipos: {{ items|length }} </td>
-        <td height="20px" vertical-align="middle" text-align="right"> {{ usd|number_format(2,'.','') }}</td>
+        <td height="20px" vertical-align="middle" text-align="right"> {{ usd|number_format(2,',','') }}</td>
         <td height="20px" vertical-align="middle" text-align="right">  </td>
-        <td height="20px" vertical-align="middle" text-align="right"> $ {{ pes|number_format(2,'.','') }} </td>
+        <td height="20px" vertical-align="middle" text-align="right"> $ {{ pes|number_format(2,',','') }} </td>
     </tr>
 
         </tbody>
@@ -99,29 +99,29 @@ table tr td, table tfoot th{ text-align: right;}
         </tr>
         </thead>
         <tbody>
-        {% set usd, pes = 0,0 %}
+        {% set cnt,usd, pes = 0,0,0 %}
     {% for item in items %}
-        {% set usd, pes = usd + item.totalDolares , pes + item.totalPesos %}
+        {% set cnt, usd, pes = cnt + item.cantidad, usd + item.totalDolares , pes + item.totalPesos %}
         <tr>
             <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.tipo}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.marca}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.modelo}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.cantidad}}</td>
-            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioDolares|number_format(2,'.','') }}</td>
-            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.totalDolares|number_format(2,'.','') }}</td>
-            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioPesos|number_format(2,'.','') }}</td>
-            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.totalPesos|number_format(2,'.','') }}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioDolares|number_format(2,',','') }}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.totalDolares|number_format(2,',','') }}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioPesos|number_format(2,',','') }}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.totalPesos|number_format(2,',','') }}</td>
         </tr>
     {% endfor %}
 
     <tr>
         <td colspan="4" height="20px" vertical-align="middle" text-align="right"> Equipos: </td>
-        <td height="20px" vertical-align="middle" text-align="right"> {{ items|length }} </td>
+        <td height="20px" vertical-align="middle" text-align="right"> {{ cnt }} </td>
         <td height="20px" vertical-align="middle" text-align="right"> </td>
+        <td height="20px" vertical-align="middle" text-align="right"> {{ usd|number_format(2,',','') }} </td>
         <td height="20px" vertical-align="middle" text-align="right"> </td>
-        <td height="20px" vertical-align="middle" text-align="right"> {{ usd|number_format(2,'.','') }} </td>
-        <td height="20px" vertical-align="middle" text-align="right"> {{ pes|number_format(2,'.','') }} </td>
+        <td height="20px" vertical-align="middle" text-align="right"> {{ pes|number_format(2,',','') }} </td>
     </tr>
 
         </tbody>

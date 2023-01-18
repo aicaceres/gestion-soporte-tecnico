@@ -229,19 +229,28 @@ class Equipo {
     }
 
     public function getAntiguedad() {
-        $adq = $this->getFechaAdquisicion() ? new \DateTime(UtilsController::toAnsiDate($this->getFechaAdquisicion(), '/')) : null;
-        $fecha = $this->getInicioVidaUtil() ? $this->getInicioVidaUtil() : $this->getFechaInstalacion() ? $this->getFechaInstalacion() : $adq;
-        if ($fecha) {
-            return UtilsController::calculaAntiguedad($fecha);
+        //$adq = $this->getFechaAdquisicion() ? new \DateTime(UtilsController::toAnsiDate($this->getFechaAdquisicion(), '/')) : null;
+        //$fecha = $this->getInicioVidaUtil() ? $this->getInicioVidaUtil() : $this->getFechaInstalacion() ? $this->getFechaInstalacion() : $adq;
+        if ($this->getInicioVidaUtil()) {
+            return UtilsController::calculaAntiguedad($this->getInicioVidaUtil());
         }
         return null;
     }
 
-    public function getVidaUtil() {
-        $adq = $this->getFechaAdquisicion() ? new \DateTime(UtilsController::toAnsiDate($this->getFechaAdquisicion(), '/')) : null;
-        $fecha = $this->getInicioVidaUtil() ? $this->getInicioVidaUtil() : ($this->getFechaInstalacion() ? $this->getFechaInstalacion() : $adq);
-        return $fecha;
-    }
+//    public function getVidaUtil() {
+//        $adq = null;
+//        if ($this->getFechaAdquisicion()) {
+//            $adq = new \DateTime(UtilsController::toAnsiDate($this->getFechaAdquisicion(), '/'));
+//            if (intval($adq->format('Y')) > 2019)
+//                $adq = null;
+//        }
+////        $adq = $this->getFechaAdquisicion() ? new \DateTime(UtilsController::toAnsiDate($this->getFechaAdquisicion(), '/')) : null;
+////        if (intval($adq->format('Y')) > 2019) {
+////            $adq = null;
+////        }
+//        $fecha = $this->getInicioVidaUtil() ? $this->getInicioVidaUtil() : ($this->getFechaInstalacion() ? $this->getFechaInstalacion() : $adq);
+//        return $fecha;
+//    }
 
     public function getTexto() {
         return $this->codigo . ' - ' . $this->nombre . ' - ' . $this->nroSerie;
@@ -338,23 +347,23 @@ class Equipo {
         return ($this->getMonedaEquipo() == 'U$S') ? $this->getPrecioEquipo() * $this->getCotizacionEquipo() : $this->getPrecioEquipo();
     }
 
-    public function getFechaInstalacion() {
-        $fecha = '';
-        if ($this->getOrdenesdetrabajo()) {
-            foreach ($this->getOrdenesdetrabajo() as $ord) {
-                if ($fecha)
-                    break;
-                if ($ord->getTareas()) {
-                    foreach ($ord->getTareas() as $tar) {
-                        if (strpos($tar->getDescripcion(), '<strong>Operativo</strong>') !== false) {
-                            $fecha = $tar->getFecha();
-                        }
-                    }
-                }
-            }
-        }
-        return $fecha;
-    }
+//    public function getFechaInstalacion() {
+//        $fecha = '';
+//        if ($this->getOrdenesdetrabajo()) {
+//            foreach ($this->getOrdenesdetrabajo() as $ord) {
+//                if ($fecha)
+//                    break;
+//                if ($ord->getTareas()) {
+//                    foreach ($ord->getTareas() as $tar) {
+//                        if (strpos($tar->getDescripcion(), '<strong>Operativo</strong>') !== false) {
+//                            $fecha = $tar->getFecha();
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return $fecha;
+//    }
 
     /*     * 9j5nwg3 ************************** */
 
@@ -675,14 +684,14 @@ class Equipo {
     }
 
     protected function getUploadRootDir() {
-        // la ruta absoluta del directorio donde se deben
-        // guardar los archivos cargados
+// la ruta absoluta del directorio donde se deben
+// guardar los archivos cargados
         return __DIR__ . '/../../../web/' . $this->getUploadDir();
     }
 
     protected function getUploadDir() {
-        // se deshace del __DIR__ para no meter la pata
-        // al mostrar el documento/imagen cargada en la vista.
+// se deshace del __DIR__ para no meter la pata
+// al mostrar el documento/imagen cargada en la vista.
         return 'uploads/photos';
     }
 
@@ -709,9 +718,9 @@ class Equipo {
      */
     public function setFile(UploadedFile $file = null) {
         $this->file = $file;
-        // check if we have an old image path
+// check if we have an old image path
         if (isset($this->path)) {
-            // store the old name to delete after the update
+// store the old name to delete after the update
             $this->temp = $this->path;
             $this->path = null;
         }
@@ -726,7 +735,7 @@ class Equipo {
      */
     public function preUpload() {
         if (null !== $this->getFile()) {
-            // haz lo que quieras para generar un nombre único
+// haz lo que quieras para generar un nombre único
             $filename = sha1(uniqid(mt_rand(), true));
             $this->path = $filename . '.' . $this->getFile()->guessExtension();
         }
@@ -740,16 +749,16 @@ class Equipo {
         if (null === $this->getFile()) {
             return;
         }
-        // si hay un error al mover el archivo, move() automáticamente
-        // envía una excepción. This will properly prevent
-        // the entity from being persisted to the database on error
+// si hay un error al mover el archivo, move() automáticamente
+// envía una excepción. This will properly prevent
+// the entity from being persisted to the database on error
         $this->getFile()->move($this->getUploadRootDir(), $this->path);
-        // check if we have an old image
+// check if we have an old image
         if (isset($this->temp)) {
-            // delete the old image
+// delete the old image
             if (file_exists($this->getUploadRootDir() . '/' . $this->temp))
                 unlink($this->getUploadRootDir() . '/' . $this->temp);
-            // clear the temp image path
+// clear the temp image path
             $this->temp = null;
         }
         $this->file = null;

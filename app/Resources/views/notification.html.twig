@@ -2,7 +2,7 @@
     {% for message in messages %}
         {# type = danger, info, warning, check #}
         {# icon = ban, info, warning, check #}
-    <div class="alert alert-{{ type }} alert-dismissable">
+    <div class="alert alert-{{ type }}">
         {% if type=='danger' %}
             <i class="fa fa-ban"></i>
         {% elseif type=='success' %}    

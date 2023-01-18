@@ -58,7 +58,7 @@
                         <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/>
                     </form>    
                     <div class="box-body table-responsive" style="padding: 15px" >
-                        <table id="tablelist" class="table table-bordered table-hover adminlist" style="font-size:12px">
+                        <table id="admin_tablelist" class="table table-bordered table-hover adminlist" style="font-size:12px">
                             <thead>
                                 <tr>
                                     <th>Tipo</th>
@@ -69,49 +69,13 @@
                                     <th>Modelo</th>
                                     <th>Estado</th>
                                     <th>Inicio Vida Útil</th>
-                                    <th>Ubicación</th>
-                                    <th>Edificio - Dpto - Piso</th>
+                                    <th>Ubicación - Edificio - Dpto - Piso</th>
                                     <th>Eliminar</th>
-                                    <th></th>
+                                    <th style="width:40px;"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for eq in equipos %}    
-                                    {% set actual = eq.ubicacionActual %}
-                                    <tr class="{{ eq.deletedAt is null ? "" : "deleted" }}" >
-                                        <td>{{ eq.tipo }}</td>
-                                        <td>{{ eq.nroSerie }}</td>
-                                        <td>{{ eq.barcode }}</td>
-                                        <td>{{ eq.nombre }}</td>
-                                        <td>{{ eq.marca }}</td>
-                                        <td>{{ eq.modelo }}</td>
-                                        <td>{{ eq.estado }}</td>
-                                        <td style="text-align:center;">
-                                            {% if eq.vidaUtil and not eq.deletedAt %}  
-                                                {{  eq.vidaUtil|date('d-m-Y')  }} 
-                                            {% else %} 
-                                                <input class="update-vidautil" data-id="{{ eq.id }}" data-url="{{ path('update_vidautil',{id : eq.id}) }}"  autocomplete="off" style="width:100px"/>                                       
-                                            {% endif %} </td>
-                                        <td>{% if actual.ubicacion and actual.ubicacion.deletedAt is null %} {{ actual.ubicacion }} {% endif %}</td>
-                                        <td>
-                                            {% if actual.ubicacion and actual.ubicacion.deletedAt is null %}
-                                                {% if actual.departamento and actual.departamento.deletedAt is null %}
-                                                    {% if actual.departamento.edificio and actual.departamento.edificio.deletedAt is null %}
-                                                        {{ actual.departamento.edificio }} -
-                                                    {% endif %}    
-                                                    {{ actual.departamento }} -
-                                                    {{ actual.piso }}
-                                                {% endif %}    
-
-                                            {% endif %}
-
-                                        </td>
-                                        <td><input type="checkbox" class="update-eliminar" data-id="{{ eq.id }}" data-url="{{ path('update_eliminar',{id : eq.id}) }}" {{ eq.eliminar ? 'checked="checked"' : '' }} /></td>
-                                        <td> 
-                                            <a href="{{ path('equipo_edit', { 'id': eq.id }) }}" target='_blank' data-toggle="tooltip" title="Ver"><i class="fa fa-edit"></i></a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                                
                             </tbody>                        
                         </table>
                         <br>
@@ -130,39 +94,100 @@
             $('.select2').on('select2:select', function () {
                 $('#searchform').submit();
             });
-            $('.update-vidautil').datepicker();
-            $('.update-vidautil').on('change', function () {
-                var fecha = $(this);
-                if (fecha.val()) {
-                    var parent = $(this).parent();
-                    var data = {fecha: fecha.val()};
-                    $.ajax({
-                        type: 'POST',
-                        url: $(this).data('url'),
-                        data: data,
-                        success: function (data) {
-                            if (data === 'OK') {
-                                parent.html(fecha.val());
-                            } else {
-                                fecha.val('');
-                                alert(data);
-                            }
+            $('.checks').on('ifChanged', function () {
+                $('#searchform').submit();
+            });
+
+            var oTable = $('#admin_tablelist').dataTable({
+                "columnDefs": [
+                    // These are the column name variables that will be sent to the server
+                    {"name": "tipo", "targets": 0},
+                    {"name": "nroSerie", "targets": 1},
+                    {"name": "barcode", "targets": 2},
+                    {"name": "nombre", "targets": 3},
+                    {"name": "marca", "targets": 4},
+                    {"name": "modelo", "targets": 5},
+                    {"name": "estado", "targets": 6},
+                    {"name": "vidaUtil", "targets": 7},
+                    {"name": "ubicacion", "targets": 8},
+                    {"name": "eliminar", "targets": 9},
+                    {"name": "actions", "targets": 10},
+                    {"targets": 'no-sort', "orderable": false}
+                ],
+                "rowCallback": function (row, data) {
+                    var tr = $(row);
+
+                    var vidautil = tr.find('.update-vidautil');
+                    vidautil.datepicker();
+                    vidautil.on('change', function () {
+                        var fecha = $(this);
+                        if (fecha.val()) {
+                            changeVidaUtil(fecha);
                         }
                     });
+                    var eliminar = tr.find('.update-eliminar');
+                    eliminar.on('change', function (e) {
+                        url = $(this).data('url');
+                        changeEliminar(url, e.target.checked);
+                    });
 
+                    if (tr.find('.edit-equipo').data('deleted')) {
+                        tr.addClass('deleted');
+                    }
+                },
+                // Server-side parameters
+                "processing": true,
+                "serverSide": true,
+                // Ajax call
+                "ajax": {
+                    "url": "{{ path('equipo_adminlist_datatables') }}",
+                    "type": "POST"
+                },
+                // Classic DataTables parameters
+                "paging": true,
+                "info": true,
+                "searching": true,
+                "pageLength": 25,
+                "bLengthChange": false,
+                "ordering": false,
+                "pagingType": "full_numbers",
+                "oLanguage": {
+                    "oPaginate": {
+                        "sFirst": "<<",
+                        "sNext": ">",
+                        "sLast": ">>",
+                        "sPrevious": "<"
+                    },
+                    "sProcessing": "Cargando...",
+                    "sLengthMenu": "Mostrar _MENU_ registros ",
+                    "sZeroRecords": "Sin datos",
+                    "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+                    "sInfoEmpty": "Sin coincidencias",
+                    "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                    "sSearch": "Buscar:"
                 }
-
-            });
-            $('.update-eliminar').on('ifChecked', function (e) {
-                url = $(this).data('url');
-                changeEliminar(url, true);
-            });
-            $('.update-eliminar').on('ifUnchecked', function () {
-                url = $(this).data('url');
-                changeEliminar(url, false);
             });
 
         });
+        function changeVidaUtil(obj){
+            var parent = obj.parent();
+            var data = {fecha: obj.val()};
+            $.ajax({
+                type: 'POST',
+                url: obj.data('url'),
+                data: data,
+                success: function (data) {
+                    if (data === 'OK') {
+                        parent.html(obj.val());
+                    } else {
+                        fecha.val('');
+                        alert(data);
+                    }
+                }
+            });
+        
+        }
+        
         function changeEliminar(url, check) {
             var data = {eliminar: check};
             $.ajax({

@@ -1176,4 +1176,179 @@ class EquipoRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
+    public function getAdminListDTData($start, $length, $orders, $search, $columns, $otherConditions, $filtro) {
+        // Create Main Query
+        $query = $this->_em->createQueryBuilder();
+        $query->select("e,eu")
+                ->from('AppBundle\Entity\Equipo', 'e');
+
+        // Create Count Query
+        $countQuery = $this->_em->createQueryBuilder();
+        $countQuery->select("count(e.id)")
+                ->from('AppBundle\Entity\Equipo', 'e');
+
+        // Create inner joins
+        $query
+                ->innerJoin('e.tipo', 'tipo')
+                ->innerJoin('e.estado', 'estado')
+                ->innerJoin('e.marca', 'marca')
+                ->innerJoin('e.modelo', 'modelo')
+                ->innerJoin('e.ubicaciones', 'eu')
+                ->andWhere('eu.actual=1')
+                ->leftJoin('eu.piso', 'p')
+                ->leftJoin('eu.departamento', 'd')
+                ->leftJoin('d.edificio', 'ed')
+                ->leftJoin('ed.ubicacion', 'u');
+
+        $countQuery
+                ->innerJoin('e.tipo', 'tipo')
+                ->innerJoin('e.estado', 'estado')
+                ->innerJoin('e.marca', 'marca')
+                ->innerJoin('e.modelo', 'modelo')
+                ->innerJoin('e.ubicaciones', 'eu')
+                ->andWhere('eu.actual=1')
+                ->leftJoin('eu.piso', 'p')
+                ->leftJoin('eu.departamento', 'd')
+                ->leftJoin('d.edificio', 'ed')
+                ->leftJoin('ed.ubicacion', 'u');
+
+        // Other conditions than the ones sent by the Ajax call ?
+        if ($otherConditions === null) {
+            // No
+            // However, add a "always true" condition to keep an uniform treatment in all cases
+            $query->where("eu.actual=1");
+            $countQuery->where("eu.actual=1");
+        }
+        else {
+            // Add condition
+            $query->where($otherConditions);
+            $countQuery->where($otherConditions);
+        }
+
+        // Fields Search
+        foreach ($filtro as $key => $value) {
+            if ($value) {
+                // $searchItem is what we are looking for
+                $searchItem = $value;
+                $searchQuery = null;
+                // $column['name'] is the name of the column as sent by the JS
+                switch ($key) {
+                    case 'estado': {
+                            if ($searchItem != 'T') {
+                                $searchQuery = 'estado.id=' . $searchItem;
+                            }
+                            break;
+                        }
+                    case 'tipo': {
+                            $searchQuery = 'tipo.id=' . $searchItem;
+                            break;
+                        }
+                }
+                if ($searchQuery !== null) {
+                    $query->andWhere($searchQuery);
+                    $countQuery->andWhere($searchQuery);
+                }
+            }
+        }
+        if ($search['value']) {
+            $searchItem = trim($search['value']);
+            switch ($searchItem) {
+                case 'verificar':
+                    $searchQuery = ' d.deletedAt is not null OR d is null OR e.deletedAt is not null OR e is null OR u.deletedAt is not null OR u is null ';
+                    break;
+//                case 'sin ubicacion':
+//                    $searchQuery = ' u.deletedAt is not null OR u is null ';
+//                    break;
+//                case 'sin edificio':
+//                    $searchQuery = ' e.deletedAt is not null OR e is null ';
+//                    break;
+//                case 'sin departamento':
+//                    $searchQuery = ' d.deletedAt is not null OR d is null ';
+//                    break;
+                default:
+                    $searchQuery = ' e.nombre LIKE \'%' . $searchItem . '%\' OR e.nroSerie LIKE \'%' . $searchItem . '%\' ' .
+                            ' OR e.barcode LIKE  \'%' . $searchItem . '%\' ' .
+                            ' OR tipo.nombre LIKE \'%' . $searchItem . '%\'  OR  marca.nombre LIKE \'%' . $searchItem . '%\' ' .
+                            ' OR modelo.nombre LIKE \'%' . $searchItem . '%\'  OR  estado.nombre LIKE \'%' . $searchItem . '%\' ' .
+                            ' OR ( u.abreviatura LIKE \'%' . $searchItem . '%\'  OR ed.nombre LIKE \'%' . $searchItem . '%\' '
+                            . ' OR d.nombre LIKE \'%' . $searchItem . '%\' OR p.nombre LIKE \'%' . $searchItem . '%\' )   ';
+                    break;
+            }
+
+            // sin datos de ubicacion
+//            if ($searchItem == 'verificar'){
+//                $searchQuery = ' d.deletedAt is not null OR d is null OR e.deletedAt is not null OR e is null OR u.deletedAt is not null OR u is null ';
+//            }
+//            else {
+//                $searchQuery = ' e.nombre LIKE \'%' . $searchItem . '%\' OR e.nroSerie LIKE \'%' . $searchItem . '%\' ' .
+//                        ' OR e.barcode LIKE  \'%' . $searchItem . '%\' ' .
+//                        ' OR tipo.nombre LIKE \'%' . $searchItem . '%\'  OR  marca.nombre LIKE \'%' . $searchItem . '%\' ' .
+//                        ' OR modelo.nombre LIKE \'%' . $searchItem . '%\'  OR  estado.nombre LIKE \'%' . $searchItem . '%\' ' .
+//                        ' OR ( u.abreviatura LIKE \'%' . $searchItem . '%\'  OR ed.nombre LIKE \'%' . $searchItem . '%\' '
+//                        . ' OR d.nombre LIKE \'%' . $searchItem . '%\' OR p.nombre LIKE \'%' . $searchItem . '%\' )   ';
+//            }
+            $query->andWhere($searchQuery);
+
+            $countQuery->andWhere($searchQuery);
+        }
+        // Limit
+        $query->setFirstResult($start)->setMaxResults($length);
+
+        // Order
+        /* foreach ($orders as $key => $order) {
+          // $order['name'] is the name of the order column as sent by the JS
+          if ($order['name'] != '') {
+          $orderColumn = null;
+          switch ($order['name']) {
+          case 'nroSerie': {
+          $orderColumn = 'e.nroSerie';
+          break;
+          }
+          case 'nombre': {
+          $orderColumn = 'e.nombre';
+          break;
+          }
+          case 'tipo': {
+          $orderColumn = 'tipo.nombre';
+          break;
+          }
+          case 'estado': {
+          $orderColumn = 'estado.nombre';
+          break;
+          }
+          case 'marca': {
+          $orderColumn = 'marca.nombre';
+          break;
+          }
+          case 'modelo': {
+          $orderColumn = 'modelo.nombre';
+          break;
+          }
+          }
+          if ($orderColumn !== null) {
+          $query->orderBy($orderColumn, $order['dir']);
+          }
+          }
+          } */
+
+        $query->orderBy('tipo.nombre,e.nombre,marca.nombre,modelo.nombre');
+
+        // Execute
+        $results = $query->getQuery()->getResult();
+        $countResult = $countQuery->getQuery()->getSingleScalarResult();
+
+        return array(
+            "results" => $results,
+            "countResult" => $countResult
+        );
+    }
+
+    public function adminListCount() {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("count(e.id)")
+                ->from('AppBundle\Entity\Equipo', 'e');
+
+        return $query->getQuery()->getSingleScalarResult();
+    }
+
 }

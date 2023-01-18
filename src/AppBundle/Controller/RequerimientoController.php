@@ -534,7 +534,7 @@ class RequerimientoController extends Controller {
         $ubicacion = $em->getRepository('ConfigBundle:Ubicacion')->find($filtro['idUbicacion']);
         $edificio = $em->getRepository('ConfigBundle:Edificio')->find(($filtro['idEdificio']) ? $filtro['idEdificio'] : 0);
         $departamento = $em->getRepository('ConfigBundle:Departamento')->find(($filtro['idDepartamento']) ? $filtro['idDepartamento'] : 0);
-        $periodo = UtilsController::ultimoMesParaFiltro($filtro['estado'], $filtro['estado']);
+        $periodo = UtilsController::ultimoMesParaFiltro($filtro['desde'], $filtro['hasta']);
         $arrayFiltro = array($tipo ? $tipo->getNombre() : 'Todos', $filtro['estado'] ? $filtro['estado'] : 'Todos',
             $ubicacion ? $ubicacion->getAbreviatura() : 'Todos', $edificio ? $edificio->getNombre() : 'Todos',
             $departamento ? $departamento->getNombre() : 'Todos', $periodo['desde'], $periodo['hasta']);

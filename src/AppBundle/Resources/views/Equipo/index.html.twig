@@ -27,11 +27,7 @@
                 <h3 class='box-title'><i class="fa fa-desktop"></i> &nbsp; Equipos  
                     
                 </h3>
-                <div class="pull-right box-tools">
-                    
-                    {% if app.user.rol.admin %}
-                    <a type="button" class="btn btn-danger btn-sm" href="{{ path('get_admin_list') }}" style="margin-right:30px"> LISTADO ADMIN</a>
-                    {% endif %}
+                <div class="pull-right box-tools">                    
                                       
                     {% if app.user.access('view_logs') and entities|length>0 %}
                         <button type="button" class="btn btn-default btn-sm seeHistory" data-toggle="tooltip" title="Historial de cambios"
