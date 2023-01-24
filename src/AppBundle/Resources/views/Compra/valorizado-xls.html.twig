@@ -64,7 +64,7 @@ table tr td, table tfoot th{ text-align: right;}
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.estado}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">
                  {% if item.antiguedad %} {{ item.antiguedad }} - {% endif %}
-                 {% if item.vidaUtil  %} {{ item.vidaUtil|date('d/m/Y') }} {% endif %}
+                 {% if item.inicioVidaUtil  %} {{ item.inicioVidaUtil|date('d/m/Y') }} {% endif %}
             </td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioDolares(filtro['cotizacion'])|number_format(2,',','') }}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{ item.cotizacionEquipo(filtro['cotizacion'])|number_format(2,',','') }}</td>

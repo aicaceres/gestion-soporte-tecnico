@@ -1311,7 +1311,7 @@ class CompraController extends Controller {
         if ($filtro['tipoReporte'] == 'detalle') {
             // informe detallado de equipos valorizados
             $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($filtro, $userId);
-            if ($filtro['antiguedad'] !== '') {
+            if ($filtro['antiguedad']) {
                 foreach ($entities as $key => $entity) {
                     $antig = explode(' ', $entity->getAntiguedad());
                     if ($filtro['antiguedad'] !== $antig[0]) {
