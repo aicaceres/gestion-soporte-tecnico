@@ -303,7 +303,7 @@ class EquipoRepository extends EntityRepository {
 
     public function findValorizadoResumenByCriteria($data, $userId = null) {
         $query = $this->_em->createQueryBuilder();
-        $query->select('COUNT(e.id) cantidad, t.id tipoId, ma.id marcaId, mo.id modeloId')
+        $query->select('t.id tipoId, ma.id marcaId, mo.id modeloId')
                 ->from('AppBundle\Entity\Equipo', 'e')
                 ->innerJoin('e.tipo', 't')
                 ->innerJoin('e.marca', 'ma')

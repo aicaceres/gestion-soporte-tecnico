@@ -52,7 +52,7 @@ table tr td, table tfoot th{ text-align: right;}
         <tbody>
         {% set usd, pes = 0,0 %}
     {% for item in items %}
-        {% set usd, pes = usd + item.precioDolares(filtro['cotizacion']) , pes + item.precioPesos %}
+        {% set usd, pes = usd + item.precioDolares(filtro['cotizacion']) , pes + item.precioPesos(filtro['cotizacion']) %}
         <tr>
             <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{item.tipo}}</td>
@@ -68,7 +68,7 @@ table tr td, table tfoot th{ text-align: right;}
             </td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioDolares(filtro['cotizacion'])|number_format(2,',','') }}</td>
             <td height="20px" vertical-align="middle" padding-left="5px">{{ item.cotizacionEquipo(filtro['cotizacion'])|number_format(2,',','') }}</td>
-            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioPesos|number_format(2,',','') }}</td>
+            <td height="20px" vertical-align="middle" padding-left="5px">{{ item.precioPesos(filtro['cotizacion'])|number_format(2,',','') }}</td>
         </tr>
     {% endfor %}
 

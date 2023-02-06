@@ -343,8 +343,8 @@ class Equipo {
         return ($this->getMonedaEquipo() == '$') ? $this->getPrecioEquipo() / $this->getCotizacionEquipo($cotiz) : $this->getPrecioEquipo();
     }
 
-    public function getPrecioPesos() {
-        return ($this->getMonedaEquipo() == 'U$S') ? $this->getPrecioEquipo() * $this->getCotizacionEquipo() : $this->getPrecioEquipo();
+    public function getPrecioPesos($cotiz = 1) {
+        return ($this->getMonedaEquipo() == 'U$S') ? $this->getPrecioEquipo() * $this->getCotizacionEquipo($cotiz) : $this->getPrecioEquipo();
     }
 
 //    public function getFechaInstalacion() {

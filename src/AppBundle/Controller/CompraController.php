@@ -1185,7 +1185,7 @@ class CompraController extends Controller {
         if ($filtro['tipoReporte'] == 'detalle') {
             // informe detallado de equipos valorizados
             $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($filtro, $userId);
-            if ($filtro['antiguedad']) {
+            if ($filtro['antiguedad'] != '') {
                 foreach ($entities as $key => $entity) {
                     $antig = explode(' ', $entity->getAntiguedad());
                     if ($filtro['antiguedad'] !== $antig[0]) {
@@ -1211,27 +1211,34 @@ class CompraController extends Controller {
                 );
                 $sub = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($data, $userId);
 
-                $cant = 0;
+                $cantidad = 0;
                 $totalDolares = $totalPesos = 0;
-                foreach ($sub as $item) {
+                foreach ($sub as $key => $item) {
+                    if ($filtro['antiguedad'] != '') {
+                        $antiguedad = explode(' ', $item->getAntiguedad());
+                        if ($filtro['antiguedad'] !== $antiguedad[0]) {
+                            continue;
+                        }
+                    }
                     //$dolares[] = $item->getPrecioDolares($filtro['cotizacion']);
                     $tipo = $item->getTipo()->getNombre();
                     $marca = $item->getMarca()->getNombre();
                     $modelo = $item->getModelo()->getNombre();
-                    $dolares = ($item->getMonedaEquipo() == '$') ? $item->getPrecioEquipo() / $cotiz : $item->getPrecioEquipo();
-                    $pesos = ($item->getMonedaEquipo() == 'U$S') ? $item->getPrecioEquipo() * $cotiz : $item->getPrecioEquipo();
+                    $dolares = ($item->getMonedaEquipo() == '$') ? $item->getPrecioEquipo() / $item->getCotizacionEquipo($cotiz) : $item->getPrecioEquipo();
+                    $pesos = ($item->getMonedaEquipo() == 'U$S') ? $item->getPrecioEquipo() * $item->getCotizacionEquipo($cotiz) : $item->getPrecioEquipo();
                     $totalDolares += $dolares;
                     $totalPesos += $pesos;
-                    $cant++;
+                    $cantidad++;
                 }
-
-                $precioDolares = $totalDolares / $cant;
-                $precioPesos = $totalPesos / $cant;
+                if ($cantidad == 0)
+                    continue;
+                $precioDolares = $totalDolares / $cantidad;
+                $precioPesos = $totalPesos / $cantidad;
                 $entities[] = [
                     'tipo' => $tipo,
                     'marca' => $marca,
                     'modelo' => $modelo,
-                    'cantidad' => $ent['cantidad'],
+                    'cantidad' => $cantidad,
                     'precioPesos' => $precioPesos,
                     'precioDolares' => $precioDolares,
                     'totalDolares' => $totalDolares,
@@ -1357,7 +1364,7 @@ class CompraController extends Controller {
                     'tipo' => $tipo,
                     'marca' => $marca,
                     'modelo' => $modelo,
-                    'cantidad' => $ent['cantidad'],
+                    'cantidad' => $cant,
                     'precioPesos' => $precioPesos,
                     'precioDolares' => $precioDolares,
                     'totalDolares' => $totalDolares,

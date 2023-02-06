@@ -17,7 +17,7 @@
         <tbody>
             {% set usd, pes = 0,0 %}
             {% for entity in entities %}
-                {% set usd, pes = usd+entity.precioDolares(filtro['cotizacion']) , pes+entity.precioPesos %}
+                {% set usd, pes = usd+entity.precioDolares(filtro['cotizacion']) , pes+entity.precioPesos(filtro['cotizacion']) %}
             <tr>    
                 <td>{{ entity.tipo }}</td>
                 <td>{{ entity.marca }}</td>
@@ -32,7 +32,7 @@
                 </td>
                 <td style="text-align:right;padding-right: 10px" > {{ entity.precioDolares(filtro['cotizacion'])|number_format(2,'.',',') }} </td>
                 <td style="text-align:right;padding-right: 10px" > {{ entity.cotizacionEquipo(filtro['cotizacion'])|number_format(2,'.',',') }} </td>
-                <td style="text-align:right;padding-right: 10px">{{ entity.precioPesos|number_format(2,'.',',') }}</td>
+                <td style="text-align:right;padding-right: 10px">{{ entity.precioPesos(filtro['cotizacion'])|number_format(2,'.',',') }}</td>
             </tr>    
             {% endfor %}
         </tbody>
