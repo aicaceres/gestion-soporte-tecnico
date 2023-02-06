@@ -34,6 +34,16 @@
                     </fieldset>
                 </div>    
             {% endif %}
+            {% if form.activo is defined %}
+                <div class="col-md-12">
+                    <fieldset>
+                        {{ form_row(form.activo) }}
+                        <p class="text-info ">
+                            <i class="fa fa-info-circle" ></i> <small>Este valor indica si se muestra en carga de nuevos items</small>
+                        </p>
+                    </fieldset>
+                </div>    
+            {% endif %}
 
             {% if form.modelos is defined %}
                 <div class="col-md-12">

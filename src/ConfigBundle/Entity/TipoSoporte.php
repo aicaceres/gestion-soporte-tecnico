@@ -1,9 +1,11 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\TipoSoporte
  * @ORM\Table(name="tipo_soporte",uniqueConstraints={@ORM\UniqueConstraint(name="tipo_soporte_idx", columns={"nombre"})})
@@ -12,8 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     fields={"nombre"}, errorPath="nombre", message="Este tipo ya existe."
  * )
  */
-class TipoSoporte
-{
+class TipoSoporte {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -21,33 +22,44 @@ class TipoSoporte
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false)
      * @Assert\NotBlank()
      */
     protected $nombre;
+
     /**
      * @var string $abreviatura
      * @ORM\Column(name="abreviatura", type="string", unique=true)
      */
-    protected $abreviatura;    
+    protected $abreviatura;
+
     /**
      * @ORM\Column(name="inicial", type="boolean")
      */
-    protected $inicial = false;    
+    protected $inicial = false;
+
+    /**
+     * @ORM\Column(name="activo", type="boolean")
+     */
+    protected $activo = true;
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */
     private $created;
+
     /**
      * @var datetime $updated
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
      */
-    private $updated;    
+    private $updated;
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -55,25 +67,25 @@ class TipoSoporte
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+
     /**
      * @var User $updatedBy
      * @Gedmo\Blameable(on="update")
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;    
+    private $updatedBy;
 
     public function __toString() {
         return $this->nombre;
-    }    
-    
+    }
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -83,8 +95,7 @@ class TipoSoporte
      * @param string $nombre
      * @return Nacionalidad
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -93,10 +104,9 @@ class TipoSoporte
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
 
@@ -106,8 +116,7 @@ class TipoSoporte
      * @param string $abreviatura
      * @return Nacionalidad
      */
-    public function setAbreviatura($abreviatura)
-    {
+    public function setAbreviatura($abreviatura) {
         $this->abreviatura = $abreviatura;
 
         return $this;
@@ -116,10 +125,9 @@ class TipoSoporte
     /**
      * Get abreviatura
      *
-     * @return string 
+     * @return string
      */
-    public function getAbreviatura()
-    {
+    public function getAbreviatura() {
         return $this->abreviatura;
     }
 
@@ -129,8 +137,7 @@ class TipoSoporte
      * @param \DateTime $created
      * @return TipoSoporte
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -139,10 +146,9 @@ class TipoSoporte
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -152,8 +158,7 @@ class TipoSoporte
      * @param \DateTime $updated
      * @return TipoSoporte
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -162,10 +167,9 @@ class TipoSoporte
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -175,8 +179,7 @@ class TipoSoporte
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return TipoSoporte
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -185,10 +188,9 @@ class TipoSoporte
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -198,8 +200,7 @@ class TipoSoporte
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return TipoSoporte
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -208,10 +209,9 @@ class TipoSoporte
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -221,8 +221,7 @@ class TipoSoporte
      * @param boolean $inicial
      * @return TipoSoporte
      */
-    public function setInicial($inicial)
-    {
+    public function setInicial($inicial) {
         $this->inicial = $inicial;
 
         return $this;
@@ -231,10 +230,29 @@ class TipoSoporte
     /**
      * Get inicial
      *
-     * @return boolean 
+     * @return boolean
      */
-    public function getInicial()
-    {
+    public function getInicial() {
         return $this->inicial;
     }
+
+    /**
+     * Set activo
+     * @param boolean $activo
+     * @return Usuario
+     */
+    public function setActivo($activo) {
+        $this->activo = $activo;
+        return $this;
+    }
+
+    /**
+     * Get activo
+     *
+     * @return boolean
+     */
+    public function getActivo() {
+        return $this->activo;
+    }
+
 }

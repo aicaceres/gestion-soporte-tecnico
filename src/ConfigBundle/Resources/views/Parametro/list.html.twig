@@ -15,7 +15,7 @@
     </thead>
     <tbody>
         {% for entity in entities %}
-            <tr>
+            <tr {% if entity.activo is defined %} {{ entity.activo ? '' : 'class="deleted"' }} {% endif %}>
                 <td>{{ entity.id }}</td>
                 <td>{{ entity.nombre }}</td>
                 {% if entity.abreviatura is defined %} <td> {{ entity.abreviatura }}</td> {% endif %}
