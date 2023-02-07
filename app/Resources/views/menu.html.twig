@@ -116,11 +116,19 @@
                 <i class="fa fa-angle-left pull-right"></i>
             </a>
             <ul class="treeview-menu">
+                {% if app.user.access('insumo_entrega') %}
+                <li id="entrega">
+                    <a href="{{path('insumo_entrega')}}">
+                        <i class="fa fa-circle-o"></i>
+                        Entrega de Insumos
+                    </a>
+                </li>
+                {% endif %}
                 {% if app.user.access('insumo_solicitud') %}
                 <li id="solicitud">
                     <a href="{{path('insumo_solicitud')}}">
                         <i class="fa fa-circle-o"></i>
-                        Solicitudes de Insumo <small class="label pull-right bg-red solPendientes" title="Solicitudes Pendientes">0</small>
+                        Solicitudes de Soporte <small class="label pull-right bg-red solPendientes" title="Solicitudes Pendientes">0</small>
                     </a>
                 </li>
                 {% endif %}

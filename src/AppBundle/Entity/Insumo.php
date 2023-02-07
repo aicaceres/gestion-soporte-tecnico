@@ -1,23 +1,24 @@
 <?php
+
 namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * AppBundle\Entity\Insumo
  * @ORM\Table(name="insumo",uniqueConstraints={@ORM\UniqueConstraint(name="insumo_idx", columns={"tipo_id","marca_id","modelo_id"})})
  * @ORM\Entity(repositoryClass="AppBundle\Entity\InsumoRepository")
  * @UniqueEntity(
- *     fields={"tipo","marca","modelo"}, errorPath="tipo", 
+ *     fields={"tipo","marca","modelo"}, errorPath="tipo",
  *     message="Ya existe un insumo de este tipo, marca y modelo."
  * )
  * @ORM\HasLifecycleCallbacks
- * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)   
- * @Gedmo\Loggable()  
+ * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ * @Gedmo\Loggable()
  */
-class Insumo
-{
+class Insumo {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -25,48 +26,55 @@ class Insumo
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $nombre;    
+    protected $nombre;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Tipo",inversedBy="insumos")
      * @ORM\JoinColumn(name="tipo_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $tipo;     
+    protected $tipo;
+
     /**
      * @var string $codigo
      * @ORM\Column(name="codigo", type="string", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $codigo; 
+    protected $codigo;
+
     /**
      * @var string $barcode
      * @ORM\Column(name="barcode", type="string", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $barcode; 
+    protected $barcode;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Marca")
      * @ORM\JoinColumn(name="marca_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $marca;    
+    protected $marca;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Modelo")
      * @ORM\JoinColumn(name="modelo_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
-    protected $modelo;    
+    protected $modelo;
+
     /**
      * @var string $stockMinimo
      * @ORM\Column(name="stock_minimo", type="integer", nullable=true)
      * @Gedmo\Versioned()
      */
-    protected $stockMinimo=0;     
+    protected $stockMinimo = 0;
 
     /**
      * @var datetime $created
@@ -74,12 +82,14 @@ class Insumo
      * @ORM\Column(type="datetime")
      */
     private $created;
+
     /**
      * @var datetime $updated
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
      */
-    private $updated;    
+    private $updated;
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -87,70 +97,73 @@ class Insumo
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+
     /**
      * @var User $updatedBy
      * @Gedmo\Blameable(on="update")
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;    
+    private $updatedBy;
+
     /**
      * @ORM\Column(name="deletedAt", type="datetime", nullable=true)
      */
-    private $deletedAt;    
-    
+    private $deletedAt;
+
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Stock", mappedBy="insumo")
      */
-    protected $stock;        
+    protected $stock;
+
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\StockHistorico", mappedBy="insumo")
      */
-    protected $stockHistorico;        
+    protected $stockHistorico;
 
     public function __toString() {
         return $this->getTextoCompleto();
-    }    
+    }
+
     public function getTextoCompleto() {
         $marca = ( $this->getMarca() ) ? $this->getMarca()->getNombre() : '';
         $modelo = ( $this->getModelo() ) ? $this->getModelo()->getNombre() : '';
-        return $this->getTipo()->getNombre().' │ '.$marca.' │ '.$modelo;
+        return $this->getTipo()->getNombre() . ' │ ' . $marca . ' │ ' . $modelo;
     }
-
 
     public function getTexto() {
         $marca = ( $this->getMarca() ) ? $this->getMarca()->getNombre() : '';
         $modelo = ( $this->getModelo() ) ? $this->getModelo()->getNombre() : '';
-        return $this->getBarcode().' - '.$this->getTipo()->getNombre().' - '.$marca.' - '.$modelo;
-    }    
-
-    public function getCodigoItem(){
-       return  ( $this->barcode ) ? $this->barcode : $this->codigo;
+        return $this->getBarcode() . ' - ' . $this->getTipo()->getNombre() . ' - ' . $marca . ' - ' . $modelo;
     }
-    
+
+    public function getCodigoItem() {
+        return ( $this->barcode ) ? $this->barcode : $this->codigo;
+    }
+
     public function getStockByDeposito($dep) {
         foreach ($this->getStock() as $stock) {
-            if( $stock->getDeposito()->getId()==$dep ){
+            if ($stock->getDeposito()->getId() == $dep) {
                 return ($stock->getCantidad()) ? $stock->getCantidad() : 0;
             }
         }
         return 0;
     }
+
     public function getStockTotal() {
         $total = 0;
         foreach ($this->getStock() as $stock) {
-            $total = $total + ( $stock->getCantidad() ? $stock->getCantidad() : 0);            
+            $total = $total + ( $stock->getCantidad() ? $stock->getCantidad() : 0);
         }
         return $total;
     }
-    
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -160,8 +173,7 @@ class Insumo
      * @param string $nombre
      * @return Insumo
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -170,10 +182,9 @@ class Insumo
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
 
@@ -183,8 +194,7 @@ class Insumo
      * @param string $barcode
      * @return Insumo
      */
-    public function setBarcode($barcode)
-    {
+    public function setBarcode($barcode) {
         $this->barcode = $barcode;
 
         return $this;
@@ -193,10 +203,9 @@ class Insumo
     /**
      * Get barcode
      *
-     * @return string 
+     * @return string
      */
-    public function getBarcode()
-    {
+    public function getBarcode() {
         return $this->barcode;
     }
 
@@ -206,8 +215,7 @@ class Insumo
      * @param integer $stockMinimo
      * @return Insumo
      */
-    public function setStockMinimo($stockMinimo)
-    {
+    public function setStockMinimo($stockMinimo) {
         $this->stockMinimo = $stockMinimo;
 
         return $this;
@@ -216,10 +224,9 @@ class Insumo
     /**
      * Get stockMinimo
      *
-     * @return integer 
+     * @return integer
      */
-    public function getStockMinimo()
-    {
+    public function getStockMinimo() {
         return $this->stockMinimo;
     }
 
@@ -229,8 +236,7 @@ class Insumo
      * @param \DateTime $created
      * @return Insumo
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -239,10 +245,9 @@ class Insumo
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -252,8 +257,7 @@ class Insumo
      * @param \DateTime $updated
      * @return Insumo
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -262,10 +266,9 @@ class Insumo
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -275,8 +278,7 @@ class Insumo
      * @param \DateTime $deletedAt
      * @return Insumo
      */
-    public function setDeletedAt($deletedAt)
-    {
+    public function setDeletedAt($deletedAt) {
         $this->deletedAt = $deletedAt;
 
         return $this;
@@ -285,10 +287,9 @@ class Insumo
     /**
      * Get deletedAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getDeletedAt()
-    {
+    public function getDeletedAt() {
         return $this->deletedAt;
     }
 
@@ -298,8 +299,7 @@ class Insumo
      * @param \ConfigBundle\Entity\Tipo $tipo
      * @return Insumo
      */
-    public function setTipo(\ConfigBundle\Entity\Tipo $tipo = null)
-    {
+    public function setTipo(\ConfigBundle\Entity\Tipo $tipo = null) {
         $this->tipo = $tipo;
 
         return $this;
@@ -308,10 +308,9 @@ class Insumo
     /**
      * Get tipo
      *
-     * @return \ConfigBundle\Entity\Tipo 
+     * @return \ConfigBundle\Entity\Tipo
      */
-    public function getTipo()
-    {
+    public function getTipo() {
         return $this->tipo;
     }
 
@@ -321,8 +320,7 @@ class Insumo
      * @param \ConfigBundle\Entity\Marca $marca
      * @return Insumo
      */
-    public function setMarca(\ConfigBundle\Entity\Marca $marca = null)
-    {
+    public function setMarca(\ConfigBundle\Entity\Marca $marca = null) {
         $this->marca = $marca;
 
         return $this;
@@ -331,10 +329,9 @@ class Insumo
     /**
      * Get marca
      *
-     * @return \ConfigBundle\Entity\Marca 
+     * @return \ConfigBundle\Entity\Marca
      */
-    public function getMarca()
-    {
+    public function getMarca() {
         return $this->marca;
     }
 
@@ -344,8 +341,7 @@ class Insumo
      * @param \ConfigBundle\Entity\Modelo $modelo
      * @return Insumo
      */
-    public function setModelo(\ConfigBundle\Entity\Modelo $modelo = null)
-    {
+    public function setModelo(\ConfigBundle\Entity\Modelo $modelo = null) {
         $this->modelo = $modelo;
 
         return $this;
@@ -354,10 +350,9 @@ class Insumo
     /**
      * Get modelo
      *
-     * @return \ConfigBundle\Entity\Modelo 
+     * @return \ConfigBundle\Entity\Modelo
      */
-    public function getModelo()
-    {
+    public function getModelo() {
         return $this->modelo;
     }
 
@@ -367,8 +362,7 @@ class Insumo
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Insumo
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -377,10 +371,9 @@ class Insumo
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -390,8 +383,7 @@ class Insumo
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Insumo
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -400,10 +392,9 @@ class Insumo
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -413,8 +404,7 @@ class Insumo
      * @param string $codigo
      * @return Insumo
      */
-    public function setCodigo($codigo)
-    {
+    public function setCodigo($codigo) {
         $this->codigo = $codigo;
 
         return $this;
@@ -423,17 +413,16 @@ class Insumo
     /**
      * Get codigo
      *
-     * @return string 
+     * @return string
      */
-    public function getCodigo()
-    {
+    public function getCodigo() {
         return $this->codigo;
     }
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->stock = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -443,8 +432,7 @@ class Insumo
      * @param \AppBundle\Entity\Stock $stock
      * @return Insumo
      */
-    public function addStock(\AppBundle\Entity\Stock $stock)
-    {
+    public function addStock(\AppBundle\Entity\Stock $stock) {
         $this->stock[] = $stock;
 
         return $this;
@@ -455,18 +443,16 @@ class Insumo
      *
      * @param \AppBundle\Entity\Stock $stock
      */
-    public function removeStock(\AppBundle\Entity\Stock $stock)
-    {
+    public function removeStock(\AppBundle\Entity\Stock $stock) {
         $this->stock->removeElement($stock);
     }
 
     /**
      * Get stock
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getStock()
-    {
+    public function getStock() {
         return $this->stock;
     }
 
@@ -476,8 +462,7 @@ class Insumo
      * @param \AppBundle\Entity\StockHistorico $stockHistorico
      * @return Insumo
      */
-    public function addStockHistorico(\AppBundle\Entity\StockHistorico $stockHistorico)
-    {
+    public function addStockHistorico(\AppBundle\Entity\StockHistorico $stockHistorico) {
         $this->stockHistorico[] = $stockHistorico;
 
         return $this;
@@ -488,18 +473,17 @@ class Insumo
      *
      * @param \AppBundle\Entity\StockHistorico $stockHistorico
      */
-    public function removeStockHistorico(\AppBundle\Entity\StockHistorico $stockHistorico)
-    {
+    public function removeStockHistorico(\AppBundle\Entity\StockHistorico $stockHistorico) {
         $this->stockHistorico->removeElement($stockHistorico);
     }
 
     /**
      * Get stockHistorico
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getStockHistorico()
-    {
+    public function getStockHistorico() {
         return $this->stockHistorico;
     }
+
 }

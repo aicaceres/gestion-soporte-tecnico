@@ -26,6 +26,13 @@ class ParametroType extends AbstractType {
                 'label' => 'Clase:',
                 'choices_as_values' => true, 'multiple' => false, 'expanded' => true));
         }
+        if (property_exists($data, 'subclase')) {
+            $builder->add('subclase', 'choice', array('choices' => array(
+                    'Hardware' => 'HARDWARE', 'Insumo' => 'INSUMO'),
+                'label' => 'Subclase:',
+                'empty_data' => 'HARDWARE',
+                'choices_as_values' => true, 'multiple' => false, 'expanded' => true));
+        }
         if (property_exists($data, 'modelos')) {
             $builder->add('modelos', 'collection', array(
                 'type' => new ModeloType(),
@@ -36,7 +43,7 @@ class ParametroType extends AbstractType {
                 'prototype_name' => 'itemform',
                 'attr' => array(
                     'class' => 'row item'
-        )));
+            )));
         }
         if (property_exists($data, 'marca')) {
             $builder->add('marca', 'entity', array('label' => 'Marca:',

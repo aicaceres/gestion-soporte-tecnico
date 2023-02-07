@@ -44,6 +44,16 @@
                     </fieldset>
                 </div>    
             {% endif %}
+            {% if form.subclase is defined %}
+                <div class="col-md-12 subclase {{ entity.clase == 'E' ? 'hidden' : '' }}">
+                    <fieldset>
+                        {{ form_row(form.subclase) }}                        
+                    </fieldset>
+                    <p class="text-info ">
+                            <i class="fa fa-info-circle" ></i> <small>Valor para diferenciar Hardware/Perifericos de Soporte Técnico de Insumos para entrega en Mesa de Entradas</small>
+                        </p>
+                </div>    
+            {% endif %}
 
             {% if form.modelos is defined %}
                 <div class="col-md-12">

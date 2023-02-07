@@ -1,0 +1,35 @@
+{% extends "dataTableList.html.twig" %}
+
+{% block page_content %}
+{% include "notification.html.twig" %}    
+
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{ box_color }}'>
+            <div class='box-header'>
+                <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; Entrega de Insumo - Mesa de Entradas</h3>  
+            </div><!-- /.box-header -->
+            <div class='box-body'>                                             
+                <form id="searchform" action="{{ path('insumo_entrega') }}" method="get" class="form-horizontal">
+                     
+                       
+                </form>          
+                        
+                        
+                <div class="table-responsive" style="padding:0 15px" >
+                    
+                </div>
+            </div>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}
+{% block javascripts_inline %}   
+    {{parent()}}
+<script type="text/javascript">
+$(document).ready(function() {    
+    
+});
+
+</script>    
+{% endblock %}

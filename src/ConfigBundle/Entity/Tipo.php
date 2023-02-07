@@ -1,9 +1,11 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\Tipo
  *
@@ -14,8 +16,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     message="Este tipo ya existe en esta clase."
  * )
  */
-class Tipo
-{
+class Tipo {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -23,30 +24,42 @@ class Tipo
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false)
      * @Assert\NotBlank()
      */
     protected $nombre;
+
     /**
      * @var string $clase
      * @ORM\Column(name="clase", type="string", length=1, nullable=false)
      */
     protected $clase;
-    
+
+    /**
+     * @var string $subclase
+     * @ORM\Column(name="subclase", type="string")
+     * @Gedmo\Versioned()
+     * INSUMO | HARDWARE
+     */
+    protected $subclase = 'HARDWARE';
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */
     private $created;
+
     /**
      * @var datetime $updated
      * @Gedmo\Timestampable(on="update")
      * @ORM\Column(type="datetime")
      */
-    private $updated;    
+    private $updated;
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -54,53 +67,50 @@ class Tipo
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
+
     /**
      * @var User $updatedBy
      * @Gedmo\Blameable(on="update")
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;    
-    
+    private $updatedBy;
+
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Insumo", mappedBy="tipo")
-    */
+     */
     protected $insumos;
-    
 
     public function __toString() {
         return $this->nombre;
     }
-    
-    public function getInsumosEnStock(){
-        foreach ($this->getInsumos() as $ins){
-            if($ins->getStockTotal()>0 ){
+
+    public function getInsumosEnStock() {
+        foreach ($this->getInsumos() as $ins) {
+            if ($ins->getStockTotal() > 0) {
                 return false;
-            }                
+            }
         }
         return true;
     }
 
-
     public function getTxtselect() {
-        return $this->nombre.' ('.$this->getClase().')' ;
-    } 
-    
+        return $this->nombre . ' (' . $this->getClase() . ')';
+    }
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->clase = 'E';
     }
-    
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -110,8 +120,7 @@ class Tipo
      * @param string $nombre
      * @return Nacionalidad
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -120,13 +129,11 @@ class Tipo
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
-
 
     /**
      * Set clase
@@ -134,8 +141,7 @@ class Tipo
      * @param string $clase
      * @return Tipo
      */
-    public function setClase($clase)
-    {
+    public function setClase($clase) {
         $this->clase = $clase;
 
         return $this;
@@ -144,11 +150,31 @@ class Tipo
     /**
      * Get clase
      *
-     * @return string 
+     * @return string
      */
-    public function getClase()
-    {
+    public function getClase() {
         return $this->clase;
+    }
+
+    /**
+     * Set subclase
+     *
+     * @param string $subclase
+     * @return Tipo
+     */
+    public function setSubclase($subclase) {
+        $this->subclase = $subclase;
+
+        return $this;
+    }
+
+    /**
+     * Get subclase
+     *
+     * @return string
+     */
+    public function getSubclase() {
+        return $this->subclase;
     }
 
     /**
@@ -157,8 +183,7 @@ class Tipo
      * @param \DateTime $created
      * @return Tipo
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -167,10 +192,9 @@ class Tipo
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -180,8 +204,7 @@ class Tipo
      * @param \DateTime $updated
      * @return Tipo
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -190,10 +213,9 @@ class Tipo
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -203,8 +225,7 @@ class Tipo
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Tipo
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -213,10 +234,9 @@ class Tipo
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -226,8 +246,7 @@ class Tipo
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Tipo
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -236,13 +255,11 @@ class Tipo
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
-
 
     /**
      * Add insumos
@@ -250,8 +267,7 @@ class Tipo
      * @param \AppBundle\Entity\Insumo $insumos
      * @return Tipo
      */
-    public function addInsumo(\AppBundle\Entity\Insumo $insumos)
-    {
+    public function addInsumo(\AppBundle\Entity\Insumo $insumos) {
         $this->insumos[] = $insumos;
 
         return $this;
@@ -262,18 +278,17 @@ class Tipo
      *
      * @param \AppBundle\Entity\Insumo $insumos
      */
-    public function removeInsumo(\AppBundle\Entity\Insumo $insumos)
-    {
+    public function removeInsumo(\AppBundle\Entity\Insumo $insumos) {
         $this->insumos->removeElement($insumos);
     }
 
     /**
      * Get insumos
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function getInsumos()
-    {
+    public function getInsumos() {
         return $this->insumos;
     }
+
 }

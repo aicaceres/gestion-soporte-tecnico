@@ -3,9 +3,14 @@
     {{parent()}}
     <link rel="stylesheet" href="{{ asset('bundles/app/jquery-ui/jquery-ui.min.css') }}">   
     <style>
-        #configbundle_parametro_clase .radio{ display:inline-block;}
-        #configbundle_parametro_clase .radio label{ font-weight: bold;}    
-        .iradio_square-blue{margin-right: 3px;}
+        #configbundle_parametro_clase .radio, 
+        #configbundle_parametro_subclase .radio 
+        { display:inline-block;}
+        #configbundle_parametro_clase .radio label, 
+        #configbundle_parametro_subclase .radio label
+        { font-weight: bold;}    
+        .iradio_square-blue
+        {margin-right: 3px;}
     </style>
 {% endblock %}
 {% set table = app.request.attributes.get('table') %}
@@ -128,11 +133,17 @@ $(document).ready(function() {
                         addNewItem($('#'+tableId+' tbody'));
                     });
                 }
-                $('#configbundle_parametro_clase').iCheck({
+                $('#configbundle_parametro_clase, #configbundle_parametro_subclase').iCheck({
                     checkboxClass: 'icheckbox_square-blue',
                     radioClass: 'iradio_square-blue',
                     increaseArea: '20%' // optional
                   });
+                  // mostrar/ocultar subclase
+                  $('#configbundle_parametro_clase').on('ifChecked', function(event){
+                      if( event.target.value == 'I') $('.subclase').removeClass('hidden')
+                      else $('.subclase').addClass('hidden')
+                   });
+                  
                 $('#configbundle_parametro_inicial,#configbundle_parametro_activo').iCheck({
                     checkboxClass: 'icheckbox_square-blue',
                     radioClass: 'iradio_square-blue',
