@@ -15,10 +15,10 @@
             </div>  
     {% endif %}         
     </div> 
-        
+    {% set title = subclase == 'INSUMO' ? 'Insumos' : 'Hardware/Periféricos' %}
     <div class="col-md-12 insumos">        
         <div class="form-group ">
-            <label>Insumos:&nbsp;</label>
+            <label>{{ title }}:&nbsp;</label>
             <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover tablaInsumos">
                 <thead>
                     <tr>
@@ -37,12 +37,12 @@
             <div  class="col-md-12" style="padding: 0">                                                        
                 <div class='box box-default box-solid insumosDatatable'>
                     <div class='box-header'>                                    
-                        <h6 class="text-primary" style="margin:0;font-weight:bold;">Buscar Insumos</h6> 
+                        <h6 class="text-primary" style="margin:0;font-weight:bold;">Buscar {{ title }}</h6> 
                         <div class="pull-right box-tools">
                             <button type="button" class="btn btn-box-tool closesearch" ><i class="fa fa-close"></i></button>
                         </div>
                     </div><!-- /.box-header -->
-                    <div id="datatableslist" class='box-body'></div>       
+                    <div id="datatableslist" class='box-body' data-subclase="{{ subclase }}"></div>       
                 </div>                             
             </div>                
         </div> 

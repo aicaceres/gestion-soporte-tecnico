@@ -89,7 +89,9 @@ class InsumoRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         $query->select('i')
                 ->from('AppBundle\Entity\InsumoxTarea', 'i')
-                ->where("1=1");
+                ->innerJoin('i.insumo', 'in')
+                ->innerJoin('in.tipo', 't')
+                ->where("t.subclase='HARDWARE'");
         switch ($estado) {
             case 1: {
                     $query->andWhere('i.fechaAutorizado is null');
@@ -117,7 +119,10 @@ class InsumoRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         $query->select('count(i.id)')
                 ->from('AppBundle\Entity\InsumoxTarea', 'i')
-                ->where("i.fechaAutorizado is null");
+                ->innerJoin('i.insumo', 'in')
+                ->innerJoin('in.tipo', 't')
+                ->where("i.fechaAutorizado is null")
+                ->andWhere("t.subclase='HARDWARE'");
         return $query->getQuery()->getSingleScalarResult();
     }
 
@@ -145,7 +150,7 @@ class InsumoRepository extends EntityRepository {
         return $query->getQuery()->getSingleScalarResult();
     }
 
-    public function getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions) {
+    public function getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions, $subclase) {
         // Create Main Query
         $query = $this->_em->createQueryBuilder();
         $query->select("e")
@@ -160,26 +165,27 @@ class InsumoRepository extends EntityRepository {
         $query
                 ->innerJoin('e.tipo', 'tipo')
                 ->innerJoin('e.marca', 'marca')
-                ->innerJoin('e.modelo', 'modelo');
+                ->innerJoin('e.modelo', 'modelo')
+                ->andWhere("tipo.subclase='" . $subclase . "'");
 
         $countQuery
                 ->innerJoin('e.tipo', 'tipo')
                 ->innerJoin('e.marca', 'marca')
-                ->innerJoin('e.modelo', 'modelo');
+                ->innerJoin('e.modelo', 'modelo')
+                ->andWhere("tipo.subclase='" . $subclase . "'");
 
         // Other conditions than the ones sent by the Ajax call ?
-        if ($otherConditions === null) {
-            // No
-            // However, add a "always true" condition to keep an uniform treatment in all cases
-            $query->where("1=1");
-            $countQuery->where("1=1");
-        }
-        else {
-            // Add condition
-            $query->where($otherConditions);
-            $countQuery->where($otherConditions);
-        }
-
+//        if ($otherConditions === null) {
+//            // No
+//            // However, add a "always true" condition to keep an uniform treatment in all cases
+//            $query->where("1=1");
+//            $countQuery->where("1=1");
+//        }
+//        else {
+//            // Add condition
+//            $query->where($otherConditions);
+//            $countQuery->where($otherConditions);
+//        }
         // Fields Search
         foreach ($columns as $key => $column) {
 

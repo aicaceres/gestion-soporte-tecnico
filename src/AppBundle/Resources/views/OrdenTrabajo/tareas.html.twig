@@ -87,7 +87,8 @@
                         <div class="col-md-12" style="margin-bottom: 10px;">
                             <div class="btn-group">
                                 <button type="button" class="btn btn-primary addTarea" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'NT'}) }}">Agregar Nota</button>
-                                <button type="button" class="btn btn-primary addTarea" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'SI'}) }}">Solicitud de Insumo</button>
+                                <button type="button" class="btn btn-primary addTarea" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'SI'}) }}">Solicitud de Hardware</button>
+                                <button type="button" class="btn btn-primary addTarea" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'PI'}) }}">Pedido de Insumos</button>
                                 <button type="button" class="btn btn-primary addTarea" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'DS'}) }}">Derivar Soporte</button>
                                 <button type="button" class="btn btn-primary addTarea need-equipo" disabled="disabled" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'RE'}) }}">Reubicar Equipo</button>
                                 <button type="button" class="btn btn-primary addTarea need-equipo one" disabled="disabled" data-url="{{ path('render_add_tarea',{'id':entity.id,'tipo':'CE'}) }}" data-size="xl">Reemplazo de Equipo</button>                                

@@ -63,9 +63,9 @@ class InsumoController extends Controller {
 
         // Further filtering can be done in the Repository by passing necessary arguments
         $otherConditions = "array or whatever is needed";
-
+        $subclase = $request->request->get('subclase');
         // Get results from the Repository
-        $results = $this->repository->getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions = null);
+        $results = $this->repository->getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $subclase);
 
         // Returned objects are of type Town
         $objects = $results["results"];
@@ -163,9 +163,10 @@ class InsumoController extends Controller {
      * @Method("GET")
      */
     public function getAutocompleteInsumoTipo(Request $request) {
-        $term = $request->get('q');
+        $term = $request->get('search');
+        $subclase = $request->get('subclase');
         $em = $this->getDoctrine()->getManager();
-        $results = $em->getRepository('ConfigBundle:Tipo')->filterTipoInsumoByTerm($term);
+        $results = $em->getRepository('ConfigBundle:Tipo')->filterTipoInsumoByTerm($term, $subclase);
         return new JsonResponse($results);
     }
 

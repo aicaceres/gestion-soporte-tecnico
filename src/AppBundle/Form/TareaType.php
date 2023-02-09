@@ -70,8 +70,8 @@ class TareaType extends AbstractType {
             $builder->add('estadoNuevoId', 'hidden', array('mapped' => false))
                     ->add('ubicacionNueva', new EquipoUbicacionType(), array('mapped' => false));
         }
-        if ($tipoTarea == 'SI') {
-            // solicitud de insumos
+        if (in_array($tipoTarea, array('SI', 'PI'))) {
+            // solicitud de hardware // pedido de insumos
             $builder->add('insumos', 'collection', array(
                 'type' => new InsumoxTareaType(),
                 'by_reference' => false,

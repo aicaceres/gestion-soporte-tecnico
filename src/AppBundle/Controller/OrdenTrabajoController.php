@@ -470,9 +470,15 @@ class OrdenTrabajoController extends Controller {
                 );
                 break;
             case 'SI':
-                // SI= Solicitud de Insumo
+                // SI= Solicitud de Hardware
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea-insumo.html.twig',
-                        array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot)
+                        array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot, 'subclase' => 'HARDWARE')
+                );
+                break;
+            case 'PI':
+                // SI= Pedido de Insumo
+                $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea-insumo.html.twig',
+                        array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot, 'subclase' => 'INSUMO')
                 );
                 break;
             case 'CE':
@@ -682,7 +688,7 @@ class OrdenTrabajoController extends Controller {
                     $salida = 'OUT';
                 }
                 if ($entity->getTipoTarea()->getAbreviatura() == 'SI') {
-                    // solicitar insumos
+                    // solicitar hardware
                     $text = '';
                     foreach ($entity->getInsumos() as $insumoxTarea) {
                         $insumoxTarea->setTarea($entity);

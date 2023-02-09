@@ -7,7 +7,7 @@
     <div class='col-md-12'>
         <div class='box box-solid {{ box_color }}'>
             <div class='box-header'>
-                <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; Solicitud de Insumo desde Soporte Técnico</h3>  
+                <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; Solicitud de Hardware/Perifericos - Soporte Técnico</h3>  
             </div><!-- /.box-header -->
             <div class='box-body'>                                             
                 <form id="searchform" action="{{ path('insumo_solicitud') }}" method="get" class="form-horizontal">
@@ -75,7 +75,7 @@
                                     <td><span class="hidden">{{ entity.created|date('YmdHi') }}</span>{{ entity.created|date('d-m-Y H:i') }}</td>
                                     <td class="insumotxt">{% if entity.insumo %} {{entity.insumo.texto }} {% else %} {{ entity.descripcion }} {% endif %}</td>
                                     <td class="number stockTd" style="font-weight:bold">{% if entity.insumo %} {{entity.insumo.stockByDeposito(depId)|number_format(0) }} {% endif %}</td>
-                                    <td class="number cantidad">{{entity.cantidad|number_format(0) }}</td>
+                                    <td class="number cantidad">{{entity.cantidad|number_format(0) }} </td>
                                     <td class="hidden-xs">{{entity.createdBy }} 
                                         <a href="javascript:void(0)" class="view-ot pull-right" data-nro="{{ desc }}" data-url="{{ path('soporte_ordentrabajo_show', { 'id': entity.tarea.ordenTrabajo.id }) }}" 
                                            data-toggle="tooltip" title="{{ tooltip }}"><i class="fa fa-briefcase"></i></a>                                                                                
