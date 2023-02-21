@@ -200,4 +200,15 @@ class UbicacionRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
+    public function getDepositosAsignados($userId) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('d')
+                ->from('ConfigBundle\Entity\Departamento', 'd')
+                ->innerJoin('d.edificio', 'e')
+                ->innerJoin('e.usuarios', 'us')
+                ->where('d.deposito=1')
+                ->andWhere('us.id=' . $userId);
+        return $query->getQuery()->getResult();
+    }
+
 }

@@ -60,6 +60,11 @@ class InsumoxTarea {
     protected $autorizante;
 
     /**
+     * @ORM\OneToOne(targetEntity="AppBundle\Entity\InsumoEntregaDetalle", mappedBy="insumoxTarea")
+     */
+    protected $insumoEntregaDetalle;
+
+    /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
@@ -381,4 +386,27 @@ class InsumoxTarea {
         return $this->cantidadAprobada;
     }
 
+
+    /**
+     * Set insumoEntregaDetalle
+     *
+     * @param \AppBundle\Entity\InsumoEntregaDetalle $insumoEntregaDetalle
+     * @return InsumoxTarea
+     */
+    public function setInsumoEntregaDetalle(\AppBundle\Entity\InsumoEntregaDetalle $insumoEntregaDetalle = null)
+    {
+        $this->insumoEntregaDetalle = $insumoEntregaDetalle;
+
+        return $this;
+    }
+
+    /**
+     * Get insumoEntregaDetalle
+     *
+     * @return \AppBundle\Entity\InsumoEntregaDetalle 
+     */
+    public function getInsumoEntregaDetalle()
+    {
+        return $this->insumoEntregaDetalle;
+    }
 }

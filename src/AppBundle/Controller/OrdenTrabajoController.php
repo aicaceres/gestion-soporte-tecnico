@@ -19,6 +19,8 @@ use AppBundle\Entity\EquipoUbicacion;
 use AppBundle\Entity\Mensajeria;
 use AppBundle\Entity\Documentacion;
 use AppBundle\Form\DocumentacionType;
+use AppBundle\Entity\InsumoEntrega;
+use AppBundle\Entity\InsumoEntregaDetalle;
 /* use AppBundle\Entity\Requerimiento;
   use AppBundle\Form\RequerimientoType;
   use AppBundle\Form\OrdenTrabajoType;
@@ -476,7 +478,7 @@ class OrdenTrabajoController extends Controller {
                 );
                 break;
             case 'PI':
-                // SI= Pedido de Insumo
+                // PI= Pedido de Insumo
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea-insumo.html.twig',
                         array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot, 'subclase' => 'INSUMO')
                 );
@@ -696,6 +698,32 @@ class OrdenTrabajoController extends Controller {
                         $text = $text . ' [ ' . $insumoxTarea->getCantidad() . ' - ' . $insumoxTarea->getDescripcion() . ' ] ';
                     }
                     $entity->setDescripcion($text);
+                    $em->flush();
+                    $salida = 'OK';
+                }
+                if ($entity->getTipoTarea()->getAbreviatura() == 'PI') {
+                    // solicitar insumo
+                    $text = '';
+                    // Generar pedido de insumo a mesa de entradas
+                    $pedido = new InsumoEntrega();
+                    $pedido->setFecha(new \DateTime());
+                    $pedido->setEstado('PENDIENTE');
+                    $pedido->setResponsable($this->getUser()->getNombre());
+                    $servTecnico = $em->getRepository('ConfigBundle:Departamento')->findOneByServicioTecnico(1);
+                    $pedido->setSolicitante($servTecnico);
+
+                    foreach ($entity->getInsumos() as $insumoxTarea) {
+                        $insumoxTarea->setTarea($entity);
+                        $detped = new InsumoEntregaDetalle();
+                        $detped->setInsumo($insumoxTarea->getInsumo());
+                        $detped->setCantidad($insumoxTarea->getCantidad());
+                        $detped->setInsumoxTarea($insumoxTarea);
+                        $pedido->addDetalle($detped);
+                        $em->flush();
+                        $text = $text . ' [ ' . $insumoxTarea->getCantidad() . ' - ' . $insumoxTarea->getDescripcion() . ' ] ';
+                    }
+                    $entity->setDescripcion($text);
+                    $em->persist($pedido);
                     $em->flush();
                     $salida = 'OK';
                 }

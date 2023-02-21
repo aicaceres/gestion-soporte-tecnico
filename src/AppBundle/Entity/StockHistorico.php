@@ -1,16 +1,17 @@
 <?php
+
 namespace AppBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
 /**
  * AppBundle\Entity\StockHistorico
  *
  * @ORM\Table(name="stock_historico")
  * @ORM\Entity(repositoryClass="AppBundle\Entity\StockRepository")
  */
-class StockHistorico extends Controller
-{
+class StockHistorico extends Controller {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -18,54 +19,55 @@ class StockHistorico extends Controller
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
-    
+
     /**
      * @var date $fecha
      * @ORM\Column(name="fecha", type="date", nullable=false)
      */
-    private $fecha;     
-    
+    private $fecha;
+
     /**
      * @var string $tipo
      * @ORM\Column(name="tipo", type="string", nullable=false)
      */
     // Nombre de la tabla de donde se guarda el id de movimiento.
-    private $tipo;     
-    
+    private $tipo;
+
     /**
      * @var integer $movimiento
      * @ORM\Column(name="movimiento", type="integer")
      */
-    private $movimiento; 
-    
+    private $movimiento;
+
     /**
      * @var string $signo
      * @ORM\Column(name="signo", type="string")
      */
-    private $signo='+'; 
-    
-     /**
+    private $signo = '+';
+
+    /**
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=2 )
      */
     protected $cantidad;
-     /**
+
+    /**
      * @var integer $stock
      * @ORM\Column(name="stock", type="decimal", scale=2, nullable=true )
      */
     protected $stock;
-    
-     /**
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Departamento")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
      */
-    protected $deposito; 
-    
-     /**
+    protected $deposito;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Insumo", inversedBy="stockHistorico")
      * @ORM\JoinColumn(name="insumo_id", referencedColumnName="id",onDelete="CASCADE")
      */
-    protected $insumo; 
+    protected $insumo;
 
     /**
      * @var datetime $created
@@ -73,7 +75,7 @@ class StockHistorico extends Controller
      * @ORM\Column(type="datetime")
      */
     private $created;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -81,12 +83,11 @@ class StockHistorico extends Controller
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
     public $nroComprobante;
     public $equipo;
     public $urlMovimiento;
 
-    public function getTipoMovimiento(){
+    public function getTipoMovimiento() {
         switch ($this->getTipo()) {
             case 'AJUSTE':
                 return 'Ajuste de Stock';
@@ -96,12 +97,14 @@ class StockHistorico extends Controller
                 return 'Movimiento Interdepósito';
             case 'SOPORTE':
                 return 'Soporte Técnico';
+            case 'ENTREGAINSUMO':
+                return 'Entrega de Insumo';
             default:
                 return NULL;
         }
     }
 
-    public function getEntidadMovimiento(){
+    public function getEntidadMovimiento() {
         switch ($this->getTipo()) {
             case 'AJUSTE':
                 return 'AppBundle:StockAjuste';
@@ -111,6 +114,8 @@ class StockHistorico extends Controller
                 return 'AppBundle:StockMovimiento';
             case 'SOPORTE':
                 return 'AppBundle:InsumoxTarea';
+            case 'ENTREGAINSUMO':
+                return 'AppBundle:InsumoEntrega';
             default:
                 return NULL;
         }
@@ -119,10 +124,9 @@ class StockHistorico extends Controller
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -132,8 +136,7 @@ class StockHistorico extends Controller
      * @param \DateTime $fecha
      * @return StockHistorico
      */
-    public function setFecha($fecha)
-    {
+    public function setFecha($fecha) {
         $this->fecha = $fecha;
 
         return $this;
@@ -142,10 +145,9 @@ class StockHistorico extends Controller
     /**
      * Get fecha
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getFecha()
-    {
+    public function getFecha() {
         return $this->fecha;
     }
 
@@ -155,8 +157,7 @@ class StockHistorico extends Controller
      * @param string $tipo
      * @return StockHistorico
      */
-    public function setTipo($tipo)
-    {
+    public function setTipo($tipo) {
         $this->tipo = $tipo;
 
         return $this;
@@ -165,10 +166,9 @@ class StockHistorico extends Controller
     /**
      * Get tipo
      *
-     * @return string 
+     * @return string
      */
-    public function getTipo()
-    {
+    public function getTipo() {
         return $this->tipo;
     }
 
@@ -178,8 +178,7 @@ class StockHistorico extends Controller
      * @param integer $movimiento
      * @return StockHistorico
      */
-    public function setMovimiento($movimiento)
-    {
+    public function setMovimiento($movimiento) {
         $this->movimiento = $movimiento;
 
         return $this;
@@ -188,10 +187,9 @@ class StockHistorico extends Controller
     /**
      * Get movimiento
      *
-     * @return integer 
+     * @return integer
      */
-    public function getMovimiento()
-    {
+    public function getMovimiento() {
         return $this->movimiento;
     }
 
@@ -201,8 +199,7 @@ class StockHistorico extends Controller
      * @param string $signo
      * @return StockHistorico
      */
-    public function setSigno($signo)
-    {
+    public function setSigno($signo) {
         $this->signo = $signo;
 
         return $this;
@@ -211,10 +208,9 @@ class StockHistorico extends Controller
     /**
      * Get signo
      *
-     * @return string 
+     * @return string
      */
-    public function getSigno()
-    {
+    public function getSigno() {
         return $this->signo;
     }
 
@@ -224,8 +220,7 @@ class StockHistorico extends Controller
      * @param string $cantidad
      * @return StockHistorico
      */
-    public function setCantidad($cantidad)
-    {
+    public function setCantidad($cantidad) {
         $this->cantidad = $cantidad;
 
         return $this;
@@ -234,10 +229,9 @@ class StockHistorico extends Controller
     /**
      * Get cantidad
      *
-     * @return string 
+     * @return string
      */
-    public function getCantidad()
-    {
+    public function getCantidad() {
         return $this->cantidad;
     }
 
@@ -247,8 +241,7 @@ class StockHistorico extends Controller
      * @param \DateTime $created
      * @return StockHistorico
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -257,10 +250,9 @@ class StockHistorico extends Controller
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -270,8 +262,7 @@ class StockHistorico extends Controller
      * @param \ConfigBundle\Entity\Departamento $deposito
      * @return StockHistorico
      */
-    public function setDeposito(\ConfigBundle\Entity\Departamento $deposito = null)
-    {
+    public function setDeposito(\ConfigBundle\Entity\Departamento $deposito = null) {
         $this->deposito = $deposito;
 
         return $this;
@@ -280,10 +271,9 @@ class StockHistorico extends Controller
     /**
      * Get deposito
      *
-     * @return \ConfigBundle\Entity\Departamento 
+     * @return \ConfigBundle\Entity\Departamento
      */
-    public function getDeposito()
-    {
+    public function getDeposito() {
         return $this->deposito;
     }
 
@@ -293,8 +283,7 @@ class StockHistorico extends Controller
      * @param \AppBundle\Entity\Insumo $insumo
      * @return StockHistorico
      */
-    public function setInsumo(\AppBundle\Entity\Insumo $insumo = null)
-    {
+    public function setInsumo(\AppBundle\Entity\Insumo $insumo = null) {
         $this->insumo = $insumo;
 
         return $this;
@@ -303,10 +292,9 @@ class StockHistorico extends Controller
     /**
      * Get insumo
      *
-     * @return \AppBundle\Entity\Insumo 
+     * @return \AppBundle\Entity\Insumo
      */
-    public function getInsumo()
-    {
+    public function getInsumo() {
         return $this->insumo;
     }
 
@@ -316,8 +304,7 @@ class StockHistorico extends Controller
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return StockHistorico
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -326,10 +313,9 @@ class StockHistorico extends Controller
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -339,8 +325,7 @@ class StockHistorico extends Controller
      * @param string $stock
      * @return StockHistorico
      */
-    public function setStock($stock)
-    {
+    public function setStock($stock) {
         $this->stock = $stock;
 
         return $this;
@@ -349,10 +334,10 @@ class StockHistorico extends Controller
     /**
      * Get stock
      *
-     * @return string 
+     * @return string
      */
-    public function getStock()
-    {
+    public function getStock() {
         return $this->stock;
     }
+
 }

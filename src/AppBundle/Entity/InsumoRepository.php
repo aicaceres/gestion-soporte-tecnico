@@ -150,7 +150,7 @@ class InsumoRepository extends EntityRepository {
         return $query->getQuery()->getSingleScalarResult();
     }
 
-    public function getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions, $subclase) {
+    public function getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions, $subclase, $deposito) {
         // Create Main Query
         $query = $this->_em->createQueryBuilder();
         $query->select("e")
@@ -218,6 +218,12 @@ class InsumoRepository extends EntityRepository {
                                         ->andWhere('stk.cantidad>0');
                                 $countQuery->innerJoin('e.stock', 'stk')
                                         ->andWhere('stk.cantidad>0');
+                                if ($deposito) {
+                                    $query->innerJoin('stk.deposito', 'dp')
+                                            ->andWhere('dp.id = ' . $deposito);
+                                    $countQuery->innerJoin('stk.deposito', 'dp')
+                                            ->andWhere('dp.id = ' . $deposito);
+                                }
                             }
                             break;
                         }
@@ -272,6 +278,60 @@ class InsumoRepository extends EntityRepository {
             "results" => $results,
             "countResult" => $countResult
         );
+    }
+
+    public function findEntregaByCriteria($data, $userId) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('r')
+                ->from('AppBundle\Entity\InsumoEntrega', 'r')
+                ->innerJoin('r.solicitante', 's')
+                ->innerJoin('s.edificio', 'e')
+                ->where("1=1");
+        if ($data['estado']) {
+            $query->andWhere("r.estado= '" . $data['estado'] . "'");
+        }
+        if ($data['idUbicacion']) {
+            $query->innerJoin('e.ubicacion', 'u')
+                    ->andWhere('u.id=' . $data['idUbicacion']);
+            if ($data['idEdificio']) {
+                $query->andWhere('e.id=' . $data['idEdificio']);
+                if ($data['idDepartamento']) {
+                    $query->andWhere('s.id=' . $data['idDepartamento']);
+                }
+            }
+        }
+        if ($data['desde'] || $data['hasta']) {
+            // buscar por fecha
+            if ($data['desde']) {
+                $cadena = " r.fecha >= '" . UtilsController::toAnsiDate($data['desde']) . " 00:00:00'";
+                $query->andWhere($cadena);
+            }
+            if ($data['hasta']) {
+                $cadena = " r.fecha <= '" . UtilsController::toAnsiDate($data['hasta']) . " 23:59:59'";
+                $query->andWhere($cadena);
+            }
+        }
+        if ($userId) {
+            // restringuir segun permiso
+            $query->innerJoin('e.usuarios', 'us')
+                    ->andWhere('us.id=' . $userId);
+        }
+        return $query->getQuery()->getResult();
+    }
+
+    public function findByDeposito($id) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("i.id,concat( t.nombre,' | ',m.nombre,' | ',mo.nombre) nombre")
+                ->from('AppBundle\Entity\Insumo', 'i')
+                ->innerJoin('i.tipo', 't')
+                ->innerJoin('i.marca', 'm')
+                ->innerJoin('i.modelo', 'mo')
+                ->innerJoin('i.stock', 's')
+                ->innerJoin('s.deposito', 'd')
+                ->where("t.subclase ='INSUMO'")
+                ->andWhere('d.id = ' . $id)
+                ->andWhere('s.cantidad>0');
+        return $query->getQuery()->getArrayResult();
     }
 
 }

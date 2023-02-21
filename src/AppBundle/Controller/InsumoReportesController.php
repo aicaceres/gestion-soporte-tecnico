@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 use ConfigBundle\Controller\UtilsController;
 
 /**
- * @Route("/insumo_reportes")
+ * @Route("/insumo_reporte")
  */
 class InsumoReportesController extends Controller {
     private $mesesCorto = array("ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC");
@@ -26,11 +26,11 @@ class InsumoReportesController extends Controller {
         'rgba(75, 97, 11, 0.5)', 'rgba(8, 8, 138, 0.5)');
 
     /**
-     * @Route("/", name="insumo_reportes")
+     * @Route("/solicitudes", name="insumo_reporte_solicitudes")
      * @Method("GET")
      * @Template("AppBundle:Reportes:insumo.html.twig")
      */
-    public function indexAction(Request $request) {
+    public function solicitudesAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), 'reportes_insumo');
         $em = $this->getDoctrine()->getManager();
         $em->getFilters()->disable('softdeleteable');
@@ -81,7 +81,7 @@ class InsumoReportesController extends Controller {
             }
         }
 
-        $tiposInsumos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I'), array('nombre' => 'ASC'));
+        $tiposInsumos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I', 'subclase' => 'HARDWARE'), array('nombre' => 'ASC'));
 
         return array(
             'filtro' => $filtro,
@@ -116,7 +116,7 @@ class InsumoReportesController extends Controller {
             }
         }
 
-        $tiposInsumos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I'), array('nombre' => 'ASC'));
+        $tiposInsumos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I', 'subclase' => 'HARDWARE'), array('nombre' => 'ASC'));
 
         $textoFiltro = array('Todos');
         $hoy = new \DateTime();
@@ -169,6 +169,19 @@ class InsumoReportesController extends Controller {
         }
     }
 
+    /**
+     * @Route("/entregas", name="insumo_reporte_entregas")
+     * @Method("GET")
+     * @Template("AppBundle:Reportes:insumo.html.twig")
+     */
+    public function entregasAction(Request $request) {
+        return new Response('Informe en desarrollo');
+    }
+
+    /*
+     * FUNCIONES ADICIONALES
+     */
+
     private function getDatosReporteInsumoxSector($em, $filtro, $tiposInsumos, $sectores) {
         // Reporte por Sector, tipo incidencia y tipo de equipos
         if ($em->getFilters()->isEnabled('softdeleteable')) {
@@ -209,10 +222,6 @@ class InsumoReportesController extends Controller {
         $label = array('PERÍODO ' . $filtro['desde'] . ' al ' . $filtro['hasta']);
         return array('dataset' => $dataset, 'labels' => $label, 'tabla' => $tabla, 'total' => $total);
     }
-
-    /*
-     * FUNCIONES ADICIONALES
-     */
 
     private function getTextoFiltro($em, $datos, $tabla = 'Ubicacion') {
         $cadena = '';

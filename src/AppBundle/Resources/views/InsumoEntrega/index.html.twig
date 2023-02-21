@@ -1,35 +1,155 @@
 {% extends "dataTableList.html.twig" %}
 
 {% block page_content %}
-{% include "notification.html.twig" %}    
+    {% include "notification.html.twig" %}    
 
-<div class='row'>
-    <div class='col-md-12'>
-        <div class='box box-solid {{ box_color }}'>
-            <div class='box-header'>
-                <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; Entrega de Insumo - Mesa de Entradas</h3>  
-            </div><!-- /.box-header -->
-            <div class='box-body'>                                             
-                <form id="searchform" action="{{ path('insumo_entrega') }}" method="get" class="form-horizontal">
-                     
-                       
-                </form>          
-                        
-                        
-                <div class="table-responsive" style="padding:0 15px" >
-                    
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='box box-solid {{ box_color }}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-puzzle-piece"></i> &nbsp; Entrega de Insumo - Mesa de Entradas</h3>  
+                </div><!-- /.box-header -->
+                <div class='box-body'>                                             
+                    <form id="searchform" action="{{ path('insumo_entrega') }}" method="get">
+                        <div class="col-md-10">
+
+                            <fieldset>                          
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label>Ubicación:</label>
+                                        <select id="selUbicacion" name="idUbicacion" urledificio="{{ path('select_edificios') }}" class="ubicacion_selector form-control select2">
+                                            <option {%if app.session.get('filtro_entrega')['idUbicacion']==0 %} selected="selected" {%endif%} value="0">Todos</option>
+                                            {%for ubic in ubicaciones %}
+                                                <option {%if ubic.id == app.session.get('filtro_entrega')['idUbicacion'] %} selected="selected" {%endif%} value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                                            {% endfor %} 
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group ">
+                                        <label>Edificio:</label>                                    
+                                        <select id="selEdificio" name="idEdificio" urldepartamento="{{ path('select_departamentos') }}" class="edificio_selector form-control select2">
+                                            <option value="{{ app.session.get('filtro_entrega')['idEdificio'] }}" >Todos</option>
+                                            {%for edif in edificios %}
+                                                <option {%if edif.id == app.session.get('filtro_entrega')['idEdificio'] %} selected="selected" {%endif%} value="{{edif.id}}">{{edif.nombre}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group ">
+                                        <label>Área Solicitante:</label>
+                                        <select id="selDepartamento" name="idDepartamento" urldatosdepartamento="{{ path('datos_departamento') }}" class="departamento_selector form-control select2">
+                                            <option value="{{ app.session.get('filtro_entrega')['idDepartamento'] }}" >Todos</option>
+                                            {%for dep in departamentos %}
+                                                <option {%if dep.id == app.session.get('filtro_entrega')['idDepartamento'] %} selected="selected" {%endif%} value="{{dep.id}}">{{dep.nombre}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>                                  
+                            </fieldset>                        
+
+
+                            <fieldset>                                     
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        {% set estado = app.session.get('filtro_entrega')['estado'] %}
+                                        <label>Estado:</label>
+                                        <select id="selEstado" name="estado" class="form-control select2">
+                                            <option value="0" {%if estado==0 %}selected="selected" {%endif%}>Todos</option>
+                                            <option value="PENDIENTE" {%if estado=='PENDIENTE' %} selected="selected" {%endif%}>Pendiente</option>
+                                            <option value="ENTREGADO" {%if estado=='ENTREGADO' %} selected="selected" {%endif%}>Entregado</option>
+                                            <option value="CANCELADO" {%if estado=='CANCELADO' %} selected="selected" {%endif%}>Cancelado</option>
+                                        </select>
+                                    </div>
+                                </div>                                     
+                                <div class="col-md-3">
+                                    <label class="required">Período:</label>
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" name="desde" id="desde" class="form-control datepicker" value="{{filtro.desde}}">
+                                    </div>   
+                                </div>    
+                                <div class="col-md-3"> 
+                                    <label>&nbsp;</label>
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" name="hasta" id="hasta" class="form-control datepicker" value="{{filtro.hasta}}">                                            
+                                    </div>                                           
+                                </div>     
+                                <div class="col-md-3"> 
+                                    <input type="hidden" id="opFiltro" name="_opFiltro" value="buscar"/> 
+                                    <label style="width:100%;">&nbsp;</label>
+                                    <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>                                
+                                    <button type="button" id="limpiar-filtros" data-toggle="tooltip" title="Quitar filtros" class="form-control btn btn-default btn-sm" style="width:40%;"><i class="glyphicon glyphicon-refresh"></i> Limpiar</button>
+                                </div> 
+                            </fieldset>
+
+                        </div>    
+                        <div class="col-md-2">
+                            {% if app.user.access('insumo_entrega') %}
+                                <label style="width:100%;">&nbsp;</label>
+                                <a href="{{ path('insumo_entrega_new') }}" data-toggle="tooltip" class="btn btn-primary" style="margin-top:2px;white-space:normal;" title="Agregar Nuevo">NUEVA ENTREGA</a>
+                            {% endif %}
+                        </div>                                         
+                    </form>          
+
+
+                    <div class="table-responsive" style="padding:0 15px" >
+                        <table id="tablelist" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Solicitante</th>
+                                    <th>N° Entrega</th>
+                                    <th>N° JIRA</th>
+                                    <th>Estado</th>
+                                    <th class="no-sort thactions"> Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entity in entities %}
+                                    <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }} {{ entity.estado == 'PENDIENTE' ? "altaPrioridad" : ""  }}">
+                                        <td><span class="hidden">{{ entity.fecha|date('YmdHi') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>                                
+                                        <td>{{ entity.solicitante.nombreCompleto}}</td>
+                                        <td>{{ "%06d" | format(entity.id)}} </td>
+                                        <td>{{ entity.jira}}</td>
+                                        <td>{{ entity.estado}}</td>                                  
+                                        <td class="link-actions"> 
+                                            <a href="javascript:void(0)" class="view-historico" data-nro="{{ "%06d" | format(entity.id)}}" data-url="{{ path('modal_insumo_entrega_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver Entrega"><i class="fa fa-folder-open"></i></a>
+                                            {% if entity.estado=='PENDIENTE' %}
+                                            <a href="{{ path('insumo_entrega_edit', {'id': entity.id}) }}" data-toggle="tooltip" title="Editar Entrega"><i class="fa fa-edit"></i></a>
+                                            {% endif %}
+                                            {% if entity.estado=='ENTREGADO' %}
+                                            <a href="{{path('print_insumo_entrega_remito', { 'id': entity.id })}}" data-toggle="tooltip" title="Remito" target="_blank" ><i class="fa  fa-file-text"></i></a>&nbsp;
+                                           {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        </div><!-- /.box -->
-    </div><!-- /.col-->
-</div><!-- ./row -->
+            </div><!-- /.box -->
+        </div><!-- /.col-->
+    </div><!-- ./row -->
 {% endblock %}
 {% block javascripts_inline %}   
     {{parent()}}
-<script type="text/javascript">
-$(document).ready(function() {    
-    
-});
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#limpiar-filtros').on('click', function () {
+                $('#searchform').find('.select2').val(0);
+                $('#searchform').find('.datepicker').val('');
+                $('#searchform').submit();
+            });
+            var oTable = $('#tablelist').dataTable();
+            oTable.fnSort( [ [0,'desc'] ] );
+        });
 
-</script>    
+    </script>    
 {% endblock %}

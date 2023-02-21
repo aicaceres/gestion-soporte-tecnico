@@ -1,0 +1,421 @@
+{% extends "base.html.twig" %}
+{% block page_content %}
+    <div class='row'>
+        <div class='col-md-12'>
+            {{ form_start(form) }}
+            <div class='box box-solid {{box_color}}'>
+                <div class='box-header'>
+                    <h3 class='box-title'><i class="fa fa-briefcase"></i> &nbsp; Entrega de Insumos </h3>                                      
+                </div><!-- /.box-header -->
+                <div class='box-body'>
+                    {% include "form-notification.html.twig" %}
+                    <div class="row">                        
+                        <div class="col-md-12">
+                            <div class="col-md-2">
+                                {{ form_row(form.fecha) }}
+                            </div>
+                            <div class="col-md-1">
+                                {{ form_row(form.hora) }}
+                            </div>                                 
+                            {% if entity.id %}
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label>N° Entrega:</label>
+                                        <input type="text" class="form-control" style="text-align:center"
+                                               readonly="readonly" value="{{ "%06d" | format(entity.id)}}">
+                                    </div>
+                                </div> 
+                            {% endif %}    
+                            <div class="col-md-2">
+                                {{ form_row(form.jira) }}                                  
+                            </div>
+                            <div class="col-md-3">
+                                {{ form_row(form.responsable) }}                                        
+                            </div> 
+                            <div class="col-md-2 hidden">
+                                {% if entity.id %}
+                                    {{ form_row(form.estado) }}  
+                                {% else %}
+                                    {{ form_row(form.estado, { 'attr': { 'disabled' : 'disabled' } }) }}  
+                                {% endif %}  
+                            </div>                            
+                        </div> 
+                        {% if entity.id %}
+                            <div class="col-md-12">
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label>Ubicación:</label>                                    
+                                        <input type="text" class="form-control" readonly="readonly" value="{{ entity.solicitante.edificio.ubicacion.abreviatura }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group ">
+                                        <label>Edificio:</label>
+                                        <input type="text" class="form-control" readonly="readonly" value="{{ entity.solicitante.edificio.nombre }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group ">
+                                        <label>Departamento:</label>
+                                        <input type="text" class="form-control" readonly="readonly" value="{{ entity.solicitante.nombre }}">
+                                    </div>
+                                </div>    
+                                <div class="col-md-2">
+                                    <div class="form-group ">
+                                        <label for="appbundle_insumoentrega_estado">Estado:</label>
+                                        <input type="text" id="appbundle_insumoentrega_estado" class="form-control"
+                                               readonly="readonly" value="{{ entity.estado}}">
+                                    </div>
+                                </div>
+
+                            {% else %}
+
+                                <div class="col-md-12">
+                                    <div class="col-md-2">
+                                        <div class="form-group ">
+                                            <label>Ubicación:</label>                                    
+                                            <select id="selUbicacion" name="idUbicacion" urledificio="{{ path('select_edificios') }}" class="ubicacion_selector form-control select2">
+                                                {%for ubic in ubicaciones %}
+                                                    <option value="{{ubic.id}}">{{ubic.abreviatura}}</option>
+                                                {% endfor %} 
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group ">
+                                            <label>Edificio:</label>
+                                            <span class="required" title="Dato requerido">*</span>
+                                            <select id="selEdificio" name="idEdificio" urldepartamento="{{ path('select_departamentos') }}" class="edificio_selector form-control select2" required="required">                                        
+                                                <option value="0">Todos</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form_row(form.solicitante, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector select2' } }) }}   
+                                    </div>                                                                 
+                                </div>  
+                            {% endif %}
+                            <div class="col-md-12">  
+                                <div class="col-md-9">
+                                    {{ form_row(form.observacion) }}
+                                </div>  
+                                <div class="col-md-3">
+                                    {{ form_row(form.deposito) }}
+                                </div>              
+                            </div>   
+                            <div class="col-md-12">    
+                                <h5 class="text-yellow" style="margin:0 20px 4px;">INSUMOS ASOCIADOS</h5>
+                                <hr style="margin:0 15px 10px;border:2px solid #f39c12;">                                                        
+
+                                <div class="col-md-12">                                
+                                    <table id="insumos" class="table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:3%">#</th>
+                                                <th style="width:15%">Código de Barra</th>
+                                                <th style="width:42%">Tipo - Marca - Modelo</th>
+                                                <th style="width:10%">Stock</th>
+                                                <th style="width:10%">Cantidad</th>
+                                                <th style="width:25%">Obs. Adicionales</th>
+                                                <th class="nosort aligncenter" style="width: 5%">
+                                                    <a href="javascript:void(0)" class="btn btn-danger btn-xs linkAdd" title="Agregar Insumo" data-form="detalles" data-toggle="tooltip"><i class="fa fa-plus"></i> Agregar</a>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody data-index="{{form.detalles | length }}" class="collectionHolder"
+                                               data-prototype="{% filter escape %}{% include 'AppBundle:InsumoEntrega:prototype-detalle.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                                            {% for item in form.detalles %}                                            
+                                                {% include "AppBundle:InsumoEntrega:prototype-detalle.html.twig" with {'item':item} %}                                              
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>  
+                                <div class="col-md-12">    
+                                    <div class="col-md-12">
+                                        {{ form_row(form.textoRemito) }}
+                                    </div>    
+                                </div>    
+                            </div>    
+                        </div>                    
+                    </div>     
+                    <div id="datatableslist" data-subclase="INSUMO" data-deposito=""></div>                   
+                    <div class="box-footer">
+                        <div class="btn-group pull-right">
+                            <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                            <a type="button" class="btn btn-app volver" href="{{ path('insumo_entrega')}}"><i class="fa fa-reply"></i> Cancelar</a>
+                        </div>
+                    </div>                                                    
+                </div><!-- /.box -->
+                {{ form_errors(form) }}
+                <div style="display:none">    
+                    {{ form_end(form) }}                
+                </div> 
+            </div><!-- /.col-->        
+        </div><!-- ./row -->
+    {% endblock %}
+    {% block javascripts_inline %}   
+        {{parent()}}
+        <script type="text/javascript">
+            var $dataHolder;
+            $(document).ready(function () {
+                $(document).keypress(function (e) {
+                    var keycode = (e.keyCode ? e.keyCode : e.which);
+                    if (keycode == '13' && !$(e.target).is("textarea")) {
+                        e.preventDefault();
+                    }
+                });
+                $('[id$="_hora"]').timepicker({'timeFormat': 'G:i'});
+                $(".ubicacion_selector").change();
+                $('.edificio_selector').change();
+
+                $('#datatableslist').data('deposito', $('#appbundle_insumoentrega_deposito').val())
+                $('#appbundle_insumoentrega_deposito').on('select2:select', function (e) {
+                    $('#datatableslist').data('deposito', $(this).val())
+                    setInsumosxDeposito()
+                });
+                
+                // Get the container who holds the collection
+                $dataHolder = $('.table tbody');
+
+                $dataHolder.find('.link-actions').each(function () {
+                    addDeleteLink($(this));
+                });
+                $dataHolder.find('.ordTd').each(function (i) {
+                    $(this).html(i + 1);
+                });
+                
+                $dataHolder.find('[id$="_insumo"]').on('select2:selecting', function (e) {
+                    sel = $(e.currentTarget);
+                    if (checkDuplicado(e.params.args.data.id)) {
+                        alert('Este insumo ya fue agregado a la lista!');
+                        sel.val('').trigger("change");
+                        return false;
+                    } else {
+                        $.get("{{path('find_barcode_by_id')}}", {id: e.params.args.data.id}, function (data) {
+                            var itemTr = sel.closest('.item');
+                            itemTr.find('.bcTd input').val(data);
+                            // update stock
+                            updateStock(sel)
+                            itemTr.find('.cntTd input').focus();
+                        });
+                    }
+                });
+
+                $('.linkAdd').on('click', function (e) {
+                    e.preventDefault();
+                    addNewInsumo();
+                    e.stopPropagation();
+                });
+
+                $('[name="appbundle_insumoentrega"]').on('submit', function (e) {                                       
+                    let ckstck = true
+                    $('[id$="_insumo"]').each(function () {
+                        const stock = $(this).closest('.item').find('.stckTd input').val()
+                        const cantidad = $(this).closest('.item').find('.cntTd input').val()
+                        if (stock < cantidad) {
+                            ckstck = false
+                            $(this).closest('.item').find('.cntTd input').focus()
+                        }
+                        if (!$(this).val()) {
+                            $(this).closest('tr').remove();
+                        }
+                    });
+                    if($('[id$="_insumo"]').length == 0 ){
+                        alert('Debe ingresar insumos para la entrega!')
+                        return false
+                    }
+
+                    if (!ckstck) {
+                        alert('Alguno de los items no posee el stock suficiente para la entrega!')
+                        return false
+                    }
+                    // confirmar al entregar pedido pendiente
+                    if($('#appbundle_insumoentrega_estado').val() == 'PENDIENTE'){
+                        if( !confirm('Confirma la entrega del pedido pendiente?.\n \n Se realizarán los descuentos correspondientes al stock.')){
+                            return false
+                        }
+                    }
+                });
+                updateStock()
+            });
+
+            function addNewInsumo() {
+                var prototype = $dataHolder.data('prototype');
+                var index = $dataHolder.data('index');
+                var newForm = prototype.replace(/items/g, index);
+                $dataHolder.append(newForm);
+                $dataHolder.data('index', index + 1);
+                const sel = $dataHolder.find('[id$="_insumo"]').last();
+
+                setInsumosxDeposito(sel)
+
+                addDeleteLink($dataHolder.find('.link-actions').last());
+                $dataHolder.find('.ordTd').last().html($dataHolder.data('index'));
+                $dataHolder.find('.searchInsumoEntrega').last().attr('id', 'item_' + $dataHolder.data('index'));
+                sel.on('select2:selecting', function (e) {
+                    if (checkDuplicado(e.params.args.data.id)) {
+                        alert('Este insumo ya fue agregado a la lista!');
+                        sel.val('').trigger("change");
+                        return false;
+                    } else {
+                        $.get("{{path('find_barcode_by_id')}}", {id: e.params.args.data.id}, function (data) {
+                            var itemTr = sel.closest('.item');
+                            itemTr.find('.bcTd input').val(data);
+                            // update stock
+                            updateStock(sel)
+                            itemTr.find('.cntTd input').focus();
+                        });
+                    }
+                });
+
+                var barcode = $dataHolder.find('.bcTd input').last();
+                barcode.on('keypress', function (e) {
+                    var keycode = (e.keyCode ? e.keyCode : e.which);
+                    if (keycode == '13') {
+                        $.get("{{path('find_insumo_id_by_barcode')}}", {bc: barcode.val().toUpperCase()}, function (data) {
+                            if (checkDuplicado(data)) {
+                                alert('Este insumo ya fue agregado a la lista!');
+                                barcode.val('');
+                                sel.val('').trigger("change");
+                                return false;
+                            }
+                            sel.val(data).trigger("change");
+                            if (!sel.val()) {
+                                alert('el código de barra no pertenece a un insumo existente en este depósito!!');
+                                barcode.val('');
+                                sel.val('').trigger("change");
+                                return false;
+                            }
+                            // update stock
+                            updateStock(sel)
+                        });
+                    }
+                });
+                barcode.focus();
+            }
+
+            // carga o actualiza el combo de insumos segun el deposito
+            function setInsumosxDeposito(sel) {
+                const depositoId = $('#appbundle_insumoentrega_deposito').val();
+                if (sel) {
+                    getInsumosxDeposito(sel, depositoId)
+                } else {
+                    $dataHolder.find('[id$="_insumo"]').each(function () {
+                        let item = $(this)
+                        getInsumosxDeposito(item, depositoId)
+                    })
+                }
+            }
+            // obtiene la lista de insumos por deposito
+            function getInsumosxDeposito(sel, depositoId) {
+                const selValue = sel.val()
+                sel.html('');
+                $.ajax({
+                    type: 'post',
+                    url: "{{ path('get_insumos_x_deposito') }}",
+                    data: {deposito_id: depositoId},
+                    success: function (data) {
+                        changeDataSelect(sel, data);
+                        sel.select2();
+                        if (selValue) {
+                            sel.val(selValue).trigger("change");
+                            updateStock(sel)
+                        }
+                    }
+                });
+            }
+
+            function addDeleteLink($itemFormTd) {
+                var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><i class="fa fa-minus"></i></a>');
+                $itemFormTd.append($removeFormA);
+                $removeFormA.on('click', function (e) {
+                    var res = true;
+                    if ($itemFormTd.parent().find('[id$="_insumo"]').val() > 0)
+                        res = confirm('Desea eliminar este item?');
+                    if (res) {
+                        e.preventDefault();
+                        $itemFormTd.parent().remove();
+                        var index = $dataHolder.data('index');
+                        $dataHolder.data('index', index - 1);
+                        $dataHolder.find('.ordTd').each(function (i) {
+                            jQuery(this).html(i + 1);
+                        });
+                    }
+                });
+            }
+
+            function checkDuplicado(id) {
+                // revisar que no se haya seleccionado ya ese valor en otra fila.
+                res = false;
+                items = $dataHolder.find('[id$="_insumo"]')
+                items.each(function (i) {
+                    if ($(this).val() && $(this).val() == id)
+                        res = true;
+                });
+                return res;
+            }
+
+            function updateStock(sel) {
+                if (sel) {
+                    const stckTd = sel.closest('.item').find('.stckTd input');
+                    // busco y actualizo stock segun deposito
+                    setStockValue(sel.val(), stckTd)
+                } else {
+                    // actualizo la lista
+                    $dataHolder.find('[id$="_insumo"]').each(function () {
+                        let item = $(this)
+                        const stckTd = item.closest('.item').find('.stckTd input');
+                        setStockValue(item.val(), stckTd)
+                    })
+                }
+            }
+
+            function setStockValue(id, stckTd) {
+                var depositoId = $('#appbundle_insumoentrega_deposito').val();
+                if (id) {
+                    $.getJSON("{{path('get_stock_by_deposito')}}", {id: id, deposito: depositoId}, function (data) {
+                        stckTd.val(data)
+                    });
+                } else {
+                    stckTd.val('')
+                }
+            }
+
+            function agregarInsumos(list, idx) {
+                // carga un solo insumo.
+                item = list.shift();
+                $btn = $("#" + idx);
+                barcode = $btn.closest('.item').find('td.bcTd input');
+                cantidad = $btn.closest('.item').find('td.cntTd input');
+                sel = $btn.closest('.insTd').find('[id$="_insumo"]');
+                if (checkDuplicado(item)) {
+                    alert('Este insumo ya fue agregado a la lista!');
+                    barcode.val('');
+                    sel.val('').trigger("change");
+                    return false;
+                }
+                sel.val(item).trigger('change');
+
+                if (!sel.val()) {
+                    //buscar datos y agregar item al select
+                    $.getJSON("{{path('find_insumo_data_by_id')}}", {id: item}, function (data) {
+                        if (data.msj == 'OK') {
+                            barcode.val(data.barcode);
+                            var newState = new Option(data.nombre, data.id, true, true);
+                            sel.append(newState).trigger('change');
+                            // update stock
+                            updateStock(sel)
+                            cantidad.focus();
+                        } else {
+                            alert(data.msj);
+                            return false;
+                        }
+                    });
+                } else {
+                    // update stock
+                    updateStock(sel)
+                    cantidad.focus();
+                }
+            }
+        </script>    
+    {% endblock %}

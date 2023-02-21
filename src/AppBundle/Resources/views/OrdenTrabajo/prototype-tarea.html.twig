@@ -14,7 +14,7 @@
                 <td class="tecTd">{% if item.createdBy %} {{ item.createdBy.username }} {% endif %}</td>
                 <td class="tipoTd">{{ item.tipoTarea }} </td>
                 <td class="detTd">
-                    {% if item.tipoTarea.abreviatura == 'SI' %}
+                    {% if item.tipoTarea.abreviatura in ['SI','PI'] %}
                         {% for insxtarea in item.insumos  %}
                             <span> {{ insxtarea.cantidad }} - {{ insxtarea.descripcion }} </span> 
                             {{ insxtarea.estado(1)|raw }}

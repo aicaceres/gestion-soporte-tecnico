@@ -3,10 +3,10 @@
         font-size: 12px;
     }
     #insumos_dt_table_wrapper div.dataTables_paginate ul.pagination {
-	font-size: 10px;
+        font-size: 10px;
     }
     .dataTables_filter {
-	display: none;
+        display: none;
     }
     /* Move tfood in the upper part of the table */
     tfoot {
@@ -14,282 +14,285 @@
     }
     #select2-selTipo-container, #select2-selMarca-container,#select2-selModelo-container{
         color:orangered;
-     }
+    }
 </style>
-        <div class="box-body table-responsive no-padding" style="margin-bottom:0 !important" >
-            <table id="insumos_dt_table" style="font-size:90%" class="table table-bordered table-hover insumolist">
-                <tfoot>
-                    <tr>
-                        <th>Código de Barra</th>
-                        <th>Tipo</th>
-                        <th>Marca</th>
-                        <th>Modelo</th>
-                        <th></th>
-                    </tr>
-                </tfoot>
-                <thead>
-                    <tr>
-                        <th style='width:20%'>Código de Barra</th>
-                        <th>Tipo</th>
-                        <th>Marca</th>
-                        <th>Modelo</th>
-                        <th style='width:8%'>Stock</th>
-                        <th class="no-sort" style="width:2%;">
-                            <input class="hidden" type="checkbox" id="ckTodos" />
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
+<div class="box-body table-responsive no-padding" style="margin-bottom:0 !important" >
+    <table id="insumos_dt_table" style="font-size:90%" class="table table-bordered table-hover insumolist">
+        <tfoot>
+            <tr>
+                <th>Código de Barra</th>
+                <th>Tipo</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th></th>
+            </tr>
+        </tfoot>
+        <thead>
+            <tr>
+                <th style='width:20%'>Código de Barra</th>
+                <th>Tipo</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th style='width:8%'>Stock</th>
+                <th class="no-sort" style="width:2%;">
+                    <input class="hidden" type="checkbox" id="ckTodos" />
+                </th>
+            </tr>
+        </thead>
+        <tbody>
 
-                </tbody>                        
-            </table>  
-            <div style="width:100%;text-align:center;" ><button type="button" class=" hidden btn btn-sm btn-primary" id="selectInsumo"> Seleccionar </button></div>
-            
-        </div>            
+        </tbody>                        
+    </table>  
+    <div style="width:100%;text-align:center;" ><button type="button" class=" hidden btn btn-sm btn-primary" id="selectInsumo"> Seleccionar </button></div>
 
-<script type="text/javascript">         
-$(document).ready(function() { 
-    var pos = 1;
-    $('#insumos_dt_table tfoot th').each( function (i) {
-        switch (i) {
-            case 0:
-              //barcode
-              $(this).html( "<input id='input_barcode' type='text' class='form-control' placeholder='Código de Barra' style='width:100%;color:orangered;'/>" );
-              break;            
-            case 1:
-              //tipo
-              selTipo = "<select required='false' id='selTipo' class='form-control' style='width:100%;'></select>";
-              $(this).html(selTipo);
-              break;            
-            case 2:
-              //marca
-              selMarca = "<select id='selMarca' class='form-control' style='width:100%;'></select>";
-              $(this).html(selMarca);
-              break;            
-            case 3:
-              //modelo
-              selModelo = "<select id='selModelo' class='form-control' style='width:100%;'></select>";
-              $(this).html(selModelo);
-              break;            
-            case 4:
-              //stock
-              ckStock = "<small style='text-align:center;display:block;'> Solo en stock <input type='checkbox' id='ckStock' value='1'/></small>";
-              $(this).html(ckStock);
-              break;            
-        }  
-      /*  var title = $(this).text();
-        if(title){
-            $(this).html( "<input id='input" + pos + "' type='text' class='form-control' placeholder='" + title + "' style='width:100%;color:orangered;'/>" );
-        }else{
-            $(this).html( "" );
-        }
-        pos ++;*/
-    });
-    
-    var table = $('#insumos_dt_table').DataTable({
-        "columnDefs": [        
-            // These are the column name variables that will be sent to the server
-            { "name": "barcode",   "targets": 0 },
-            { "name": "tipo",  "targets": 1 },
-            { "name": "marca",  "targets": 2 },
-            { "name": "modelo",  "targets": 3 },
-            { "name": "stock",  "targets": 4 },
-            { "name": "checks",  "targets": 5 },
-            { "targets"  : 'no-sort', "orderable": false }       
-        ],
-        // Server-side parameters
-        "processing": true,
-        "serverSide": true,
-        // Ajax call
-        "ajax": {
-            "url": "{{ path('insumo_search_datatables') }}",
-            "data": {'subclase': $('#datatableslist').data('subclase') },
-            "type": "POST"
-        },
-        // Classic DataTables parameters
-        "paging" : true,
-        "info" : true, 
-        "searching": true,        
-        "pageLength": 10,
-        "bLengthChange": false,
-        "order": [[1, 'asc']],
-            "pagingType": "full_numbers",
-        "oLanguage": {
-            "oPaginate": {
-                "sFirst": "<<",
-                "sNext": ">",
-                "sLast": ">>",
-                "sPrevious": "<"
+</div>            
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var pos = 1;
+        $('#insumos_dt_table tfoot th').each(function (i) {
+            switch (i) {
+                case 0:
+                    //barcode
+                    $(this).html("<input id='input_barcode' type='text' class='form-control' placeholder='Código de Barra' style='width:100%;color:orangered;'/>");
+                    break;
+                case 1:
+                    //tipo
+                    selTipo = "<select required='false' id='selTipo' class='form-control' style='width:100%;'></select>";
+                    $(this).html(selTipo);
+                    break;
+                case 2:
+                    //marca
+                    selMarca = "<select id='selMarca' class='form-control' style='width:100%;'></select>";
+                    $(this).html(selMarca);
+                    break;
+                case 3:
+                    //modelo
+                    selModelo = "<select id='selModelo' class='form-control' style='width:100%;'></select>";
+                    $(this).html(selModelo);
+                    break;
+                case 4:
+                    //stock
+                    ckStock = "<small style='text-align:center;display:block;'> Solo en stock <input type='checkbox' id='ckStock' value='1'/></small>";
+                    $(this).html(ckStock);
+                    break;
+            }
+            /*  var title = $(this).text();
+             if(title){
+             $(this).html( "<input id='input" + pos + "' type='text' class='form-control' placeholder='" + title + "' style='width:100%;color:orangered;'/>" );
+             }else{
+             $(this).html( "" );
+             }
+             pos ++;*/
+        });
+
+        var table = $('#insumos_dt_table').DataTable({
+            "columnDefs": [
+                // These are the column name variables that will be sent to the server
+                {"name": "barcode", "targets": 0},
+                {"name": "tipo", "targets": 1},
+                {"name": "marca", "targets": 2},
+                {"name": "modelo", "targets": 3},
+                {"name": "stock", "targets": 4},
+                {"name": "checks", "targets": 5},
+                {"targets": 'no-sort', "orderable": false}
+            ],
+            // Server-side parameters
+            "processing": true,
+            "serverSide": true,
+            // Ajax call
+            "ajax": {
+                "url": "{{ path('insumo_search_datatables') }}",
+                "data": {
+                    'subclase': $('#datatableslist').data('subclase'), 
+                    'deposito': $('#datatableslist').data('deposito')
+                },
+                "type": "POST"
             },
-            "sProcessing": "Cargando...",
-            "sLengthMenu": "Mostrar _MENU_ registros ",
-            "sZeroRecords": "Sin datos",
-            "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
-            "sInfoEmpty": "Sin coincidencias",
-            "sInfoFiltered": "(filtrado de _MAX_ registros)",
-            "sSearch": "Buscar:"
-        }
-    }); 
-    
-    
-    $("#input_barcode").on( 'keyup change', function () { 
-        var that = table.column(0);
-            if ( that.search() !== this.value )
-            {
-                that
-                    .search( this.value )
-                    .draw();
+            // Classic DataTables parameters
+            "paging": true,
+            "info": true,
+            "searching": true,
+            "pageLength": 10,
+            "bLengthChange": false,
+            "order": [[1, 'asc']],
+            "pagingType": "full_numbers",
+            "oLanguage": {
+                "oPaginate": {
+                    "sFirst": "<<",
+                    "sNext": ">",
+                    "sLast": ">>",
+                    "sPrevious": "<"
+                },
+                "sProcessing": "Cargando...",
+                "sLengthMenu": "Mostrar _MENU_ registros ",
+                "sZeroRecords": "Sin datos",
+                "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+                "sInfoEmpty": "Sin coincidencias",
+                "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                "sSearch": "Buscar:"
             }
         });
-    /// TIPO    
-    $('#selTipo').select2({
-        placeholder: {
-      id: "null",
-      text:"Tipo",
-      selected:'selected'
-    },        
-        allowClear: true,
-        dropdownParent: $('.modal'),
-        ajax: {
-          url: "{{path('get-autocomplete-insumo-tipo')}}",
-          data: function (params) {
-            var query = {
-              search: params.term,
-              subclase: $('#datatableslist').data('subclase')
-            }
-            return query;
-          },
-          dataType: 'json',
-          processResults: function (data) {
-            return {
-              results: data
-            };
-          }
-        }
-      });
-    $('#selTipo').on('select2:select', function (e) {   
-        var data = e.params.data.text;
-        var that = table.column(1);
-            if ( that.search() !== data )
+
+
+        $("#input_barcode").on('keyup change', function () {
+            var that = table.column(0);
+            if (that.search() !== this.value)
             {
                 that
-                    .search( data )
-                    .draw();
-            }
-    }); 
-    $("#selTipo").on("select2:unselecting", function() {
-        var that = table.column(1);
-        that.search( '' )
-            .draw();
-     });
-    /// MARCA    
-    $('#selMarca').select2({
-        placeholder: "Marca",
-        allowClear: true,
-        dropdownParent: $('.modal'),
-        ajax: {
-          url: "{{path('get-autocomplete-insumo-marca')}}",
-          dataType: 'json',
-          processResults: function (data) {
-            return {
-              results: data
-            };
-          }
-        }
-      });
-    $('#selMarca').on('select2:select', function (e) {
-        var data = e.params.data.text;
-        var that = table.column(2);
-            if ( that.search() !== data )
-            {
-                that
-                    .search( data )
-                    .draw();
-            }
-        $('#selModelo').val('').trigger('change');    
-    });  
-    $("#selMarca").on("select2:unselecting", function() {
-        var that = table.column(2);
-        that.search( '' )
-            .draw();
-        $('#selModelo').val('').trigger('change');
-     });
-    /// MODELO    
-    $('#selModelo').select2({
-        placeholder: "Modelo",
-        allowClear: true,
-        dropdownParent: $('.modal'),
-        ajax: {
-          url: "{{path('get-autocomplete-insumo-modelo')}}",
-          data: function (params) {
-            var query = {
-              search: params.term,
-              marca: $("#selMarca").val()
-            }
-            return query;
-          },
-          dataType: 'json',
-          processResults: function (data) {
-            return {
-              results: data
-            };
-          }
-        }
-      });
-    $('#selModelo').on('select2:select', function (e) {
-        var data = e.params.data.text;
-        var that = table.column(3);
-            if ( that.search() !== data )
-            {
-                that
-                    .search( data )
-                    .draw();
-            }
-    });  
-    $("#selModelo").on("select2:unselecting", function() {
-        var that = table.column(3);
-        that.search( '' )
-            .draw();
-     });
-    // En stock
-    $('#ckStock').iCheck({
-        checkboxClass: 'icheckbox_square-blue',            
-        increaseArea: '20%' // optional
-      });
-    $('#ckStock').on('ifChecked', function(){        
-       var that = table.column(5);
-        that
-            .search( 1 )
-            .draw();
-    });
-    $('#ckStock').on('ifUnchecked', function(){        
-       var that = table.column(5);
-        that
-            .search( 0 )
-            .draw();
-    }); 
-    $("#ckStock").iCheck('check');
-    /*pos = 1;
-    table.columns().every( function () {    
-        var that = this;    
-        $("#input"+pos).on( 'keyup change', function () {
-            if ( that.search() !== this.value )
-            {
-                that
-                    .search( this.value )
-                    .draw();
+                        .search(this.value)
+                        .draw();
             }
         });
-        pos++;
-    });*/
-    
-    $('#ckTodos').on('click',function(){
-        if( $(this).prop('checked')){
-            $('.ckItem').prop('checked',true);            
-        }else{
-            $('.ckItem').prop('checked',false);
-        }
+        /// TIPO    
+        $('#selTipo').select2({
+            placeholder: {
+                id: "null",
+                text: "Tipo",
+                selected: 'selected'
+            },
+            allowClear: true,
+            dropdownParent: $('.modal'),
+            ajax: {
+                url: "{{path('get-autocomplete-insumo-tipo')}}",
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        subclase: $('#datatableslist').data('subclase')
+                    }
+                    return query;
+                },
+                dataType: 'json',
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                }
+            }
+        });
+        $('#selTipo').on('select2:select', function (e) {
+            var data = e.params.data.text;
+            var that = table.column(1);
+            if (that.search() !== data)
+            {
+                that
+                        .search(data)
+                        .draw();
+            }
+        });
+        $("#selTipo").on("select2:unselecting", function () {
+            var that = table.column(1);
+            that.search('')
+                    .draw();
+        });
+        /// MARCA    
+        $('#selMarca').select2({
+            placeholder: "Marca",
+            allowClear: true,
+            dropdownParent: $('.modal'),
+            ajax: {
+                url: "{{path('get-autocomplete-insumo-marca')}}",
+                dataType: 'json',
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                }
+            }
+        });
+        $('#selMarca').on('select2:select', function (e) {
+            var data = e.params.data.text;
+            var that = table.column(2);
+            if (that.search() !== data)
+            {
+                that
+                        .search(data)
+                        .draw();
+            }
+            $('#selModelo').val('').trigger('change');
+        });
+        $("#selMarca").on("select2:unselecting", function () {
+            var that = table.column(2);
+            that.search('')
+                    .draw();
+            $('#selModelo').val('').trigger('change');
+        });
+        /// MODELO    
+        $('#selModelo').select2({
+            placeholder: "Modelo",
+            allowClear: true,
+            dropdownParent: $('.modal'),
+            ajax: {
+                url: "{{path('get-autocomplete-insumo-modelo')}}",
+                data: function (params) {
+                    var query = {
+                        search: params.term,
+                        marca: $("#selMarca").val()
+                    }
+                    return query;
+                },
+                dataType: 'json',
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                }
+            }
+        });
+        $('#selModelo').on('select2:select', function (e) {
+            var data = e.params.data.text;
+            var that = table.column(3);
+            if (that.search() !== data)
+            {
+                that
+                        .search(data)
+                        .draw();
+            }
+        });
+        $("#selModelo").on("select2:unselecting", function () {
+            var that = table.column(3);
+            that.search('')
+                    .draw();
+        });
+        // En stock
+        $('#ckStock').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            increaseArea: '20%' // optional
+        });
+        $('#ckStock').on('ifChecked', function () {
+            var that = table.column(5);
+            that
+                    .search(1)
+                    .draw();
+        });
+        $('#ckStock').on('ifUnchecked', function () {
+            var that = table.column(5);
+            that
+                    .search(0)
+                    .draw();
+        });
+        $("#ckStock").iCheck('check');
+        /*pos = 1;
+         table.columns().every( function () {    
+         var that = this;    
+         $("#input"+pos).on( 'keyup change', function () {
+         if ( that.search() !== this.value )
+         {
+         that
+         .search( this.value )
+         .draw();
+         }
+         });
+         pos++;
+         });*/
+
+        $('#ckTodos').on('click', function () {
+            if ($(this).prop('checked')) {
+                $('.ckItem').prop('checked', true);
+            } else {
+                $('.ckItem').prop('checked', false);
+            }
+        });
+
     });
-    
-});
 </script>    

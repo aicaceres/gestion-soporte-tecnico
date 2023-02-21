@@ -533,6 +533,10 @@ class StockController extends Controller {
                     $historico->nroComprobante = 'OT ' . $comp->getTarea()->getOrdenTrabajo()->getNroOT();
                     $historico->urlMovimiento = $controller->generateUrl('soporte_ordentrabajo_show', array('id' => $comp->getTarea()->getOrdenTrabajo()->getId()));
                     break;
+                case 'ENTREGAINSUMO':
+                    $historico->nroComprobante = 'EI ' . str_pad($comp->getId(), 6, '0', STR_PAD_LEFT);
+                    $historico->urlMovimiento = $controller->generateUrl('modal_insumo_entrega_show', array('id' => $comp->getId()));
+                    break;
                 default:
                     return NULL;
             }

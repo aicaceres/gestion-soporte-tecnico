@@ -1,0 +1,33 @@
+<tr class="item" divdata="item_items">   
+    <td class="ordTd"></td>
+    {% if item.vars.data.id is defined %}
+    
+    <td class="bcTd">{{ item.vars.data.insumo.barcode }}
+        <div style="display:none;">
+            {{ form_widget(item.barcode) }}
+            {{ form_widget(item.insumo) }}
+            {{ form_widget(item.insumoId) }}
+        </div>
+    </td>
+    <td class="insTd">
+        {{ item.vars.data.insumo.textoCompleto }}
+    </td>    
+    {% else %}
+    <td class="bcTd">{{ form_widget(item.barcode, { 'attr': {'class' : 'form-control' } }) }}</td>
+    <td class="insTd">
+        <div class="input-group">
+            {{ form_widget(item.insumo, { 'attr': {'class' : 'form-control select2' } }) }}
+                <span class="input-group-btn" style="padding-left: 5px;">
+                    <button data-toggle="tooltip" title="Buscar Insumo" type="button" data-url="{{path('render_search_insumo')}}" id=""
+                        class="btn btn-default btn-flat btn-xs searchInsumoEntrega" data-function="agregarInsumos" data-param="id"><i class="fa fa-search"></i></button>
+                </span>
+        </div>
+        {{ form_errors(item.insumo) }}  
+        {{ form_widget(item.insumoId) }}
+    </td>            
+    {% endif %}
+    <td class="stckTd"><input type="text" disabled="disabled" style="text-align:center; width:50px;" class="form-control"></td> 
+    <td class="cntTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number', 'min':'0' } }) }}</td> 
+    <td>{{ form_widget(item.descripcion, { 'attr': {'class' : 'form-control' } }) }} </td>    
+    <td class="link-actions"></td>
+</tr>

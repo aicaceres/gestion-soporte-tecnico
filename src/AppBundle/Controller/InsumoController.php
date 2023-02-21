@@ -28,6 +28,7 @@ class InsumoController extends Controller {
      * @Method("GET")
      */
     public function renderSearchInsumoAction() {
+
         $partial = $this->renderView('AppBundle:Insumo:partial-search-insumo.html.twig');
         return new Response($partial);
     }
@@ -64,8 +65,9 @@ class InsumoController extends Controller {
         // Further filtering can be done in the Repository by passing necessary arguments
         $otherConditions = "array or whatever is needed";
         $subclase = $request->request->get('subclase');
+        $deposito = $request->request->get('deposito');
         // Get results from the Repository
-        $results = $this->repository->getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $subclase);
+        $results = $this->repository->getRequiredDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $subclase, $deposito);
 
         // Returned objects are of type Town
         $objects = $results["results"];
@@ -677,7 +679,7 @@ class InsumoController extends Controller {
         }
         catch (\Exception $ex) {
             $em->getConnection()->rollback();
-            var_dump($ex->getMessage());
+            //var_dump($ex->getMessage());
             return new Response(json_encode('ERROR'));
         }
     }
@@ -893,4 +895,50 @@ class InsumoController extends Controller {
       return new Response(json_encode('ERROR'));
       }
       } */
+
+    /**
+     * @Route("/getInsumosxDeposito", name="get_insumos_x_deposito")
+     * @Method("POST")
+     */
+    public function getInsumosxDeposito(Request $request) {
+        $id = $request->get('deposito_id');
+        $em = $this->getDoctrine()->getManager();
+        $insumos = $em->getRepository('AppBundle:Insumo')->findByDeposito($id);
+        return new JsonResponse($insumos);
+    }
+
+    /**
+     * @Route("/findBarcodeById", name="find_barcode_by_id")
+     * @Method("GET")
+     */
+    public function findBarcodeById(Request $request) {
+        $id = $request->get('id');
+        $em = $this->getDoctrine()->getManager();
+        $insumo = $em->getRepository('AppBundle:Insumo')->find($id);
+        return new Response(($insumo) ? $insumo->getBarcode() : null);
+    }
+
+    /**
+     * @Route("/findInsumoIdByBarcode", name="find_insumo_id_by_barcode")
+     * @Method("GET")
+     */
+    public function findInsumoIdByBarcode(Request $request) {
+        $barcode = $request->get('bc');
+        $em = $this->getDoctrine()->getManager();
+        $insumo = $em->getRepository('AppBundle:Insumo')->findOneByBarcode($barcode);
+        return new Response(($insumo) ? $insumo->getId() : null);
+    }
+
+    /**
+     * @Route("/getStockByDeposito", name="get_stock_by_deposito")
+     * @Method("GET")
+     */
+    public function getStockByDeposito(Request $request) {
+        $id = $request->get('id');
+        $deposito = $request->get('deposito');
+        $em = $this->getDoctrine()->getManager();
+        $insumo = $em->getRepository('AppBundle:Insumo')->find($id);
+        return new Response(($insumo) ? $insumo->getStockByDeposito($deposito) : '');
+    }
+
 }

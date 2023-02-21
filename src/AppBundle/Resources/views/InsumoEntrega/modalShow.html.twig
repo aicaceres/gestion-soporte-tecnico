@@ -1,0 +1,53 @@
+<div class="row">
+    <div class="col-md-8 col-md-offset-1">
+        <fieldset style="padding-bottom:10px;">
+            <div class="col-md-12">
+                <span style="padding-right:20px;"><strong>Fecha:</strong>&nbsp;{{entity.fecha|date('d-m-Y [H:i]')}}</span>                        
+
+                <span style="padding-right:20px;"><strong>N° Entrega:</strong>&nbsp;{{ "%06d" | format(entity.id)}}</span>
+
+                <span style="padding-right:20px;"><strong>N° JIRA:</strong>&nbsp;{{entity.jira}}</span>
+
+                <span style="padding-right:20px;{% if entity.estado=='CANCELADO'%}color:red;{%endif%}"><strong>Estado:</strong>&nbsp;{{entity.estado}}</span>
+            </div> 
+        </fieldset> 
+        <fieldset style="padding-bottom:10px;">
+            <div class="col-md-7">
+                <span><strong>Area Solicitante:</strong>&nbsp;{{entity.solicitante.nombreCompleto}}</span>                        
+            </div>
+            <div class="col-md-5">
+                <span><strong>Nombre del Solicitante:</strong>&nbsp; {{entity.responsable}}</span>
+            </div>    
+        </fieldset>    
+        <fieldset style="padding-bottom:15px;">
+            <div class="col-md-12">
+                <span><strong>Observaciones:</strong>&nbsp;{{entity.observacion}}</span>                        
+            </div>                                       
+        </fieldset>                           
+    </div>  
+
+    <div class="col-md-10 col-md-offset-1"> 
+        <h4>Detalle</h4>            
+        <table cellpadding="0" cellspacing="0" border="0" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th style="width:6%;">#</th>
+                    <th style="width:40%;">Insumo</th>
+                    <th style="width:8%;">Cantidad</th>
+                    <th style="width:30%;">Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in entity.detalles %}
+                    <tr>
+                        <td class="ordTd">{{loop.index}}</td>
+                        <td class="prodTd">{{ item.insumo }}</td>
+                        <td class="cantTd">{{ item.cantidad|number_format(2,'.',',') }} </td>                                
+                        <td class="motTd">{{ item.descripcion }}</td>
+                    </tr>
+                {% endfor %}           
+            </tbody>
+        </table>  
+    </div>      
+</div>
+{% include "admin-form-data.html.twig" with {'table':entity} %}

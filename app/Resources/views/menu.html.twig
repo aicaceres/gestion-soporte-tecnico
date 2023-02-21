@@ -94,8 +94,7 @@
                         <li id="anual"><a href="{{path('soporte_reportes_anual')}}"><i class="fa fa-circle-o"></i> Anual</a></li>                        
                         <li id="detallado"><a href="{{path('soporte_reportes_detallado')}}"><i class="fa fa-circle-o"></i> Detallado</a></li>                        
                     </ul>
-                </li>
-                                                          
+                </li>                                                          
             {% endif %}
         </ul>        
     </li>
@@ -133,11 +132,22 @@
                 </li>
                 {% endif %}
                 {% if app.user.access('reportes_insumo') %}
-                <li id="reporteinsumo">
+                {#<li id="reporteinsumo">
                     <a href="{{path('insumo_reportes')}}">
                         <i class="fa fa-circle-o"></i>
                         Reportes
                     </a>
+                </li>#}
+                <li id="reporte">
+                    <a href="#"><i class="fa fa-circle-o"></i> Reportes
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li id="entregas"><a href="{{path('insumo_reporte_entregas')}}"><i class="fa fa-circle-o"></i> Entregas de Insumos </a></li>                        
+                        <li id="solicitudes"><a href="{{path('insumo_reporte_solicitudes')}}"><i class="fa fa-circle-o"></i> Solicitudes de Soporte</a></li>                        
+                    </ul>
                 </li>
                 {% endif %}
                 <hr class="menudiv">
