@@ -94,6 +94,75 @@ class InsumoReportesController extends Controller {
     }
 
     /**
+     * @Route("/entregas", name="insumo_reporte_entregas")
+     * @Method("GET")
+     * @Template("AppBundle:Reportes:entregas.html.twig")
+     */
+    public function entregasAction(Request $request) {
+        UtilsController::haveAccess($this->getUser(), 'reportes_insumo');
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+        $session = $this->get('session');
+        $sessionFiltro = $session->get('filtro_reportes_entregas');
+
+        switch ($request->get('_opFiltro')) {
+            case 'buscar':
+                $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+                $filtro = array(
+                    'selTipo' => $request->get('selTipo'),
+                    'selUbicaciones' => $request->get('selUbicaciones'),
+                    'selEdificios' => $request->get('selEdificios'),
+                    'selDepartamento' => $request->get('selDepartamento'),
+                    'desde' => $periodo['desde'],
+                    'hasta' => $periodo['hasta'],
+                );
+                break;
+            default:
+                //desde paginacion, se usa session
+                if ($sessionFiltro) {
+                    $periodo = UtilsController::ultimoMesParaFiltro($sessionFiltro['desde'], $sessionFiltro['hasta']);
+                    $filtro = array(
+                        'selTipo' => $sessionFiltro['selTipo'],
+                        'selUbicaciones' => $sessionFiltro['selUbicaciones'],
+                        'selEdificios' => $sessionFiltro['selEdificios'],
+                        'selDepartamento' => $sessionFiltro['selDepartamento'],
+                        'desde' => $periodo['desde'],
+                        'hasta' => $periodo['hasta'],
+                    );
+                }
+                else {
+                    $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+                    $filtro = array('selUbicaciones' => 0, 'selEdificios' => 0, 'selDepartamento' => 0, 'selTipo' => 0,
+                        'desde' => $periodo['desde'], 'hasta' => $periodo['hasta']);
+                }
+                break;
+        }
+        $session->set('filtro_reportes_entregas', $filtro);
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findByDeletedAt(null);
+        $edificios = null;
+        $departamentos = null;
+        $sectores = $em->getRepository('ConfigBundle:Departamento')->findAllOrdenados();
+        if ($filtro['selUbicaciones']) {
+            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $this->getUser()->getId());
+            $sectores = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByUbicaciones($filtro['selUbicaciones']);
+            if ($filtro['selEdificios']) {
+                $sectores = $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
+            }
+        }
+
+        $tiposInsumos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I', 'subclase' => 'INSUMO'), array('nombre' => 'ASC'));
+
+        return array(
+            'filtro' => $filtro,
+            'tiposInsumos' => $tiposInsumos,
+            'ubicaciones' => $ubicaciones,
+            'edificios' => $edificios,
+            'departamentos' => $departamentos,
+            'datos' => $this->getDatosReporteEntregasxSector($em, $filtro, $sectores)
+        );
+    }
+
+    /**
      * @Route("/printReporteInsumos", name="print_reporte_insumos")
      * @Method("POST")
      * @Template()
@@ -169,15 +238,6 @@ class InsumoReportesController extends Controller {
         }
     }
 
-    /**
-     * @Route("/entregas", name="insumo_reporte_entregas")
-     * @Method("GET")
-     * @Template("AppBundle:Reportes:insumo.html.twig")
-     */
-    public function entregasAction(Request $request) {
-        return new Response('Informe en desarrollo');
-    }
-
     /*
      * FUNCIONES ADICIONALES
      */
@@ -233,6 +293,58 @@ class InsumoReportesController extends Controller {
             }
         }
         return $cadena;
+    }
+
+    /**
+     *
+     * Entregas de insumos
+     */
+    private function getDatosReporteEntregasxSector($em, $filtro, $sectores) {
+        // Reporte por Sector, tipo incidencia y tipo de equipos
+        if ($em->getFilters()->isEnabled('softdeleteable')) {
+            $em->getFilters()->disable('softdeleteable');
+        }
+        $movimientos = $em->getRepository('AppBundle:Stock')->getMovimientosEntregaInsumos($filtro);
+        $tiposInsumo = $em->getRepository('AppBundle:Stock')->getMovimientosEntregaInsumosDistinct($filtro);
+
+        $i = 0;
+        $tabla = $dataset = array();
+        foreach ($tiposInsumo as $tipo) {
+            $i = ($i < 20) ? ++$i : 0;
+            $dataset[$tipo['nombre']] = array('label' => $tipo['nombre'], 'maxBarThickness' => 50, 'backgroundColor' => $this->fillcolor[$i], 'borderColor' => $this->color[$i], 'borderWidth' => 1, 'data' => array(0));
+        }
+
+        $arrTotal = array('tipo' => 'T', 'nombre' => 'TOTALES', 'id' => null, 'padre' => null, 'recuento' => 0);
+
+        foreach ($sectores as $sector) {
+            $nombre = $sector['abreviatura'] . ' - ' . $sector['edifnombre'] . ' - ' . $sector['nombre'];
+            $arrSector = array('tipo' => 'S', 'nombre' => $nombre, 'id' => 'S' . $sector['id'], 'padre' => NULL, 'recuento' => 0);
+            foreach ($tiposInsumo as $tipo) {
+                $arrTipo = array('tipo' => 'M', 'nombre' => $tipo['nombre'], 'id' => 'M' . $sector['id'] . $tipo['id'], 'padre' => 'S' . $sector['id'], 'recuento' => 0);
+                foreach ($movimientos as $mov) {
+                    $entrega = $em->getRepository('AppBundle:InsumoEntrega')->find($mov->getMovimiento());
+                    $solic = $entrega->getSolicitante()->getId();
+                    // recorrer entrega
+                    if ($mov->getInsumo()->getId() == $tipo['id'] && $solic == $sector['id']) {
+                        $arrTipo['recuento'] += $mov->getCantidad();
+                    }
+                }
+                if ($arrTipo['recuento'] > 0) {
+                    array_unshift($tabla, $arrTipo);
+                    $arrSector['recuento'] += $arrTipo['recuento'];
+
+                    $dataset[$tipo['nombre']]['data'] = array($dataset[$tipo['nombre']]['data'][0] + $arrTipo['recuento']);
+                }
+            }
+            if ($arrSector['recuento'] > 0) {
+                array_unshift($tabla, $arrSector);
+                $arrTotal['recuento'] += $arrSector['recuento'];
+            }
+        }
+        array_push($tabla, $arrTotal);
+        $total = $arrTotal['recuento'];
+        $label = array('PERÍODO ' . $filtro['desde'] . ' al ' . $filtro['hasta']);
+        return array('dataset' => array_values($dataset), 'labels' => $label, 'tabla' => $tabla, 'total' => $total);
     }
 
 }

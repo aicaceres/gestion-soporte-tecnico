@@ -25,6 +25,10 @@ class UbicacionType extends AbstractType {
             $builder->add('deposito', null,
                     array('label' => 'Es depósito', 'required' => false));
         }
+        if (property_exists($data, 'depositoEntrega')) {
+            $builder->add('depositoEntrega', null,
+                    array('label' => 'Entrega de Insumos', 'required' => false));
+        }
         if (property_exists($data, 'razonSocial')) {
             $builder->add('razonSocial', null,
                     array('label' => 'Ver en compras', 'required' => false));

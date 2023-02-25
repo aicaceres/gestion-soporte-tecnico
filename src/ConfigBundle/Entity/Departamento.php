@@ -68,6 +68,11 @@ class Departamento {
     protected $deposito = false;
 
     /**
+     * @ORM\Column(name="deposito_entrega", type="boolean")
+     */
+    protected $depositoEntrega = false;
+
+    /**
      * @ORM\Column(name="servicio_tecnico", type="boolean")
      */
     protected $servicioTecnico = false;
@@ -663,4 +668,27 @@ class Departamento {
         return $this->proveedor;
     }
 
+
+    /**
+     * Set depositoEntrega
+     *
+     * @param boolean $depositoEntrega
+     * @return Departamento
+     */
+    public function setDepositoEntrega($depositoEntrega)
+    {
+        $this->depositoEntrega = $depositoEntrega;
+
+        return $this;
+    }
+
+    /**
+     * Get depositoEntrega
+     *
+     * @return boolean 
+     */
+    public function getDepositoEntrega()
+    {
+        return $this->depositoEntrega;
+    }
 }

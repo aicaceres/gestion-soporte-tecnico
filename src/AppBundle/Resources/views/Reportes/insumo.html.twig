@@ -50,7 +50,7 @@
     <div class='col-md-12'>
         <div class='box box-solid {{ box_color }}'>
             <div class='box-header'>
-                <h3 class='box-title'><i class="fa fa-bar-chart-o"></i> &nbsp; Reporte de Insumos para Soporte Técnico</h3>                
+                <h3 class='box-title'><i class="fa fa-bar-chart-o"></i> &nbsp; Reporte de Hardware para Soporte Técnico</h3>                
                 <div class="pull-right box-tools">                                
                     <!-- FORMULARIO PARA IMPRESION -->       
                 </div>
@@ -216,7 +216,7 @@ $(document).ready(function() {
         $(this).siblings('.tiposalida').val( $(this).attr('id') );        
         $(this).closest('form').submit();        
     });   
-    
+
     var barsolxsector = new Chart($('#grafico-insumo-solxsector'), {
         type: 'bar',
         data: {

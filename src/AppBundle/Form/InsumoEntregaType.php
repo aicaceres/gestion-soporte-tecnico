@@ -7,11 +7,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityRepository;
 
 class InsumoEntregaType extends AbstractType {
-    private $userId;
-
-    public function __construct($userId) {
-        $this->userId = $userId;
-    }
 
     /**
      * @param FormBuilderInterface $builder
@@ -22,14 +17,13 @@ class InsumoEntregaType extends AbstractType {
             'class' => 'ConfigBundle:Departamento',
             'label' => 'Depósito:',
             'required' => true,
-            'choice_label' => 'nombreCompleto',
+            'choice_label' => 'nombre',
             'attr' => array('class' => 'select2'),
             'query_builder' => function (EntityRepository $repository) {
                 $qb = $repository->createQueryBuilder('d')
                         ->innerJoin('d.edificio', 'e')
                         ->innerJoin('e.usuarios', 'us')
-                        ->where('d.deposito=1')
-                        ->andWhere('us.id=' . $this->userId)
+                        ->where('d.depositoEntrega=1')
                         ->orderBy('d.nombre');
                 return $qb;
             }

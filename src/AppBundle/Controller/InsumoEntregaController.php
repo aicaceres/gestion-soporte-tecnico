@@ -102,7 +102,7 @@ class InsumoEntregaController extends Controller {
         $form->get('hora')->setData($entity->getFecha()->format('H:i'));
         $userId = $this->getUser()->getId();
         $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($userId);
-        $depositosAsignados = $em->getRepository('ConfigBundle:Ubicacion')->getDepositosAsignados($userId);
+        $depositosAsignados = $em->getRepository('ConfigBundle:Departamento')->findOneByDepositoEntrega(1);
         if (!$depositosAsignados) {
             $this->get('session')->getFlashBag()->add('error', 'No posee depósitos asignados para entrega de insumos!');
             return $this->redirectToRoute('insumo_entrega');
@@ -119,7 +119,7 @@ class InsumoEntregaController extends Controller {
      * @return Form The form
      */
     private function createNewForm(InsumoEntrega $entity) {
-        $form = $this->createForm(new InsumoEntregaType($this->getUser()->getId()), $entity, array(
+        $form = $this->createForm(new InsumoEntregaType(), $entity, array(
             'action' => $this->generateUrl('insumo_entrega_create'),
             'method' => 'PUT',
         ));
@@ -225,7 +225,7 @@ class InsumoEntregaController extends Controller {
         $editForm->get('hora')->setData($entity->getFecha()->format('H:i'));
         $userId = $this->getUser()->getId();
         $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->getUbicacionesPermitidas($userId);
-        $depositosAsignados = $em->getRepository('ConfigBundle:Ubicacion')->getDepositosAsignados($userId);
+        $depositosAsignados = $em->getRepository('ConfigBundle:Departamento')->findOneByDepositoEntrega(1);
         if (!$depositosAsignados) {
             $this->get('session')->getFlashBag()->add('error', 'No posee depósitos asignados para entrega de insumos!');
             return $this->redirectToRoute('insumo_entrega');
@@ -245,7 +245,7 @@ class InsumoEntregaController extends Controller {
      * @return \Symfony\Component\Form\Form The form
      */
     private function createEditForm(InsumoEntrega $entity) {
-        $form = $this->createForm(new InsumoEntregaType($this->getUser()->getId()), $entity, array(
+        $form = $this->createForm(new InsumoEntregaType(), $entity, array(
             'action' => $this->generateUrl('insumo_entrega_update', array('id' => $entity->getId())),
             'method' => 'PUT',
         ));

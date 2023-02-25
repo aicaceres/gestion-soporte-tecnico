@@ -271,4 +271,85 @@ class StockRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
+    public function getMovimientosEntregaInsumos($filtro) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('h')
+                ->from('AppBundle\Entity\StockHistorico', 'h')
+                ->innerJoin('h.insumo', 'i')
+                ->innerJoin('AppBundle\Entity\InsumoEntrega', 'it', 'WITH', 'it.id=h.movimiento')
+                ->where("h.tipo='ENTREGAINSUMO'");
+        if ($filtro['selTipo']) {
+            $query->innerJoin('i.tipo', 't')
+                    ->andWhere('t.id = :tipo')
+                    ->setParameter('tipo', $filtro['selTipo']);
+        }
+        if ($filtro['selUbicaciones']) {
+            $query->innerJoin('it.solicitante', 's')
+                    ->innerJoin('s.edificio', 'e')
+                    ->innerJoin('e.ubicacion', 'u')
+                    ->andWhere('u.id IN (:ubicaciones)')
+                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+            if ($filtro['selEdificios']) {
+                $query->andWhere('e.id IN (:edificios)')
+                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+
+                if ($filtro['selDepartamento']) {
+                    $query->andWhere(' s.id IN (:deptos)')
+                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                }
+            }
+        }
+        if ($filtro['desde']) {
+            $cadena = " h.fecha >= '" . UtilsController::toAnsiDate($filtro['desde']) . "'";
+            $query->andWhere($cadena);
+        }
+        if ($filtro['hasta']) {
+            $cadena = " h.fecha <= '" . UtilsController::toAnsiDate($filtro['hasta']) . "'";
+            $query->andWhere($cadena);
+        }
+        return $query->getQuery()->getResult();
+    }
+
+    public function getMovimientosEntregaInsumosDistinct($filtro) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("i.id, concat( ma.nombre, ' | ' ,mo.nombre ) nombre")
+                ->from('AppBundle\Entity\StockHistorico', 'h')
+                ->innerJoin('h.insumo', 'i')
+                ->innerJoin('i.marca', 'ma')
+                ->innerJoin('i.modelo', 'mo')
+                ->innerJoin('AppBundle\Entity\InsumoEntrega', 'it', 'WITH', 'it.id=h.movimiento')
+                ->where("h.tipo='ENTREGAINSUMO'")
+                ->groupBy('i.id, nombre');
+        if ($filtro['selTipo']) {
+            $query->innerJoin('i.tipo', 't')
+                    ->andWhere('t.id = :tipo')
+                    ->setParameter('tipo', $filtro['selTipo']);
+        }
+        if ($filtro['selUbicaciones']) {
+            $query->innerJoin('it.solicitante', 's')
+                    ->innerJoin('s.edificio', 'e')
+                    ->innerJoin('e.ubicacion', 'u')
+                    ->andWhere('u.id IN (:ubicaciones)')
+                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+            if ($filtro['selEdificios']) {
+                $query->andWhere('e.id IN (:edificios)')
+                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+
+                if ($filtro['selDepartamento']) {
+                    $query->andWhere(' s.id IN (:deptos)')
+                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                }
+            }
+        }
+        if ($filtro['desde']) {
+            $cadena = " h.fecha >= '" . UtilsController::toAnsiDate($filtro['desde']) . "'";
+            $query->andWhere($cadena);
+        }
+        if ($filtro['hasta']) {
+            $cadena = " h.fecha <= '" . UtilsController::toAnsiDate($filtro['hasta']) . "'";
+            $query->andWhere($cadena);
+        }
+        return $query->getQuery()->getArrayResult();
+    }
+
 }

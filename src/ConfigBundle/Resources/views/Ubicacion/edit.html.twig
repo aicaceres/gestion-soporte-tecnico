@@ -72,15 +72,18 @@
                 </div>     
                 
                 <div class="col-md-3">
+                    {% if form.servicioTecnico is defined %}
+                    <fieldset>
+                        {{ form_row(form.servicioTecnico) }}
+                    </fieldset>
+                    {% endif %}  
                     
                     {% if form.deposito is defined %}
                     <fieldset>
                         {{ form_row(form.deposito) }}
                     </fieldset>
-                    {% endif %}  
-                    {% if form.servicioTecnico is defined %}
-                    <fieldset>
-                        {{ form_row(form.servicioTecnico) }}
+                    <fieldset id="depositoEntrega" {% if not entity.deposito %} class="hidden" {% endif %}>
+                        {{ form_row(form.depositoEntrega) }}
                     </fieldset>
                     {% endif %}  
                 </div>                      
@@ -139,6 +142,13 @@ $(document).ready(function() {
     {% endif %}    
     $(".ubicacion_selector").change();    
   
+  $('#configbundle_ubicacion_deposito').on('ifChecked',function(e){
+      $('#depositoEntrega').removeClass('hidden')
+  })
+  $('#configbundle_ubicacion_deposito').on('ifUnchecked',function(e){
+      $('#configbundle_ubicacion_depositoEntrega').iCheck('uncheck')
+      $('#depositoEntrega').addClass('hidden')
+  })
     $('.ip_address').mask('0ZZ.0ZZ.0ZZ.0ZZ', {
         translation: {
           'Z': {

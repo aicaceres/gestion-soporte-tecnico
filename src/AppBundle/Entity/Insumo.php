@@ -77,6 +77,11 @@ class Insumo {
     protected $stockMinimo = 0;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\InsumoEntregaDetalle", mappedBy="insumo")
+     */
+    protected $entregas;
+
+    /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
@@ -486,4 +491,37 @@ class Insumo {
         return $this->stockHistorico;
     }
 
+
+    /**
+     * Add entregas
+     *
+     * @param \AppBundle\Entity\InsumoEntregaDetalle $entregas
+     * @return Insumo
+     */
+    public function addEntrega(\AppBundle\Entity\InsumoEntregaDetalle $entregas)
+    {
+        $this->entregas[] = $entregas;
+
+        return $this;
+    }
+
+    /**
+     * Remove entregas
+     *
+     * @param \AppBundle\Entity\InsumoEntregaDetalle $entregas
+     */
+    public function removeEntrega(\AppBundle\Entity\InsumoEntregaDetalle $entregas)
+    {
+        $this->entregas->removeElement($entregas);
+    }
+
+    /**
+     * Get entregas
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getEntregas()
+    {
+        return $this->entregas;
+    }
 }
