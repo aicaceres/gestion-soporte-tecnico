@@ -63,15 +63,15 @@
                                 <tr>
                                     <th>Tipo</th>
                                     <th>N° Serie</th>
-                                    <th>Cod. Barra</th>
+                                    <th class="no-sort">Cod. Barra</th>
                                     <th>Descripción</th>
                                     <th>Marca</th>
                                     <th>Modelo</th>
                                     <th>Estado</th>
-                                    <th>Inicio Vida Útil</th>
-                                    <th>Ubicación - Edificio - Dpto - Piso</th>
-                                    <th>Eliminar</th>
-                                    <th style="width:40px;"></th>
+                                    <th class="no-sort">Inicio Vida Útil</th>
+                                    <th class="no-sort">Ubicación - Edificio - Dpto - Piso</th>
+                                  {#  <th class="no-sort">Eliminar</th>#}
+                                    <th class="no-sort" style="width:40px;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -91,6 +91,15 @@
     {{parent()}}
     <script type="text/javascript">
         $(document).ready(function () {
+             $('body').on('click','.eliminar-equipo',function(){
+                var msj = 'Confirma eliminar este equipo?';
+                if( $(this).closest('tr').hasClass('deleted') ){
+                    msj = 'CONFIRMA ELIMINAR ESTE EQUIPO? \n\nEsta acción eliminará definitivamente el equipo y no puede ser revertida!!!';
+                }        
+                if(!confirm(msj)){
+                    return false;
+                }
+            });
             $('.select2').on('select2:select', function () {
                 $('#searchform').submit();
             });
@@ -110,8 +119,8 @@
                     {"name": "estado", "targets": 6},
                     {"name": "vidaUtil", "targets": 7},
                     {"name": "ubicacion", "targets": 8},
-                    {"name": "eliminar", "targets": 9},
-                    {"name": "actions", "targets": 10},
+                   {# {"name": "eliminar", "targets": 9},#}
+                    {"name": "actions", "targets": 9},
                     {"targets": 'no-sort', "orderable": false}
                 ],
                 "rowCallback": function (row, data) {
@@ -149,7 +158,7 @@
                 "searching": true,
                 "pageLength": 25,
                 "bLengthChange": false,
-                "ordering": false,
+                "ordering": true,
                 "pagingType": "full_numbers",
                 "oLanguage": {
                     "oPaginate": {

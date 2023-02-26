@@ -555,7 +555,7 @@ class EquipoController extends Controller {
      * @Route("/deleteAjax/{id}", name="equipo_delete_ajax")
      * @Method("GET")
      */
-    public function deleteAjaxAction($id) {
+    public function deleteAjaxAction(Request $request, $id) {
         UtilsController::haveAccess($this->getUser(), 'equipo_delete');
         $em = $this->getDoctrine()->getManager();
         if ($this->getUser()->getRol()->getAdmin()) {
@@ -582,6 +582,9 @@ class EquipoController extends Controller {
         catch (\Exception $ex) {
             $em->getConnection()->rollback();
             $this->addFlash('danger', UtilsController::errorMessage($ex->getErrorCode()));
+        }
+        if ($request->get('url')) {
+            return $this->redirectToRoute($request->get('url'));
         }
         return $this->redirectToRoute('equipo');
     }
@@ -1346,7 +1349,7 @@ class EquipoController extends Controller {
                             }
                             $responseTemp = $responseTemp . "<a data-toggle='tooltip' title='Imprimir ficha del equipo' target='_blank' href='" . $this->generateUrl('print_ficha_equipo', array('id' => $equipo->getId())) . "'><i class='fa fa-print'></i></a>&nbsp;";
                             if ($user->getAccess('equipo_delete') or $user->getRol()->getAdmin()) {
-                                $responseTemp = $responseTemp . "&nbsp;&nbsp;<a class='eliminar-equipo' href='" . $this->generateUrl('equipo_delete_ajax', array('id' => $equipo->getId())) . "' data-toggle='tooltip' title='Eliminar' ><i class='fa fa-trash-o'></i></a>&nbsp;";
+                                $responseTemp = $responseTemp . "&nbsp;&nbsp;&nbsp;&nbsp;<a class='eliminar-equipo' href='" . $this->generateUrl('equipo_delete_ajax', array('id' => $equipo->getId())) . "' data-toggle='tooltip' title='Eliminar' ><i class='fa fa-trash-o'></i></a>&nbsp;";
                             }
                         }
                 }
@@ -1756,6 +1759,13 @@ class EquipoController extends Controller {
         else // If the request is not a POST one, die hard
             die;
 
+        // Orders
+        foreach ($orders as $key => $order) {
+            // Orders does not contain the name of the column, but its number,
+            // so add the name so we can handle it just like the $columns array
+            $orders[$key]['name'] = $columns[$order['column']]['name'];
+        }
+
         // Further filtering can be done in the Repository by passing necessary arguments
         $otherConditions = "array or whatever is needed";
         // Get results from the Repository
@@ -1847,14 +1857,15 @@ class EquipoController extends Controller {
                             $responseTemp = $equipo->getUbicacionActual()->getTexto();
                             break;
                         }
-                    case 'eliminar': {
-                            $check = $equipo->getEliminar() ? "checked='checked'" : "";
-                            $responseTemp = "<input type='checkbox' class='update-eliminar' data-id='" . $equipo->getId() . "' data-url='" . $this->generateUrl('update_eliminar', array('id' => $equipo->getId())) . "' " . $check . " />";
-                            break;
-                        }
+//                    case 'eliminar': {
+//                            $check = $equipo->getEliminar() ? "checked='checked'" : "";
+//                            $responseTemp = "<input type='checkbox' class='update-eliminar' data-id='" . $equipo->getId() . "' data-url='" . $this->generateUrl('update_eliminar', array('id' => $equipo->getId())) . "' " . $check . " />";
+//                            break;
+//                        }
                     case 'actions': {
                             $deleted = ($equipo->getDeletedAt()) ? 1 : 0;
                             $responseTemp = "<a target='_blank' href='" . $this->generateUrl('equipo_edit', array('id' => $equipo->getId())) . "' data-toggle='tooltip' style='font-size:14px' class='edit-equipo' data-deleted='" . $deleted . "' title='Editar' ><i class='fa fa-edit'></i> </a>";
+                            $responseTemp = $responseTemp . " &nbsp;&nbsp;&nbsp;  " . "<a href='" . $this->generateUrl('equipo_delete_ajax', array('id' => $equipo->getId())) . "?url=get_admin_list' data-toggle='tooltip' style='font-size:14px; color:orangered;' class='eliminar-equipo' title='Borrar' ><i class='fa fa-trash'></i> </a>";
                         }
                 }
 
