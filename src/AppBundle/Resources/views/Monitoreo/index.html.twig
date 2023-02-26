@@ -63,7 +63,7 @@
                         <fieldset>  
                             <div class="form-group">
                                 <label class="col-md-2 control-label" style="padding-left:0">Ubicaciones:</label>                        
-                                <div class="col-md-5">
+                                <div class="col-md-4">
                                     <select id="selUbicaciones" name="selUbicaciones[]" urledificio="{{ path('selEdificios') }}" class="selector_edificios form-control select2" multiple="multiple" >
                                         {%for ubic in ubiclist %}
                                             {% if ubic.id in app.user.ubicacionesPermitidas or app.user.rol.admin %}
@@ -71,7 +71,16 @@
                                             {% endif %}
                                         {% endfor %}
                                     </select> 
-                                </div>                                                    
+                                </div>    
+                                <label class="col-md-1 control-label" style="padding-left:0">Tipo:</label>    
+                                <div class="col-md-3">
+                                    <select id="selTipo" name="selTipo" class="form-control select2">
+                                        <option {%if app.session.get('filtro_monitoreo')['selTipo'] == 0 %} selected="selected" {%endif%} value="0">Todos</option>
+                                        {%for tipo in tipos %}
+                                            <option {%if tipo.id == app.session.get('filtro_monitoreo')['selTipo'] %} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                        {% endfor %}
+                                    </select> 
+                                </div> 
                                 <div class="col-md-2">
                                     <button type="submit" data-toggle="tooltip" title="Aplicar filtros" class="form-control btn btn-default btn-sm" style="width:60%;"><i class="glyphicon glyphicon-filter"></i> Buscar</button>   
                                 </div>                               
@@ -149,6 +158,7 @@ $(document).ready(function() {
             $.ajax({
                 type: 'get',
                 url: url,
+                data: { 'tipo': $('#selTipo').val() },
                 success: function(data) { 
                     $(data).insertAfter(nivelsup);
                     icon.removeClass('fa-plus').addClass('fa-minus');

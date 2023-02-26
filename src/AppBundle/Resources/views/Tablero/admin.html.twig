@@ -9,7 +9,7 @@
     </div>
     <div class="col-md-8">
     <!-- Tareas de los técnicos -->
-    {% if app.user.rol.admin %}
+    {% if app.user.rol.admin or app.user.rol.tecnico %}
         {% include "AppBundle:Tablero:box-tecnicos.html.twig" %}
     {% else %}
         {% include "AppBundle:Tablero:ot-abiertas.html.twig" %}
