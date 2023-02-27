@@ -1097,11 +1097,13 @@ class EquipoRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         $query->select('e')
                 ->from('AppBundle\Entity\Equipo', 'e')
+                ->innerJoin('e.tipo', 't')
                 ->innerJoin('e.ubicaciones', 'u')
                 ->innerJoin('u.departamento', 'd')
                 ->where("u.actual=1")
                 ->andWhere('d.id=' . $dpto)
-                ->andWhere('u.redIp is not null');
+                ->andWhere('u.redIp is not null')
+                ->orderBy('t.nombre');
         return $query->getQuery()->getResult();
     }
 
