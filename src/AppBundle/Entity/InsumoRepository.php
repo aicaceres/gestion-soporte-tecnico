@@ -9,7 +9,7 @@ use ConfigBundle\Controller\UtilsController;
  */
 class InsumoRepository extends EntityRepository {
 
-    public function findByCriteria($data) {
+    public function findByCriteria($data, $me = false) {
         $query = $this->_em->createQueryBuilder();
         $query->select('i')
                 ->from('AppBundle\Entity\Insumo', 'i')
@@ -17,6 +17,9 @@ class InsumoRepository extends EntityRepository {
                 ->innerJoin('i.marca', 'ma')
                 ->innerJoin('i.modelo', 'mo')
                 ->where("t.clase = 'I'");
+        if ($me) {
+            $query->andWhere("t.subclase = 'INSUMO' ");
+        }
         if ($data['idTipo']) {
             $query->andWhere('t.id=' . $data['idTipo']);
         }
@@ -29,7 +32,7 @@ class InsumoRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
-    public function combosByCriteria($data, $select, $order, $tabla = '') {
+    public function combosByCriteria($data, $select, $order, $tabla = '', $me = false) {
         $query = $this->_em->createQueryBuilder();
         $query->select($select)
                 ->from('AppBundle\Entity\Insumo', 'i')
@@ -38,7 +41,9 @@ class InsumoRepository extends EntityRepository {
                 ->innerJoin('i.modelo', 'mo')
                 ->where("t.clase = 'I'")
                 ->orderBy($order);
-
+        if ($me) {
+            $query->andWhere("t.subclase = 'INSUMO' ");
+        }
         if ($tabla != 'tipo') {
             if ($data['idTipo']) {
                 $query->andWhere('t.id=' . $data['idTipo']);

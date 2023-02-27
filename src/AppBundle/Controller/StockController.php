@@ -27,14 +27,24 @@ class StockController extends Controller {
     public function inventarioAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), 'insumo_inventario');
         $em = $this->getDoctrine()->getManager();
-        $depositos = $em->getRepository('ConfigBundle:Departamento')->findByDeposito(1);
-        //$tipos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I'), array('nombre' => 'ASC'));
+        $esMesaEntrada = $this->getUser()->getAccess('insumo_entrega') && !$this->getUser()->getRol()->getAdmin();
         $filtro = [
             'idTipo' => $request->get('idTipo'),
             'idMarca' => $request->get('idMarca'),
             'idModelo' => $request->get('idModelo')
         ];
-        $tipos = $em->getRepository('AppBundle:Insumo')->combosByCriteria($filtro, 'DISTINCT t.id,t.nombre', 't.nombre', 'tipo');
+
+        if ($esMesaEntrada) {
+            $depositos = $em->getRepository('ConfigBundle:Departamento')->findByDepositoEntrega(1);
+            $tipos = $em->getRepository('AppBundle:Insumo')->combosByCriteria($filtro, 'DISTINCT t.id,t.nombre', 't.nombre', 'tipo', $esMesaEntrada);
+            $entities = $em->getRepository('AppBundle:Insumo')->findByCriteria($filtro, $esMesaEntrada);
+        }
+        else {
+            $depositos = $em->getRepository('ConfigBundle:Departamento')->findByDeposito(1);
+            $tipos = $em->getRepository('AppBundle:Insumo')->combosByCriteria($filtro, 'DISTINCT t.id,t.nombre', 't.nombre', 'tipo');
+            $entities = $em->getRepository('AppBundle:Insumo')->findByCriteria($filtro);
+        }
+
 
         $marcas = $em->getRepository('AppBundle:Insumo')->combosByCriteria($filtro, 'DISTINCT ma.id,ma.nombre', 'ma.nombre', 'marca');
         if ($filtro['idMarca']) {
@@ -44,7 +54,6 @@ class StockController extends Controller {
             $modelos = NULL;
         }
 
-        $entities = $em->getRepository('AppBundle:Insumo')->findByCriteria($filtro);
         return $this->render('AppBundle:Stock:inventario.html.twig', array(
                     'entities' => $entities,
                     'depositos' => $depositos,

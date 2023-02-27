@@ -54,7 +54,6 @@ class InsumoController extends Controller {
         else // If the request is not a POST one, die hard
             die;
 
-        // Process Parameters
         // Orders
         foreach ($orders as $key => $order) {
             // Orders does not contain the name of the column, but its number,
@@ -510,7 +509,7 @@ class InsumoController extends Controller {
         $entities = $em->getRepository('AppBundle:Insumo')->findSolicitudes($periodo, $estado);
 
         //$depositos = $em->getRepository('ConfigBundle:Departamento')->findByDeposito(1);
-        $depositos = $em->getRepository('ConfigBundle:Departamento')->findBy(array('deposito' => 1), array('inicial' => 'desc'));
+        $depositos = $em->getRepository('ConfigBundle:Departamento')->findBy(array('deposito' => 1, 'depositoEntrega' => 0), array('inicial' => 'desc'));
         $depId = $request->get('depId');
         if (count($depositos) > 0) {
             if (!$depId) {

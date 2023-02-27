@@ -140,6 +140,9 @@
                     </div>     
                     <div id="datatableslist" data-subclase="INSUMO" data-deposito=""></div>                   
                     <div class="box-footer">
+                        {% if entity.id  %}
+                            <a type="button" class="btn btn-app delete" href="javascript:void(0)"><i class="fa fa-trash-o"></i> Eliminar</a>
+                        {%endif%}
                         <div class="btn-group pull-right">
                             <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
                             <a type="button" class="btn btn-app volver" href="{{ path('insumo_entrega')}}"><i class="fa fa-reply"></i> Cancelar</a>
@@ -150,14 +153,19 @@
                 <div style="display:none">    
                     {{ form_end(form) }}                
                 </div> 
+                
             </div><!-- /.col-->        
         </div><!-- ./row -->
+        {% if entity.id  %}
+            {{ form(delete_form) }}
+        {%endif%}
     {% endblock %}
     {% block javascripts_inline %}   
         {{parent()}}
         <script type="text/javascript">
             var $dataHolder;
             $(document).ready(function () {
+               
                 $(document).keypress(function (e) {
                     var keycode = (e.keyCode ? e.keyCode : e.which);
                     if (keycode == '13' && !$(e.target).is("textarea")) {

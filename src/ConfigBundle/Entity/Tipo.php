@@ -41,7 +41,6 @@ class Tipo {
     /**
      * @var string $subclase
      * @ORM\Column(name="subclase", type="string")
-     * @Gedmo\Versioned()
      * INSUMO | HARDWARE
      */
     protected $subclase = 'HARDWARE';

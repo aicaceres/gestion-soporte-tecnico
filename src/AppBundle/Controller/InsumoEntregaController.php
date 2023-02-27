@@ -220,7 +220,7 @@ class InsumoEntregaController extends Controller {
             throw $this->createNotFoundException('No se encuentra la entrega.');
         }
         $editForm = $this->createEditForm($entity);
-        //$deleteForm = $this->createDeleteForm($id);
+        $deleteForm = $this->createDeleteForm($id);
 
         $editForm->get('hora')->setData($entity->getFecha()->format('H:i'));
         $userId = $this->getUser()->getId();
@@ -234,8 +234,8 @@ class InsumoEntregaController extends Controller {
         return array(
             'entity' => $entity,
             'form' => $editForm->createView(),
-            'ubicaciones' => $ubicaciones
-                //'delete_form' => $deleteForm->createView()
+            'ubicaciones' => $ubicaciones,
+            'delete_form' => $deleteForm->createView()
         );
     }
 
@@ -250,6 +250,65 @@ class InsumoEntregaController extends Controller {
             'method' => 'PUT',
         ));
         return $form;
+    }
+
+    /**
+     * @param mixed $id The entity id
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteForm($id) {
+        return $this->createFormBuilder()
+                        ->setAction($this->generateUrl('insumo_entrega_delete', array('id' => $id)))
+                        ->setMethod('DELETE')
+                        ->getForm()
+        ;
+    }
+
+    /**
+     * @Route("/delete/{id}", name="insumo_entrega_delete")
+     * @Method("DELETE")
+     */
+    public function deleteAction(Request $request, $id) {
+        UtilsController::haveAccess($this->getUser(), 'insumo_entrega');
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+
+        $form = $this->createDeleteForm($id);
+        $form->handleRequest($request);
+        if ($form->isValid()) {
+            try {
+                $em->getConnection()->beginTransaction();
+                $entity = $em->getRepository('AppBundle:InsumoEntrega')->find($id);
+                if (!$entity) {
+                    throw $this->createNotFoundException('No existe esta entrega.');
+                }
+                // rechazar el pedido desde soporte
+                if ($entity->esPedidoInsumoSoporte()) {
+                    foreach ($entity->getDetalles() as $item) {
+                        $itemTarea = $item->getInsumoxTarea();
+                        $itemTarea->setCantidadAprobada(0);
+                        $itemTarea->setFechaAutorizado(new \DateTime());
+                        $itemTarea->setAutorizante($this->getUser());
+                        $em->persist($itemTarea);
+                    }
+                }
+                // update estado a cancelado
+                $entity->setEstado('CANCELADO');
+                $em->persist($entity);
+                $em->flush();
+                // deletedat
+                $em->remove($entity);
+                $em->flush();
+                $em->getConnection()->commit();
+                $this->addFlash('success', 'La entrega fue cancelada!');
+            }
+            catch (\Exception $ex) {
+                $em->getConnection()->rollback();
+                $this->addFlash('danger', $ex->getMessage());
+            }
+        }
+
+        return $this->redirectToRoute('insumo_entrega');
     }
 
     /**
