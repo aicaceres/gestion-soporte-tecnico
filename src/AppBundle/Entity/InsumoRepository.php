@@ -339,4 +339,47 @@ class InsumoRepository extends EntityRepository {
         return $query->getQuery()->getArrayResult();
     }
 
+    /**
+     * Para informe mesa de entradas
+     */
+    public function getMovimientosMesaEntrada($filtro) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select(" ie.fecha, concat(u.abreviatura,' - ',e.nombre) as sector, t.nombre as insumo, d.cantidad ")
+                ->from('AppBundle\Entity\InsumoEntrega', 'ie')
+                ->innerJoin('ie.detalles', 'd')
+                ->innerJoin('d.insumo', 'i')
+                ->innerJoin('i.tipo', 't')
+                ->innerJoin('ie.solicitante', 's')
+                ->innerJoin('s.edificio', 'e')
+                ->innerJoin('e.ubicacion', 'u')
+                ->where("ie.estado = 'ENTREGADO' ");
+
+        if ($filtro['selTipos']) {
+            $query->andWhere(' t.id IN (:tipos)')
+                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+        }
+        if ($filtro['selUbicaciones']) {
+            $query->andWhere('u.id IN (:ubicaciones)')
+                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+            if ($filtro['selEdificios']) {
+                $query->andWhere('e.id IN (:edificios)')
+                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+
+                if ($filtro['selDepartamento']) {
+                    $query->andWhere(' s.id IN (:deptos)')
+                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                }
+            }
+        }
+        if ($filtro['desde']) {
+            $cadena = " ie.fecha >= '" . UtilsController::toAnsiDate($filtro['desde']) . "'";
+            $query->andWhere($cadena);
+        }
+        if ($filtro['hasta']) {
+            $cadena = " ie.fecha <= '" . UtilsController::toAnsiDate($filtro['hasta']) . "'";
+            $query->andWhere($cadena);
+        }
+        return $query->getQuery()->getArrayResult();
+    }
+
 }

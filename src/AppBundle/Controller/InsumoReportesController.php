@@ -238,6 +238,157 @@ class InsumoReportesController extends Controller {
         }
     }
 
+    /**
+     * @Route("/mesaentrada", name="insumo_reporte_mesaentrada")
+     * @Method("GET")
+     * @Template("AppBundle:Reportes:mesaentrada.html.twig")
+     */
+    public function mesaentradaAction(Request $request) {
+        UtilsController::haveAccess($this->getUser(), 'reportes_insumo');
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+        $session = $this->get('session');
+        $sessionFiltro = $session->get('filtro_reportes_mesaentrada');
+
+        switch ($request->get('_opFiltro')) {
+            case 'buscar':
+                $periodo = $this->getPeriodoParaFiltro($request->get('desde'), $request->get('hasta'));
+                $filtro = array(
+                    'selTipos' => $request->get('selTipos'),
+                    'selUbicaciones' => $request->get('selUbicaciones'),
+                    'selEdificios' => $request->get('selEdificios'),
+                    'selDepartamento' => $request->get('selDepartamento'),
+                    'desde' => $periodo['desde'],
+                    'hasta' => $periodo['hasta'],
+                );
+                break;
+            default:
+                if ($sessionFiltro) {
+                    $periodo = $this->getPeriodoParaFiltro($sessionFiltro['desde'], $sessionFiltro['hasta']);
+                    $filtro = array(
+                        'selTipos' => $sessionFiltro['selTipos'],
+                        'selUbicaciones' => $sessionFiltro['selUbicaciones'],
+                        'selEdificios' => $sessionFiltro['selEdificios'],
+                        'selDepartamento' => $sessionFiltro['selDepartamento'],
+                        'desde' => $periodo['desde'],
+                        'hasta' => $periodo['hasta'],
+                    );
+                }
+                else {
+                    $periodo = $this->getPeriodoParaFiltro($request->get('desde'), $request->get('hasta'));
+                    $filtro = array('selUbicaciones' => 0, 'selEdificios' => 0, 'selDepartamento' => 0, 'selTipos' => NULL,
+                        'desde' => $periodo['desde'], 'hasta' => $periodo['hasta']);
+                }
+                break;
+        }
+        $session->set('filtro_reportes_mesaentrada', $filtro);
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findByDeletedAt(null);
+        $edificios = null;
+        $departamentos = null;
+        $sectores = $em->getRepository('ConfigBundle:Departamento')->findAllOrdenados();
+        if ($filtro['selUbicaciones']) {
+            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $this->getUser()->getId());
+            $sectores = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByUbicaciones($filtro['selUbicaciones']);
+            if ($filtro['selEdificios']) {
+                $sectores = $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
+            }
+        }
+
+        $tiposInsumos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I', 'subclase' => 'INSUMO'), array('nombre' => 'ASC'));
+
+        return array(
+            'filtro' => $filtro,
+            'tiposInsumos' => $tiposInsumos,
+            'ubicaciones' => $ubicaciones,
+            'edificios' => $edificios,
+            'departamentos' => $departamentos,
+            'datos' => $this->getDatosReporteMesaEntrada($em, $filtro, $sectores)
+        );
+    }
+
+    private function getPeriodoParaFiltro($desde, $hasta) {
+        $hoy = new \DateTime();
+        $inicio = date("d-m-Y", strtotime('first day of January', time()));
+        $ini = ($desde) ? $desde : $inicio;
+        $fin = ($hasta) ? $hasta : $hoy->format('d-m-Y');
+        return array('desde' => $ini, 'hasta' => $fin);
+    }
+
+    private function getDatosReporteMesaEntrada($em, $filtro) {
+        // Reporte por sector, tipo de insumo y mes
+        $movimientos = $em->getRepository('AppBundle:InsumoEntrega')->getMovimientosMesaEntrada($filtro);
+        // armar array de meses según filtro periodo
+        $meses = UtilsController::getMesesEnPeriodo($filtro);
+        // obtener los tipos de insumo
+        $tiposInsumos = array_unique(array_column($movimientos, 'insumo'));
+        $sectores = array_unique(array_column($movimientos, 'sector'));
+        arsort($sectores);
+        $dataset = $data = $tabla = array();
+        /**
+         *  GRAFICO
+         */
+        // crear estructura del dataset
+        $i = 0;
+        foreach ($tiposInsumos as $tipo) {
+            // data por mes
+            foreach ($meses as $mes) {
+                $data[$mes] = 0;
+            }
+            $i = ($i < 20) ? ++$i : 0;
+            $dataset[$tipo] = array('label' => $tipo, 'maxBarThickness' => 50, 'backgroundColor' => $this->fillcolor[$i], 'borderColor' => $this->color[$i], 'borderWidth' => 1, 'data' => $data);
+        }
+        // cargar data de cada insumo y periodo
+        foreach ($movimientos as $mov) {
+            $mes = $mov['fecha']->format('m-Y');
+            $dataset[$mov['insumo']]['data'][$mes] = floatval($dataset[$mov['insumo']]['data'][$mes]) + floatval($mov['cantidad']);
+        }
+        // quitar keys de data dentro del dataset
+        foreach ($dataset as &$item) {
+            $values = array_values($item['data']);
+            $item['data'] = $values;
+        }
+        // cambiar mes en formate numero por texto corto
+        foreach ($meses as $mes) {
+            $arr = split('-', $mes);
+            $labels[] = $this->mesesCorto[intval($arr[0]) - 1] . ' ' . $arr[1];
+        }
+        /**
+         * TABLA
+         */
+        $arrTotal = array('tipo' => 'T', 'nombre' => 'TOTALES', 'id' => null, 'padre' => null, 'recuento' => $data, 'total' => 0);
+        foreach ($sectores as $sectorKey => $sector) {
+            $arrSector = array('tipo' => 'S', 'nombre' => $sector, 'id' => 'S' . $sectorKey, 'padre' => NULL, 'recuento' => $data, 'total' => 0);
+            foreach ($tiposInsumos as $tipoKey => $tipo) {
+                $arrTipo = array('tipo' => 'M', 'nombre' => $tipo, 'id' => 'M' . $sectorKey . $tipoKey, 'padre' => 'S' . $sectorKey, 'recuento' => $data, 'total' => 0);
+                foreach ($movimientos as $mov) {
+                    if ($mov['insumo'] == $tipo && $mov['sector'] == $sector) {
+                        // contar en el mes que corresponda
+                        $mes = $mov['fecha']->format('m-Y');
+                        $arrTipo['recuento'][$mes] = floatval($arrTipo['recuento'][$mes]) + floatval($mov['cantidad']);
+                        $arrTipo['total'] = floatval($arrTipo['total']) + floatval($mov['cantidad']);
+                    }
+                }
+                if ($arrTipo['total'] > 0) {
+                    array_unshift($tabla, $arrTipo);
+                    foreach ($arrTipo['recuento'] as $key => $value) {
+                        $arrSector['recuento'][$key] = floatval($arrSector['recuento'][$key]) + floatval($arrTipo['recuento'][$key]);
+                    }
+                    $arrSector['total'] = floatval($arrSector['total']) + floatval($arrTipo['total']);
+                }
+            }
+            if ($arrSector['total'] > 0) {
+                array_unshift($tabla, $arrSector);
+                foreach ($arrSector['recuento'] as $key => $value) {
+                    $arrTotal['recuento'][$key] = floatval($arrTotal['recuento'][$key]) + floatval($arrSector['recuento'][$key]);
+                }
+                $arrTotal['total'] = floatval($arrTotal['total']) + floatval($arrSector['total']);
+            }
+        }
+
+        array_push($tabla, $arrTotal);
+        return array('dataset' => array_values($dataset), 'labels' => $labels, 'meses' => $meses, 'tabla' => $tabla);
+    }
+
     /*
      * FUNCIONES ADICIONALES
      */

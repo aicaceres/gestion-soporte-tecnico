@@ -300,4 +300,16 @@ class UtilsController extends Controller {
         return $txt;
     }
 
+    public static function getMesesEnPeriodo($periodo) {
+        $fecha = strtotime($periodo['desde']);
+        $hasta = strtotime($periodo['hasta']);
+        $months = array();
+
+        while ($fecha <= $hasta) {
+            $months[] = date('m-Y', $fecha);
+            $fecha = strtotime('+1 MONTH', $fecha);
+        }
+        return $months;
+    }
+
 }

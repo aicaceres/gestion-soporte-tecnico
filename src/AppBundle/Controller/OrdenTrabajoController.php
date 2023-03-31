@@ -709,8 +709,8 @@ class OrdenTrabajoController extends Controller {
                     $pedido->setFecha(new \DateTime());
                     $pedido->setEstado('PENDIENTE');
                     $pedido->setResponsable($this->getUser()->getNombre());
-                    $servTecnico = $em->getRepository('ConfigBundle:Departamento')->findOneByServicioTecnico(1);
-                    $pedido->setSolicitante($servTecnico);
+                    //$servTecnico = $em->getRepository('ConfigBundle:Departamento')->findOneByServicioTecnico(1);
+                    $pedido->setSolicitante($entity->getOrdenTrabajo()->getRequerimiento()->getSolicitante());
 
                     foreach ($entity->getInsumos() as $insumoxTarea) {
                         $insumoxTarea->setTarea($entity);

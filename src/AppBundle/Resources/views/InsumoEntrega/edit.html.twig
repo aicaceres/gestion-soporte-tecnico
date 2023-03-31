@@ -220,7 +220,7 @@
                     $('[id$="_insumo"]').each(function () {
                         const stock = $(this).closest('.item').find('.stckTd input').val()
                         const cantidad = $(this).closest('.item').find('.cntTd input').val()
-                        if (stock < cantidad) {
+                        if ( parseInt(stock) < parseInt(cantidad)) {
                             ckstck = false
                             $(this).closest('.item').find('.cntTd input').focus()
                         }
