@@ -26,47 +26,47 @@
     .tipoM{        
         font-size: 14px;
     }   
-    .tipoT,.table-resumen th{
+    .header{
         font-size: 14px;
         font-weight: bold;
         background-color: lightgray;
     }
-    .tabla-tipoequipo tr.tipoM td{
-        font-weight: normal !important;
-        background-color: white;
+    .tipoT{
+        font-size: 14px;
+        font-weight: bold;
+        background-color: lightgray;
     }
    </style>
    <body  >     
       <table>
           <tr>
-              <th>Reporte de Insumos para Soporte Técnico por Sector</th>
+              <th>REPORTE DE MESA DE ENTRADA</th>
           </tr>
         </table>  
         <table>  
             <tr><td>Ubicaciones: {{ filtro.ubicaciones|trim }}</td></tr>
             <tr><td>Edificios: {{ filtro.edificios|trim }} </td></tr>
             <tr><td>Departamentos: {{ filtro.departamentos|trim }} </td></tr>
-            <tr><td>Tipos de Equipos: {{ filtro.tiposEquipo}}</td></tr>
+            <tr><td>Tipos de Insumos: {{ filtro.tiposInsumos}}</td></tr>
             <tr><td>Período: {{ filtro.desde}} - {{ filtro.hasta }}</td></tr>
             </tr>
         </table>  
             
         <table class="table-resumen">
-                <tr>
+                <tr class="header">
                     <th> Tipo de Equipo > Sector</th>
-                    <th> Total </th>                        
-                    <th> Porcentaje </th>                        
+                    {% for mes in datos.labels %}
+                     <th> {{ mes }} </th> 
+                    {% endfor %}
+                    <th> TOTAL </th>                        
                 </tr>  
-                {% set sumtotal=0 %}
                 {% for item in datos.tabla %}
                     <tr id="{{item.id}}" class="tipo{{item.tipo}}">
                         <td>{{ item.nombre }} </td>
-                        <td>{{ item['recuento'] }}</td>
-                        <td>{% if item.tipo=='S' %} {{ ((item['recuento']*100)/datos.total)|number_format(2,'.',',') }}% 
-                            {% set sumtotal = sumtotal + ((item['recuento']*100)/datos.total) %}
-                            {% endif %}
-                                {% if item.tipo=='T' %}{{ sumtotal }}%{% endif %}
-                            </td>                            
+                        {% for mes in datos.meses %}
+                            <td> {{ item.recuento[mes] }} </td> 
+                        {% endfor %}
+                        <td>  {{ item.total }}   </td>                            
                     </tr>
                 {% endfor %}
             </table>    

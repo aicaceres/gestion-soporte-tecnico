@@ -246,7 +246,7 @@ class InsumoReportesController extends Controller {
     public function mesaentradaAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), 'reportes_insumo');
         $em = $this->getDoctrine()->getManager();
-        $em->getFilters()->disable('softdeleteable');
+        //$em->getFilters()->disable('softdeleteable');
         $session = $this->get('session');
         $sessionFiltro = $session->get('filtro_reportes_mesaentrada');
 
@@ -295,6 +295,7 @@ class InsumoReportesController extends Controller {
         }
 
         $tiposInsumos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I', 'subclase' => 'INSUMO'), array('nombre' => 'ASC'));
+        $datos = $this->getDatosReporteMesaEntrada($em, $filtro);
 
         return array(
             'filtro' => $filtro,
@@ -302,7 +303,7 @@ class InsumoReportesController extends Controller {
             'ubicaciones' => $ubicaciones,
             'edificios' => $edificios,
             'departamentos' => $departamentos,
-            'datos' => $this->getDatosReporteMesaEntrada($em, $filtro, $sectores)
+            'datos' => $datos
         );
     }
 
@@ -387,6 +388,69 @@ class InsumoReportesController extends Controller {
 
         array_push($tabla, $arrTotal);
         return array('dataset' => array_values($dataset), 'labels' => $labels, 'meses' => $meses, 'tabla' => $tabla);
+    }
+
+    /**
+     * @Route("/printReporteMesaentrada", name="print_reporte_mesaentrada")
+     * @Method("POST")
+     * @Template()
+     */
+    public function printReporteMesaentrada(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+        $session = $this->get('session');
+        $filtro = $session->get('filtro_reportes_mesaentrada');
+        $tipoSalida = $request->get('tiposalida');
+        $nombreReporte = $request->get('reporte');
+        $textoFiltro = array('Todos');
+        $hoy = new \DateTime();
+        $datos = $this->getDatosReporteMesaEntrada($em, $filtro);
+
+        // guarda la imágen del gráfico en directorio temporal
+        $baseFromJavascript = $request->get('grafico');
+        $data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $baseFromJavascript));
+        $tmpfname = tempnam(sys_get_temp_dir(), 'x');
+        file_put_contents($tmpfname, $data);
+        $logo1 = __DIR__ . '/../../../web/bundles/app/img/home_logo.png';
+        switch ($nombreReporte) {
+            case 'mesaentrada':
+                $textoFiltro = array('ubicaciones' => ($filtro['selUbicaciones']) ? $this->getTextoFiltro($em, $filtro['selUbicaciones']) : 'Todos',
+                    'edificios' => ($filtro['selEdificios']) ? $this->getTextoFiltro($em, $filtro['selEdificios'], 'Edificio') : 'Todos',
+                    'departamentos' => ($filtro['selDepartamento']) ? $this->getTextoFiltro($em, $filtro['selDepartamento'], 'Departamento') : 'Todos',
+                    'tiposInsumos' => ($filtro['selTipos']) ? $this->getTextoFiltro($em, $filtro['selTipos'], 'Tipo') : 'Todos',
+                    'desde' => $filtro['desde'], 'hasta' => $filtro['hasta']);
+
+                switch ($tipoSalida) {
+                    case 'pdf':
+                        $plantilla = 'AppBundle:Reportes:print_mesaentrada.pdf.twig';
+                        $arraydata = array('logo' => $logo1, 'grafico' => $tmpfname, 'datos' => $datos, 'filtro' => $textoFiltro);
+                        $filename = 'informe_mesaentrada_';
+                        break;
+                    case 'xls':
+                        $plantilla = 'AppBundle:Reportes:export_mesaentrada-xls.html.twig';
+                        $arraydata = array('datos' => $datos, 'filtro' => $textoFiltro);
+                        $filename = $fileName = 'Reporte_MesaEntrada_';
+                        break;
+                }
+                break;
+        }
+        switch ($tipoSalida) {
+            case 'pdf':
+                $facade = $this->get('ps_pdf.facade');
+                $response = new Response();
+                $this->render($plantilla, $arraydata, $response);
+                $xml = $response->getContent();
+                $content = $facade->render($xml);
+                return new Response($content, 200, array('content-type' => 'application/pdf',
+                    'Content-Disposition' => 'filename=' . $filename . $hoy->format('dmY_Hi') . '.pdf'));
+            case 'xls':
+                $partial = $this->renderView($plantilla, $arraydata);
+                $response = new Response();
+                $response->setStatusCode(200);
+                $response->headers->set('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+                $response->headers->set('Content-Disposition', 'filename="' . $filename . $hoy->format('dmY_Hi') . '.xls"');
+                $response->setContent($partial);
+                return $response;
+        }
     }
 
     /*

@@ -379,6 +379,7 @@ class InsumoRepository extends EntityRepository {
             $cadena = " ie.fecha <= '" . UtilsController::toAnsiDate($filtro['hasta']) . "'";
             $query->andWhere($cadena);
         }
+
         return $query->getQuery()->getArrayResult();
     }
 

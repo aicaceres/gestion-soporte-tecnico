@@ -1,0 +1,90 @@
+<pdf>
+    <dynamic-page page-size="A4-landscape" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <img ignore-error="true" src="{{logo}}" width="71px" height="30px" margin-bottom="10px"/>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#f39c12" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="20px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+                <h2 margin-bottom="5px" text-align="center">Reporte de Mesa de Entrada</h2>
+                <h3 margin="5px 0" vertical-align="middle">Criterios de Filtro:</h3>
+                <table>
+                    <tr> 
+                        <td border.type="none" vertical-align="middle" font-style="bold">Ubicaciones</td>
+                        <td border.type="none" vertical-align="middle" font-style="bold">Edificios</td>
+                        <td border.type="none" vertical-align="middle" font-style="bold">Departamentos</td>
+                    </tr>
+                    <tr> 
+                        <td border.type="none" vertical-align="middle">{{ filtro.ubicaciones|trim }}</td>
+                        <td border.type="none" vertical-align="middle">{{ filtro.edificios|trim }}</td>
+                        <td border.type="none" vertical-align="middle">{{ filtro.departamentos|trim }}</td>
+                    </tr>
+                </table>                                
+                <div margin-bottom="5px" margin-top="5px" vertical-align="middle"><span font-style="bold">Tipos de Insumos:</span> {{ filtro.tiposInsumos|trim }} </div>                
+                <div margin-bottom="5px" vertical-align="middle"><span font-style="bold">Período: </span>{{ filtro.desde|date('d/m/Y') }} - {{ filtro.hasta|date('d/m/Y') }}</div>
+                
+                <div height="10px"></div>
+                <img breakable="true" ignore-error="true" width="98%" src="{{grafico}}"/>
+                <div height="20px"></div>
+                <div text-align="center">
+                <table font-size="8" width="95%" text-align="left" margin="0 auto">
+                    <tr>
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" padding-left="5px" width="8 cm"><strong>Sector > Tipo de Insumo</strong></td>
+                        {% for mes in datos.labels %}
+                            <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"><strong>{{ mes }}</strong></td>
+                       {% endfor %}
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"><strong>Total</strong></td>
+                    </tr>                      
+                    {% for item in datos.tabla  %}                         
+                        {% if item.tipo=='S' %}
+                            <tr>                          
+                                <td font-style="bold" background.color="antiquewhite" height="20px" vertical-align="middle" padding-left="5px" > {{ item.nombre|upper }} </td>
+                                {% for mes in datos.meses %}
+                                    <td font-style="bold" background.color="antiquewhite" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.recuento[mes] }}</td>                                    
+                                {% endfor %}
+                                <td font-style="bold" background.color="antiquewhite" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.total }}</td>
+                               
+                            </tr>
+                        {% endif %}
+                        {% if item.tipo=='M' %}
+                                <tr font-size="7">                          
+                                    <td height="15px" vertical-align="middle" padding-left="10px" > {{ item.nombre }} </td>
+                                    {% for mes in datos.meses %}
+                                    <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.recuento[mes] }}</td>                                    
+                                    {% endfor %}
+                                    <td height="15px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.total}}</td>
+                                </tr>
+                            {% endif %}
+                        {% if item.tipo=='T' %}
+                            <tr>                          
+                                <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" padding-left="5px"> {{ item.nombre }} </td>
+                                {% for mes in datos.meses %}
+                                    <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.recuento[mes] }}</td>                                    
+                                {% endfor %}
+                                <td font-style="bold" background.color="lightgray" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{ item.total }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table> 
+                </div>
+                
+                
+              
+                
+    </dynamic-page>
+</pdf>       

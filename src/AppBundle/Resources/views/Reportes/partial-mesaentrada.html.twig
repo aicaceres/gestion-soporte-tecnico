@@ -5,11 +5,11 @@
         <h3 class="box-title">Entrega de Insumos </h3>
 
         <div class="box-tools pull-right">
-            <form id="printform_mesaentrada" name="printform" target="_blank" style="display:none;" 
-                          action="#" method="POST">                        
+            <form id="printform_mesaentrada" name="printform" target="_blank" style="display:inline-block;" 
+                          action="{{ path('print_reporte_mesaentrada') }}" method="POST">                        
                         <input type="hidden" id="grafico_print_mesaentrada" name="grafico"/>  
                         <input type="hidden" class="tiposalida" name="tiposalida"/>
-                        <input type="hidden" name="reporte" value="reqanualxestado"/>
+                        <input type="hidden" name="reporte" value="mesaentrada"/>
                         <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i> </button> 
                         <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i> </button> 
                     </form>
@@ -32,7 +32,6 @@
                     {% endfor %}
                     <th> TOTAL </th>                         
                 </tr>  
-                {% set sumtotal=0 %}
                 {% for item in datos.tabla %}
                     <tr id="{{item.id}}" data-padre="{{ item.padre }}" class="tipo{{item.tipo}} id{{item.padre}} {% if item.tipo in ['I','M'] %}hidden {% endif %}" data-id="{{ item.id }}">
                         <td>{{ item.nombre }} {% if item.tipo == 'S' %} <i class="fa fa-plus verDetalle pull-right" data-tipo="{{ item.tipo }}"></i> {% endif %}</td>
