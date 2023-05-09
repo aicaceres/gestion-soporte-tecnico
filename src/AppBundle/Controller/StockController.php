@@ -80,10 +80,18 @@ class StockController extends Controller {
         $criteria = array();
         parse_str($request->get('criteria'), $criteria);
 
+        $esMesaEntrada = $this->getUser()->getAccess('insumo_entrega') && !$this->getUser()->getRol()->getAdmin();
+        if ($esMesaEntrada) {
+            $depositos = $em->getRepository('ConfigBundle:Departamento')->findByDepositoEntrega(1);
+        }
+        else {
+            $depositos = $em->getRepository('ConfigBundle:Departamento')->findByDeposito(1);
+        }
+
+
         $tipo = $em->getRepository('ConfigBundle:Tipo')->find($criteria['idTipo']);
         $marca = $em->getRepository('ConfigBundle:Marca')->find($criteria['idMarca']);
         $modelo = $em->getRepository('ConfigBundle:Modelo')->find($criteria['idModelo']);
-        $depositos = $em->getRepository('ConfigBundle:Departamento')->findByDeposito(1);
 
         $textoFiltro = [
             'tipo' => $tipo ? $tipo->getNombre() : 'Todos',

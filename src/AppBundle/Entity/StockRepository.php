@@ -312,16 +312,17 @@ class StockRepository extends EntityRepository {
 
     public function getMovimientosEntregaInsumosDistinct($filtro) {
         $query = $this->_em->createQueryBuilder();
-        $query->select("i.id, concat( ma.nombre, ' | ' ,mo.nombre ) nombre")
+        $query->select("i.id, concat( t.nombre, ' | ' ,mo.nombre ) nombre")
                 ->from('AppBundle\Entity\StockHistorico', 'h')
                 ->innerJoin('h.insumo', 'i')
                 ->innerJoin('i.marca', 'ma')
                 ->innerJoin('i.modelo', 'mo')
+                ->innerJoin('i.tipo', 't')
                 ->innerJoin('AppBundle\Entity\InsumoEntrega', 'it', 'WITH', 'it.id=h.movimiento')
                 ->where("h.tipo='ENTREGAINSUMO'")
                 ->groupBy('i.id, nombre');
         if ($filtro['selTipo']) {
-            $query->innerJoin('i.tipo', 't')
+            $query
                     ->andWhere('t.id = :tipo')
                     ->setParameter('tipo', $filtro['selTipo']);
         }

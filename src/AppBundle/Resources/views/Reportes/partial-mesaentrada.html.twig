@@ -36,7 +36,7 @@
                     <tr id="{{item.id}}" data-padre="{{ item.padre }}" class="tipo{{item.tipo}} id{{item.padre}} {% if item.tipo in ['I','M'] %}hidden {% endif %}" data-id="{{ item.id }}">
                         <td>{{ item.nombre }} {% if item.tipo == 'S' %} <i class="fa fa-plus verDetalle pull-right" data-tipo="{{ item.tipo }}"></i> {% endif %}</td>
                         {% for mes in datos.meses %}
-                            <td> {{ item.recuento[mes] }} </td> 
+                            <td> {% if item.recuento[mes] is defined %}  {{item.recuento[mes] }} {% else %} 0 {% endif %} </td> 
                         {% endfor %}
                         <td>  {{ item.total }}   </td>                            
                     </tr>

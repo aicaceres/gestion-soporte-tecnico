@@ -201,7 +201,7 @@ class InsumoReportesController extends Controller {
                 $textoFiltro = array('ubicaciones' => ($filtro['selUbicaciones']) ? $this->getTextoFiltro($em, $filtro['selUbicaciones']) : 'Todos',
                     'edificios' => ($filtro['selEdificios']) ? $this->getTextoFiltro($em, $filtro['selEdificios'], 'Edificio') : 'Todos',
                     'departamentos' => ($filtro['selDepartamento']) ? $this->getTextoFiltro($em, $filtro['selDepartamento'], 'Departamento') : 'Todos',
-                    'tiposEquipo' => ($filtro['selTipos']) ? $this->getTextoFiltro($em, $filtro['selTipos'], 'tiposEquipo') : 'Todos',
+                    'tiposEquipo' => ($filtro['selTipos']) ? $this->getTextoFiltro($em, $filtro['selTipos'], 'Tipo') : 'Todos',
                     'desde' => $filtro['desde'], 'hasta' => $filtro['hasta']);
                 $datos = $this->getDatosReporteInsumoxSector($em, $filtro, $tiposInsumos, $sectores);
                 switch ($tipoSalida) {
