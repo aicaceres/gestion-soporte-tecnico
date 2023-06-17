@@ -728,6 +728,7 @@ class RequerimientoController extends Controller {
     public function createAddDetalleAction(Request $request, $id) {
         //UtilsController::haveAccess($this->getUser(), 'requerimiento_new');
         $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
         $op = $request->get('op');
         if ($op == 'req') {
             $requerimiento = $em->getRepository('AppBundle:Requerimiento')->find($id);

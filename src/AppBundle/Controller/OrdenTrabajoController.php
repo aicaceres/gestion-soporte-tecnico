@@ -377,13 +377,14 @@ class OrdenTrabajoController extends Controller {
         $otNro = $ot->getNroOT();
         $fecha = UtilsController::longDateSpanish($ot->getFechaOrden());
         $logo1 = __DIR__ . '/../../../web/bundles/app/img/home_logo.png';
+        $qr = __DIR__ . '/../../../web/uploads/qr_survey_ls.jpg';
         //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
 
         $this->render('AppBundle:OrdenTrabajo:ordentrabajo_resumen.pdf.twig',
-                array('ot' => $ot, 'logo' => $logo1, 'fecha' => $fecha), $response);
+                array('ot' => $ot, 'logo' => $logo1, 'qr' => $qr, 'fecha' => $fecha), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

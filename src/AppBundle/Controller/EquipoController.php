@@ -692,6 +692,7 @@ class EquipoController extends Controller {
         // Busca equipo para asociar a requerimiento
         $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
         $equipo = $em->getRepository('AppBundle:Equipo')->find($id);
         $enOrdenAbierta = $em->getRepository('AppBundle:Equipo')->checkEnOrdenAbierta($id);
         if ($equipo->getEnRequerimientoAbierto() || $enOrdenAbierta) {
