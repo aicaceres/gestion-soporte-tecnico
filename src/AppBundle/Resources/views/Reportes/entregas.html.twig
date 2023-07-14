@@ -95,11 +95,10 @@
                         <div class="col-md-12">                                   
                             <fieldset>    
                                 <div class="col-md-5">
-                                    <label class="required">Tipo de Insumo:</label>
-                                    <select id="selTipo" name="selTipo" class="form-control select2"> 
-                                        <option {%if app.session.get('filtro_reportes_entregas')['selTipo'] == 0 %}selected="selected" {%endif%} value="0" >TODOS</option>
-                                        {%for tipo in tiposInsumos %}
-                                            <option {%if tipo.id == app.session.get('filtro_reportes_entregas')['selTipo'] %} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
+                                    <label class="required">Tipos de Insumo:</label>
+                                    <select id="selTipos" name="selTipos[]" class="form-control select2" multiple="multiple"> 
+                                        {%for tipo in tiposInsumos %} 
+                                            <option {%if tipo.id in app.session.get('filtro_reportes_entregas')['selTipos'] %} selected="selected" {%endif%} value="{{tipo.id}}">{{tipo.nombre}}</option>
                                         {% endfor %}
                                     </select>
                                 </div>     
@@ -197,10 +196,10 @@
             var porcentaje = (value * 100) / padreValue;
             $(this).find('td:nth-child(6)').html(((Number.isInteger(porcentaje)) ? porcentaje : porcentaje.toFixed(2)) + '%');
         });
-        $("#selTipo").select2({
-            placeholder: "TODOS",
-            allowClear: true
-        });
+       // $("#selTipos").select2({
+       //     placeholder: "TODOS",
+       //     allowClear: true
+        //});
         $('#limpiar-filtros').on('click', function(){
             $('.select2').val(0);
             $('#searchform').find('.datepicker').val('');

@@ -40,7 +40,7 @@
                                     <span><strong>N° Cuenta:</strong>&nbsp;{{entity.nroCuenta}}</span>
                                 </div>    
                                 <div class="col-md-2">
-                                    <span><strong>Estado:</strong>&nbsp;{{entity.estado}}</span>
+                                    <span {{ entity.estado=='ANULADO' ? 'style="color:red"' : '' }} ><strong>Estado:</strong>&nbsp;{{entity.estado}}</span>
                                 </div>    
                             </fieldset>
                             {% if entity.descripcion %}
@@ -50,6 +50,16 @@
                                     </div>                                       
                                 </fieldset>
                             {% endif %}
+                            {% if entity.documentos %}
+                                <div class="col-md-12">
+                                    <div class="col-md-12">
+                                        <h6 class="text-blue" style="padding:8px 10px;background:#eee;font-weight:bold;margin:2px 0 0 0;">DOCUMENTACIÓN ANEXA</h6>
+                                        {% include "AppBundle:Compra:show-documentos.html.twig" with {'documentos':entity.documentos} %}
+                                    </div>  
+                                </div> 
+                                                                                                
+                            {% endif %}
+                                                       
                         </div>  
                         {% include "admin-form-data.html.twig" with {'table':entity} %}  
                     </div>
@@ -95,11 +105,6 @@
                                                 </tr>
                                             {% endfor %}           
                                         </tbody>
-                                       <!-- <tfoot>
-                                            <th colspan="4" style="text-align:right" >TOTAL</th>
-                                            <th style="text-align:right" >{{ entity.total|number_format(2,'.',',') }}</th>
-                                            {% if entity.estado != 'NUEVO' %}<th></th>{% endif %}
-                                        </tfoot>-->
                                     </table>    
 
                                 </div>
@@ -120,8 +125,10 @@
                 </div>                                  
                 <div class="box-footer">
                     {% include "AppBundle:Compra:partial-info.html.twig" %}
-                    <div class="btn-group pull-right">                        
+                    <div class="btn-group pull-right">   
+                        {% if entity.estado != 'ANULADO' %}
                         <a type="button" class="btn btn-app" target="_blank" href="{{ path('print_compra',{'id':entity.id})}}"><i class="fa fa-print"></i> Imprimir</a>
+                        {% endif %}
                         <a type="button" class="btn btn-app" href="{{ path('compra_admin')}}"><i class="fa fa-reply"></i> Volver</a>
                     </div>
                 </div>                         

@@ -53,6 +53,15 @@ class CompraType extends AbstractType {
                 ->add('proveedor', 'entity', array('label' => 'Proveedor:',
                     'class' => 'AppBundle:Proveedor', 'required' => false,
                     'attr' => array('class' => 'select2')))
+                ->add('documentos', 'collection', array(
+                    'type' => new CompraDocumentacionType(),
+                    'by_reference' => false,
+                    'allow_delete' => true,
+                    'allow_add' => true,
+                    'prototype_name' => 'itemdoc',
+                    'attr' => array(
+                        'class' => 'row item'
+            )))
                 ->add('detalles', 'collection', array(
                     'type' => new CompraDetalleType(),
                     'by_reference' => false,

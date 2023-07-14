@@ -335,17 +335,21 @@ $(document).ready(function() {
                                     alert('Debe ingresar el estado que se le asignará al equipo!');                                 
                                     $('#estado').select2('open');
                                     return false;
-                                }                                 
-                                $. each($(".desc_equipo"), function(){
+                                }            
+                                let alertDesc = false
+                                $.each($(".desc_equipo"), function(){
                                     if( !$(this).val() ){
-                                        alert('Debe completar la descripción de los equipos');                                        
-                                        return false;
+                                        alertDesc = true
                                     }
                                 }); 
+                                if(alertDesc){
+                                    alert('Debe completar la descripción de los equipos');                                        
+                                    return false;
+                                }   
                                 if( !$('#appbundle_tarea_ordenTrabajoDetalles').val() ){
                                     alert('Debe ingresar al menos un equipo!');
                                     return false;
-                                }                                                                                                              
+                                }              
                                 if( !$('#appbundle_tarea_ubicacion_fechaEntrega').val() ){
                                     alert('Debe indicar la fecha de entrega.');
                                     return false;
@@ -357,7 +361,12 @@ $(document).ready(function() {
                                 
                                 break; 
                             case 6:
-                                // TS - Terminar Soporte
+                                // TS - Terminar Soporte                              
+                                chkubicacionfinal = $('#chkubicacionfinal').is(':checked');         
+                                if(!chkubicacionfinal){
+                                    alert('Debe confirmar la ubicación final de los equipos antes de terminar el soporte!')
+                                    return false;
+                                }
                                 if( !confirm('Confirma dar por terminado el soporte?') ){
                                     return false;
                                 }

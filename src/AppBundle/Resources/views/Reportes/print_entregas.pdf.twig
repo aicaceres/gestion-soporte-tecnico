@@ -21,7 +21,7 @@
                 </div>
             </footer>
         </placeholders>
-                <h2 margin-bottom="5px" text-align="center">Reporte de Insumos para Soporte Técnico por Sector</h2>
+                <h2 margin-bottom="5px" text-align="center">Reporte de Entrega de Insumos</h2>
                 <h3 margin="5px 0" vertical-align="middle">Criterios de Filtro:</h3>
                 <table>
                     <tr> 
@@ -35,20 +35,21 @@
                         <td border.type="none" vertical-align="middle">{{ filtro.departamentos|trim }}</td>
                     </tr>
                 </table>                                
-                <div margin-bottom="5px" margin-top="5px" vertical-align="middle"><span font-style="bold">Tipos de Equipos:</span> {{ filtro.tiposEquipo|trim }} </div>                
+                <div margin-bottom="5px" margin-top="5px" vertical-align="middle"><span font-style="bold">Tipos de Insumos:</span> {{ filtro.tiposInsumos|trim }} </div>                
                 <div margin-bottom="5px" vertical-align="middle"><span font-style="bold">Período: </span>{{ filtro.desde|date('d/m/Y') }} - {{ filtro.hasta|date('d/m/Y') }}</div>
                 
                 <div height="10px"></div>
                 <img breakable="true" ignore-error="true" width="98%" src="{{grafico}}"/>
                 <div height="20px"></div>
                 <div text-align="center">
-                <table font-size="7" width="80%" text-align="left" margin="0 auto">
+     
+                <table font-size="7" width="100%" text-align="left" margin="0 auto">
                     <tr>
-                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" padding-left="5px" width="8 cm"><strong>Tipo de equipo > Sector </strong></td>
-                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"><strong>Total</strong></td>
-                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center"><strong>Porcentaje</strong></td>
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" padding-left="5px" font-size="8"><strong>Sector > Tipo de Insumo</strong></td>
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Total</strong></td>
+                        <td border.color="black" background.color="lightgray" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Porcentaje</strong></td>
                     </tr>  
-                    {% set sumtotal=0 %}                    
+                    {% set sumtotal=0 %}    
                     {% for item in datos.tabla  %}                         
                         {% if item.tipo=='S' %}
                             <tr>                          
@@ -75,7 +76,7 @@
                             </tr>
                         {% endif %}
                     {% endfor %}
-                </table> 
+                </table>
                 </div>
                 
                 

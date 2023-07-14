@@ -128,7 +128,18 @@ function addNewItem() {
     $collectionHolder.find('.ordTd').last().html($collectionHolder.data('index'));
     $collectionHolder.find('[id$="_signo"]').last().val($tipoajuste);
     $collectionHolder.find('textarea').last().css('height','34px');
-    insumo.on('select2:select',function(e){        
+    insumosIngresados = $collectionHolder.find('.prodTd select')
+    insumo.on('select2:selecting',function(e){  
+        let selValue = e.params.args.data.id;
+        let valid = true
+        insumosIngresados.each(function(_,v){
+            if(selValue == jQuery(v).val()){
+                alert('El insumo ya se encuentra registrado!')
+                valid = false
+                return false
+            };
+        });
+        if(!valid) return false    
         cantTd = $collectionHolder.find('.cantTd input').last();
         if( !cantTd.val() ) cantTd.val(1);        
         cantTd.focus();   

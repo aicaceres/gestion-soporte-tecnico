@@ -1,0 +1,11 @@
+<tr class="item" divdata="item_items">
+    <td class="dateTd"></td>
+    <td class="tecTd"></td>
+    <td class="descTd">{{ form_widget(newdoc.descripcion, { 'attr': {'class' : 'form-control','autocomplete':'off' } }) }} </td>
+    <td class="pathTd">{% if newdoc.vars.data %} {{ newdoc.vars.data.path }}{% endif %} </td>
+    <td class="fileTd">                   
+        {{ form_widget(newdoc.file) }}
+        {{ form_errors(newdoc.file) }}    
+    </td>
+    <td class="delTd"> </td>             
+</tr>

@@ -40,7 +40,7 @@
    <body  >     
       <table>
           <tr>
-              <th>REPORTE DE MESA DE ENTRADA</th>
+              <th>REPORTE DE ENTREGA DE INSUMOS</th>
           </tr>
         </table>  
         <table>  
@@ -53,23 +53,24 @@
         </table>  
             
         <table class="table-resumen">
-                <tr class="header">
-                    <th> Tipo de Insumo > Sector</th>
-                    {% for mes in datos.labels %}
-                     <th> {{ mes }} </th> 
-                    {% endfor %}
-                    <th> TOTAL </th>                        
-                </tr>  
-                {% for item in datos.tabla %}
-                    <tr id="{{item.id}}" class="tipo{{item.tipo}}">
-                        <td>{{ item.nombre }} </td>
-                        {% for mes in datos.meses %}
-                            <td> {{ item.recuento[mes] }} </td> 
-                        {% endfor %}
-                        <td>  {{ item.total }}   </td>                            
-                    </tr>
-                {% endfor %}
-            </table>    
+            <tr>
+                <th> Sector > Tipo de Insumo </th>
+                <th> Total </th>                        
+                <th> Porcentaje </th>                        
+            </tr>  
+            {% set sumtotal=0 %}
+            {% for item in datos.tabla %}
+                <tr id="{{item.id}}" class="tipo{{item.tipo}}">
+                    <td>{{ item.nombre }} </td>
+                    <td>{{ item['recuento'] }}</td>
+                    <td>{% if item.tipo=='S' %} {{ ((item['recuento']*100)/datos.total)|number_format(2,'.',',') }}% 
+                        {% set sumtotal = sumtotal + ((item['recuento']*100)/datos.total) %}
+                        {% endif %}
+                            {% if item.tipo=='T' %}{{ sumtotal }}%{% endif %}
+                        </td>                            
+                </tr>
+            {% endfor %}
+        </table>                                 
 
    </body>
 </html>

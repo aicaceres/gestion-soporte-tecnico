@@ -69,7 +69,25 @@
                             <div class="col-md-12">
                                 {{ form_row(form.descripcion) }}    
                             </div>
-                        </div>                          
+                        </div>
+                        <div class="col-md-12"> 
+                            <div class="col-md-12"> 
+                                <div class='box  box-default box-solid '>
+                                    <div class='box-header' style="background-color:white;">                                    
+                                        <h6 id="otdocs" class="text-blue colapsable" style="margin:0;font-weight:bold;">DOCUMENTACIÓN ANEXA &nbsp;&nbsp; </h6>
+                                        <div class="pull-right box-tools">                                                
+                                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                                        </div>
+                                    </div><!-- /.box-header -->
+                                    <div class='box-body no-padding'>  
+                                        {% if entity.estado != 'ANULADO' %}                                     
+                                            {% include "AppBundle:Compra:partial-documentos.html.twig" %}
+                                        {% endif %}
+                                        <br>
+                                    </div>      
+                                </div> 
+                            </div>
+                        </div>      
                     </div>
                     {% include "admin-form-data.html.twig" with {'table':entity} %}  
                     {% include "admin-form-deleted-data.html.twig" with {'table':entity} %}
@@ -176,9 +194,6 @@
                                 <button type="button" data-tipo="I" class="btn btn-sm btn-info linkAdd"> <i class="fa fa-plus-square"></i>&nbsp; INSUMO</button>
                                 <button type="button" data-tipo="E" class="btn btn-sm btn-primary linkAdd"> <i class="fa fa-plus-square"></i>&nbsp; EQUIPO</button>
                             </th>
-                            <!--<th style="text-align:right" >TOTAL</th>
-                            <th id="precTot right" >{{ form_widget(form.total, { 'attr': {'class' : 'number','readonly' : 'true'} }) }}</th>
-                            <th colspan="3"></th>-->
                             </tfoot>
                         </table>
                     </div>
@@ -207,11 +222,12 @@
 {% endblock %}
 {% block javascripts_inline %}   
     {{parent()}}
+<script src="{{ asset('bundles/app/bootstrap.file-input.js') }}" type="text/javascript"></script>        
 <script type="text/javascript">
     var $dataHolder;
 $(document).ready(function() {  
         // Get the container who holds the collection
-    $dataHolder = $('.table tbody');    
+    $dataHolder = $('.table.tablacompras tbody');    
 
    $('[type="submit"]').on('click',function(){
      if( !$('#appbundle_compra_proveedor').val() ){
@@ -463,7 +479,50 @@ $(document).ready(function() {
     
     $('.select2-container').css('width','100%');
     //actualizaTotales();    
+    
+        // documentos
+    $('input[type=file]').bootstrapFileInput();
+   /* $('.file-input-wrapper').removeClass('form-control');
+    $('.file-input-wrapper').addClass('btn-sm');
+    $('input[type=file]').removeClass('form-control');*/
+     
+    $('.add-documento').on('click',function(e){
+        e.preventDefault();
+        $holder = $(this).closest('table').find('.formDocumentos');
+        addNewDoc($holder);
+    });
+    $holder = $('.formDocumentos');
+    $holder.find('.delTd').each(function() {
+        addDocDeleteLink($(this));
+    });    
+    
 });
+
+function addNewDoc($holder){
+    var prototype = $holder.data('prototype');
+    var index = $holder.data('index');   
+    var newForm = prototype.replace(/itemdoc/g, index);
+    $holder.append(newForm);
+    $holder.data('index', index + 1);
+    addDocDeleteLink($holder.find('.delTd').last());
+    $holder.find('input[type=file]').last().bootstrapFileInput();
+    var d = new Date();
+    $holder.find('.dateTd').last().html( $.datepicker.formatDate('dd/mm/yy', new Date()) )
+    $holder.find('.tecTd').last().html( '{{app.user.username}}' )    
+}
+function addDocDeleteLink($itemFormTd){            
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1" class="btn btn-primary btn-xs"><i class="fa fa-trash"></i></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        if (confirm('Desea eliminar este item?')) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            var index = $holder.data('index');
+            $holder.data('index', index - 1);            
+        }
+    });
+ }
+
 function addNewItemCompra(tipo) {
     var prototype = $dataHolder.data('prototype');
     var index = $dataHolder.data('index');    

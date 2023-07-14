@@ -199,7 +199,7 @@ class RequerimientoController extends Controller {
                 if ($tecnico) {
                     $ot = $this->asignarRequerimiento($entity, $tecnico, $em);
                     $entity->setEstado('ASIGNADO');
-                    $msj = 'Se ha creado la OT N° ' . $ot->getNroOT();
+                    $msj = 'Se ha creado la OT NÂ° ' . $ot->getNroOT();
                     $em->persist($entity);
                     $em->flush();
                     $session = $this->get('session');
@@ -341,7 +341,7 @@ class RequerimientoController extends Controller {
                     $ot = $this->asignarRequerimiento($entity, $tecnico, $em);
                     if ($ot) {
                         $session->set('otid', $ot->getId());
-                        $msj = 'Se ha creado la OT N° ' . $ot->getNroOT();
+                        $msj = 'Se ha creado la OT NÂ° ' . $ot->getNroOT();
                         $entity->setEstado('ASIGNADO');
                         $em->persist($entity);
                         $em->flush();
@@ -354,7 +354,7 @@ class RequerimientoController extends Controller {
                 $em->getConnection()->commit();
                 if ($data['otid']) {
                     $otnro = $em->getRepository('AppBundle:OrdenTrabajo')->find($data['otid']);
-                    $this->addFlash('success', 'La OT N°' . $otnro->getNroOT() . ' fue guardada correctamente.');
+                    $this->addFlash('success', 'La OT NÂ°' . $otnro->getNroOT() . ' fue guardada correctamente.');
                 }
                 else {
                     $this->addFlash('success', 'El requerimiento fue guardado correctamente. ' . $msj);
@@ -431,14 +431,14 @@ class RequerimientoController extends Controller {
                     throw $this->createNotFoundException('No existe el requerimiento.');
                 }
                 if (is_null($entity->getDeletedAt())) {
-                    //forzar el guardado de ultima fecha de modificación antes de softdelete
+                    //forzar el guardado de ultima fecha de modificaciÃ³n antes de softdelete
                     $em->getFilters()->enable('softdeleteable');
                     $entity->setUpdated(new \DateTime());
                     // marcar como cancelado
                     $entity->setEstado('CANCELADO');
                     $em->persist($entity);
                     $em->flush();
-                    // volver estado y ubicación original los equipos
+                    // volver estado y ubicaciÃ³n original los equipos
                     foreach ($entity->getDetalles() as $detalle) {
                         $equipo = $detalle->getEquipo();
                         if ($detalle->getEstadoOriginal()) {
@@ -686,7 +686,7 @@ class RequerimientoController extends Controller {
                 $session = $this->get('session');
                 $session->set('otid', $ot->getId());
             }
-            $this->addFlash('success', 'Se ha creado la OT N° ' . $ot->getNroOT());
+            $this->addFlash('success', 'Se ha creado la OT NÂ° ' . $ot->getNroOT());
             return new Response($ot->getNroOT());
         }
         else {
@@ -755,7 +755,7 @@ class RequerimientoController extends Controller {
             try {
                 $em->getConnection()->beginTransaction();
                 $em->getConnection()->setAutoCommit(false);
-                // verificar que el equipo no esté en otro requerimiento, u ot
+                // verificar que el equipo no estÃ© en otro requerimiento, u ot
                 $equipo = $detalle->getEquipo();
                 if ($equipo) {
                     $enOrdenAbierta = $em->getRepository('AppBundle:Equipo')->checkEnOrdenAbierta($equipo->getId());
@@ -869,11 +869,11 @@ class RequerimientoController extends Controller {
     }
 
     /*
-     * Asignar requerimiento a técnico
+     * Asignar requerimiento a tÃ©cnico
      */
 
     private function asignarRequerimiento($requerimiento, $tecnico, $em) {
-        // si se asignó a un técnico generar orden de trabajo.
+        // si se asignÃ³ a un tÃ©cnico generar orden de trabajo.
         $ot = new OrdenTrabajo();
         $ot->setFechaOrden(new \DateTime());
         $ot->setTecnico($tecnico);
@@ -902,8 +902,8 @@ class RequerimientoController extends Controller {
         }
         $em->persist($ot);
         $em->flush();
-        // generar mensajería
-        $textoMensaje = 'Se ha asignado la OT N° ' . $ot->getNroOT();
+        // generar mensajerÃ­a
+        $textoMensaje = 'Se ha asignado la OT NÂ° ' . $ot->getNroOT();
         $asunto = 'Nueva OT';
         $mensaje = new Mensajeria();
         $mensaje->setDestinatario($tecnico);

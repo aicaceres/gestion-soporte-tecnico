@@ -278,10 +278,10 @@ class StockRepository extends EntityRepository {
                 ->innerJoin('h.insumo', 'i')
                 ->innerJoin('AppBundle\Entity\InsumoEntrega', 'it', 'WITH', 'it.id=h.movimiento')
                 ->where("h.tipo='ENTREGAINSUMO'");
-        if ($filtro['selTipo']) {
+        if ($filtro['selTipos']) {
             $query->innerJoin('i.tipo', 't')
-                    ->andWhere('t.id = :tipo')
-                    ->setParameter('tipo', $filtro['selTipo']);
+                    ->andWhere(' t.id IN (:tipos)')
+                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
             $query->innerJoin('it.solicitante', 's')
@@ -321,10 +321,9 @@ class StockRepository extends EntityRepository {
                 ->innerJoin('AppBundle\Entity\InsumoEntrega', 'it', 'WITH', 'it.id=h.movimiento')
                 ->where("h.tipo='ENTREGAINSUMO'")
                 ->groupBy('i.id, nombre');
-        if ($filtro['selTipo']) {
-            $query
-                    ->andWhere('t.id = :tipo')
-                    ->setParameter('tipo', $filtro['selTipo']);
+        if ($filtro['selTipos']) {
+            $query->andWhere(' t.id IN (:tipos)')
+                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
             $query->innerJoin('it.solicitante', 's')

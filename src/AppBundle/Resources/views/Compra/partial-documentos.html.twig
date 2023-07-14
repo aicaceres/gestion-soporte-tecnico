@@ -1,0 +1,36 @@
+<table  class="table table-bordered documentos"> 
+    <thead>
+       <tr>                              
+           <th style="width:8%">Fecha</th>
+           <th style="width:15%">Usuario</th>
+           <th>Descripción</th>
+           <th colspan="2">Archivo</th>
+           <th style="width:5%">     
+               {% if entity.estado != 'ANULADO'  %}
+                    <a href="javascript:void(0)" class="btn btn-primary btn-xs add-documento" data-url="" title="Cargar archivo"><i class="fa fa-plus"></i></a>                
+               {% endif %}                         
+           </th>
+       </tr>
+   </thead>   
+   <tbody data-index="{{form.documentos | length }}" class="collectionHolder formDocumentos" 
+          data-prototype="{% filter escape %}{% include 'AppBundle:Compra:prototype-documento.html.twig' with {'newdoc':form.documentos.vars.prototype} %}{% endfilter %}">               
+       {% for doc in form.documentos  %}        
+           <tr>                                 
+               <td class="dateTd">{{ doc.vars.data.created|date('d/m/Y') }} </td>
+               <td class="tecTd">{{ doc.vars.data.createdBy.username }} </td>
+               <td class="descTd">{{ form_widget(doc.descripcion) }} </td>
+               <td class="pathTd">
+                    {% if doc.vars.data.webPath %}                       
+                        <a href="{{ asset(doc.vars.data.webPath) }}" target="_blank">{{ doc.vars.data.path }}</a>
+                    {% endif %} 
+               </td>
+               <td class="fileTd">                   
+                     {{ form_widget(doc.file) }}
+                    {{ form_errors(doc.file) }} 
+               </td>
+               <td class="delTd"></td>               
+           </tr> 
+       {% endfor %}         
+   </tbody>      
+</table> 
+  

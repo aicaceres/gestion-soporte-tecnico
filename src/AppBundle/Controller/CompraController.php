@@ -1318,7 +1318,8 @@ class CompraController extends Controller {
         if ($filtro['tipoReporte'] == 'detalle') {
             // informe detallado de equipos valorizados
             $entities = $em->getRepository('AppBundle:Equipo')->findValorizadoDetalladoByCriteria($filtro, $userId);
-            if ($filtro['antiguedad']) {
+
+            if ($filtro['antiguedad'] != '') {
                 foreach ($entities as $key => $entity) {
                     $antig = explode(' ', $entity->getAntiguedad());
                     if ($filtro['antiguedad'] !== $antig[0]) {
@@ -1347,6 +1348,12 @@ class CompraController extends Controller {
                 $cant = 0;
                 $totalDolares = $totalPesos = 0;
                 foreach ($sub as $item) {
+                    if ($filtro['antiguedad'] != '') {
+                        $antiguedad = explode(' ', $item->getAntiguedad());
+                        if ($filtro['antiguedad'] !== $antiguedad[0]) {
+                            continue;
+                        }
+                    }
                     //$dolares[] = $item->getPrecioDolares($filtro['cotizacion']);
                     $tipo = $item->getTipo()->getNombre();
                     $marca = $item->getMarca()->getNombre();
@@ -1358,18 +1365,21 @@ class CompraController extends Controller {
                     $cant++;
                 }
 
-                $precioDolares = $totalDolares / $cant;
-                $precioPesos = $totalPesos / $cant;
-                $entities[] = [
-                    'tipo' => $tipo,
-                    'marca' => $marca,
-                    'modelo' => $modelo,
-                    'cantidad' => $cant,
-                    'precioPesos' => $precioPesos,
-                    'precioDolares' => $precioDolares,
-                    'totalDolares' => $totalDolares,
-                    'totalPesos' => $totalPesos
-                ];
+                if ($cant > 0) {
+                    $precioDolares = $totalDolares / $cant;
+                    $precioPesos = $totalPesos / $cant;
+
+                    $entities[] = [
+                        'tipo' => $tipo,
+                        'marca' => $marca,
+                        'modelo' => $modelo,
+                        'cantidad' => $cant,
+                        'precioPesos' => $precioPesos,
+                        'precioDolares' => $precioDolares,
+                        'totalDolares' => $totalDolares,
+                        'totalPesos' => $totalPesos
+                    ];
+                }
                 /* if ($precioDolares > 1) {
                   echo $sub[0]->getTipo()->getNombre() . ' - ' . $sub[0]->getMarca()->getNombre() . ' - ' . $sub[0]->getModelo()->getNombre() . '<br>';
                   var_dump($dolares);

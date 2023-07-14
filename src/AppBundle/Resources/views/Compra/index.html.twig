@@ -143,7 +143,9 @@
                                     <td>{{ entity.nroRemitoTxt|raw}}</td>
                                     <td>{{ entity.estado }}</td>                                    
                                     <td class="link-actions"> 
+                                        {% if entity.estado != 'ANULADO' %}
                                         <a href="{{ path('print_compra',{'id':entity.id})}}" target="_blank" data-toggle="tooltip" title="Imprimir"><i class="fa fa-print"></i></a>&nbsp;
+                                        {% endif %}
                                         <a href="{{ path('compra_admin_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver"><i class="fa fa-folder-open"></i></a>&nbsp;
                                         
                                         {% if app.user.access('compra_edit') and entity.estado != 'ANULADO' %}

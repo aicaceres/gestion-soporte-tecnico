@@ -110,6 +110,11 @@ class Compra {
     protected $recepciones;
 
     /**
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\CompraDocumentacion", mappedBy="compra",cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    protected $documentos;
+
+    /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
@@ -626,6 +631,37 @@ class Compra {
      */
     public function getCotizacionDolar() {
         return $this->cotizacionDolar;
+    }
+
+    /**
+     * Add documentos
+     *
+     * @param \AppBundle\Entity\CompraDocumentacion $documentos
+     * @return compra
+     */
+    public function addDocumento(\AppBundle\Entity\CompraDocumentacion $documentos) {
+        $documentos->setCompra($this);
+        $this->documentos[] = $documentos;
+
+        return $this;
+    }
+
+    /**
+     * Remove documentos
+     *
+     * @param \AppBundle\Entity\CompraDocumentacion $documentos
+     */
+    public function removeDocumento(\AppBundle\Entity\CompraDocumentacion $documentos) {
+        $this->documentos->removeElement($documentos);
+    }
+
+    /**
+     * Get documentos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getDocumentos() {
+        return $this->documentos;
     }
 
 }

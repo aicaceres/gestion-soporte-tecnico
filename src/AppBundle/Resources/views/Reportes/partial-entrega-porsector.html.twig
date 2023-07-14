@@ -2,14 +2,14 @@
     <div class="box-header with-border">
         <i class="fa fa-bar-chart"></i>
 
-        <h3 class="box-title">Insumos por Sector</h3>
+        <h3 class="box-title">Insumos Entregados</h3>
 
         <div class="box-tools pull-right">
-            <form id="printform_insumoxsector" name="printform" target="_blank" style="display:none;" 
-                          action="{{path('print_reporte_insumos')}}" method="POST">                        
+            <form id="printform_insumoxsector" name="printform" target="_blank" 
+                          action="{{path('print_reporte_entregas')}}" method="POST">                        
                         <input type="hidden" id="grafico_insumoxsector" name="grafico"/>  
                         <input type="hidden" class="tiposalida" name="tiposalida"/>
-                        <input type="hidden" name="reporte" value="insumoxsector"/>
+                        <input type="hidden" name="reporte" value="entregas"/>
                         <button type="button" id="pdf" class="btn btn-default btn-sm" data-toggle="tooltip" title="Imprimir PDF"> <i class="fa fa-file-pdf-o"></i> </button> 
                         <button type="button" id="xls" class="btn btn-default btn-sm" data-toggle="tooltip" title="Exportar XLS"> <i class="fa fa-file-excel-o"></i> </button> 
                     </form>

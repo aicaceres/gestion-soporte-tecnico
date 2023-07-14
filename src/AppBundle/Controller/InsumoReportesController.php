@@ -94,75 +94,6 @@ class InsumoReportesController extends Controller {
     }
 
     /**
-     * @Route("/entregas", name="insumo_reporte_entregas")
-     * @Method("GET")
-     * @Template("AppBundle:Reportes:entregas.html.twig")
-     */
-    public function entregasAction(Request $request) {
-        UtilsController::haveAccess($this->getUser(), 'reportes_insumo');
-        $em = $this->getDoctrine()->getManager();
-        $em->getFilters()->disable('softdeleteable');
-        $session = $this->get('session');
-        $sessionFiltro = $session->get('filtro_reportes_entregas');
-
-        switch ($request->get('_opFiltro')) {
-            case 'buscar':
-                $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
-                $filtro = array(
-                    'selTipo' => $request->get('selTipo'),
-                    'selUbicaciones' => $request->get('selUbicaciones'),
-                    'selEdificios' => $request->get('selEdificios'),
-                    'selDepartamento' => $request->get('selDepartamento'),
-                    'desde' => $periodo['desde'],
-                    'hasta' => $periodo['hasta'],
-                );
-                break;
-            default:
-                //desde paginacion, se usa session
-                if ($sessionFiltro) {
-                    $periodo = UtilsController::ultimoMesParaFiltro($sessionFiltro['desde'], $sessionFiltro['hasta']);
-                    $filtro = array(
-                        'selTipo' => $sessionFiltro['selTipo'],
-                        'selUbicaciones' => $sessionFiltro['selUbicaciones'],
-                        'selEdificios' => $sessionFiltro['selEdificios'],
-                        'selDepartamento' => $sessionFiltro['selDepartamento'],
-                        'desde' => $periodo['desde'],
-                        'hasta' => $periodo['hasta'],
-                    );
-                }
-                else {
-                    $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
-                    $filtro = array('selUbicaciones' => 0, 'selEdificios' => 0, 'selDepartamento' => 0, 'selTipo' => 0,
-                        'desde' => $periodo['desde'], 'hasta' => $periodo['hasta']);
-                }
-                break;
-        }
-        $session->set('filtro_reportes_entregas', $filtro);
-        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findByDeletedAt(null);
-        $edificios = null;
-        $departamentos = null;
-        $sectores = $em->getRepository('ConfigBundle:Departamento')->findAllOrdenados();
-        if ($filtro['selUbicaciones']) {
-            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $this->getUser()->getId());
-            $sectores = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByUbicaciones($filtro['selUbicaciones']);
-            if ($filtro['selEdificios']) {
-                $sectores = $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
-            }
-        }
-
-        $tiposInsumos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I', 'subclase' => 'INSUMO'), array('nombre' => 'ASC'));
-
-        return array(
-            'filtro' => $filtro,
-            'tiposInsumos' => $tiposInsumos,
-            'ubicaciones' => $ubicaciones,
-            'edificios' => $edificios,
-            'departamentos' => $departamentos,
-            'datos' => $this->getDatosReporteEntregasxSector($em, $filtro, $sectores)
-        );
-    }
-
-    /**
      * @Route("/printReporteInsumos", name="print_reporte_insumos")
      * @Method("POST")
      * @Template()
@@ -307,14 +238,6 @@ class InsumoReportesController extends Controller {
         );
     }
 
-    private function getPeriodoParaFiltro($desde, $hasta) {
-        $hoy = new \DateTime();
-        $inicio = date("d-m-Y", strtotime('first day of January', time()));
-        $ini = ($desde) ? $desde : $inicio;
-        $fin = ($hasta) ? $hasta : $hoy->format('d-m-Y');
-        return array('desde' => $ini, 'hasta' => $fin);
-    }
-
     private function getDatosReporteMesaEntrada($em, $filtro) {
         // Reporte por sector, tipo de insumo y mes
         $movimientos = $em->getRepository('AppBundle:InsumoEntrega')->getMovimientosMesaEntrada($filtro);
@@ -453,9 +376,158 @@ class InsumoReportesController extends Controller {
         }
     }
 
+    /**
+     * @Route("/entregas", name="insumo_reporte_entregas")
+     * @Method("GET")
+     * @Template("AppBundle:Reportes:entregas.html.twig")
+     */
+    public function entregasAction(Request $request) {
+        UtilsController::haveAccess($this->getUser(), 'reportes_insumo');
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+        $session = $this->get('session');
+        $sessionFiltro = $session->get('filtro_reportes_entregas');
+
+        switch ($request->get('_opFiltro')) {
+            case 'buscar':
+                $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+                $filtro = array(
+                    'selTipos' => $request->get('selTipos'),
+                    'selUbicaciones' => $request->get('selUbicaciones'),
+                    'selEdificios' => $request->get('selEdificios'),
+                    'selDepartamento' => $request->get('selDepartamento'),
+                    'desde' => $periodo['desde'],
+                    'hasta' => $periodo['hasta'],
+                );
+                break;
+            default:
+                //desde paginacion, se usa session
+                if ($sessionFiltro) {
+                    $periodo = UtilsController::ultimoMesParaFiltro($sessionFiltro['desde'], $sessionFiltro['hasta']);
+                    $filtro = array(
+                        'selTipos' => $sessionFiltro['selTipos'],
+                        'selUbicaciones' => $sessionFiltro['selUbicaciones'],
+                        'selEdificios' => $sessionFiltro['selEdificios'],
+                        'selDepartamento' => $sessionFiltro['selDepartamento'],
+                        'desde' => $periodo['desde'],
+                        'hasta' => $periodo['hasta'],
+                    );
+                }
+                else {
+                    $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+                    $filtro = array('selUbicaciones' => 0, 'selEdificios' => 0, 'selDepartamento' => 0, 'selTipos' => NULL,
+                        'desde' => $periodo['desde'], 'hasta' => $periodo['hasta']);
+                }
+                break;
+        }
+        $session->set('filtro_reportes_entregas', $filtro);
+        $ubicaciones = $em->getRepository('ConfigBundle:Ubicacion')->findByDeletedAt(null);
+        $edificios = null;
+        $departamentos = null;
+        $sectores = $em->getRepository('ConfigBundle:Departamento')->findAllOrdenados();
+        if ($filtro['selUbicaciones']) {
+            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $this->getUser()->getId());
+            $sectores = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByUbicaciones($filtro['selUbicaciones']);
+            if ($filtro['selEdificios']) {
+                $sectores = $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
+            }
+        }
+
+        $tiposInsumos = $em->getRepository('ConfigBundle:Tipo')->findBy(array('clase' => 'I', 'subclase' => 'INSUMO'), array('nombre' => 'ASC'));
+
+        return array(
+            'filtro' => $filtro,
+            'tiposInsumos' => $tiposInsumos,
+            'ubicaciones' => $ubicaciones,
+            'edificios' => $edificios,
+            'departamentos' => $departamentos,
+            'datos' => $this->getDatosReporteEntregasxSector($em, $filtro, $sectores)
+        );
+    }
+
+    /**
+     * @Route("/printReporteEntregas", name="print_reporte_entregas")
+     * @Method("POST")
+     * @Template()
+     */
+    public function printReporteEntregas(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+        $session = $this->get('session');
+        $filtro = $session->get('filtro_reportes_entregas');
+        $tipoSalida = $request->get('tiposalida');
+        $nombreReporte = $request->get('reporte');
+        $textoFiltro = array('Todos');
+        $hoy = new \DateTime();
+        $edificios = null;
+        $departamentos = null;
+        $sectores = $em->getRepository('ConfigBundle:Departamento')->findAllOrdenados();
+        if ($filtro['selUbicaciones']) {
+            $edificios = $em->getRepository('ConfigBundle:Edificio')->findEdificiosByUbicaciones($filtro['selUbicaciones'], $this->getUser()->getId());
+            $sectores = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByUbicaciones($filtro['selUbicaciones']);
+            if ($filtro['selEdificios']) {
+                $sectores = $departamentos = $em->getRepository('ConfigBundle:Departamento')->findDepartamentosByEdificios($filtro['selEdificios']);
+            }
+        }
+        $datos = $this->getDatosReporteEntregasxSector($em, $filtro, $sectores);
+
+        // guarda la imágen del gráfico en directorio temporal
+        $baseFromJavascript = $request->get('grafico');
+        $data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $baseFromJavascript));
+        $tmpfname = tempnam(sys_get_temp_dir(), 'x');
+        file_put_contents($tmpfname, $data);
+        $logo1 = __DIR__ . '/../../../web/bundles/app/img/home_logo.png';
+        switch ($nombreReporte) {
+            case 'entregas':
+                $textoFiltro = array('ubicaciones' => ($filtro['selUbicaciones']) ? $this->getTextoFiltro($em, $filtro['selUbicaciones']) : 'Todos',
+                    'edificios' => ($filtro['selEdificios']) ? $this->getTextoFiltro($em, $filtro['selEdificios'], 'Edificio') : 'Todos',
+                    'departamentos' => ($filtro['selDepartamento']) ? $this->getTextoFiltro($em, $filtro['selDepartamento'], 'Departamento') : 'Todos',
+                    'tiposInsumos' => ($filtro['selTipos']) ? $this->getTextoFiltro($em, $filtro['selTipos'], 'Tipo') : 'Todos',
+                    'desde' => $filtro['desde'], 'hasta' => $filtro['hasta']);
+                switch ($tipoSalida) {
+                    case 'pdf':
+                        $plantilla = 'AppBundle:Reportes:print_entregas.pdf.twig';
+                        $arraydata = array('logo' => $logo1, 'grafico' => $tmpfname, 'datos' => $datos, 'filtro' => $textoFiltro);
+                        $filename = 'informe_entregas_';
+                        break;
+                    case 'xls':
+                        $plantilla = 'AppBundle:Reportes:export_entregas-xls.html.twig';
+                        $arraydata = array('datos' => $datos, 'filtro' => $textoFiltro);
+                        $filename = $fileName = 'Reporte_Entregas_';
+                        break;
+                }
+                break;
+        }
+        switch ($tipoSalida) {
+            case 'pdf':
+                $facade = $this->get('ps_pdf.facade');
+                $response = new Response();
+                $this->render($plantilla, $arraydata, $response);
+                $xml = $response->getContent();
+                $content = $facade->render($xml);
+                return new Response($content, 200, array('content-type' => 'application/pdf',
+                    'Content-Disposition' => 'filename=' . $filename . $hoy->format('dmY_Hi') . '.pdf'));
+            case 'xls':
+                $partial = $this->renderView($plantilla, $arraydata);
+                $response = new Response();
+                $response->setStatusCode(200);
+                $response->headers->set('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+                $response->headers->set('Content-Disposition', 'filename="' . $filename . $hoy->format('dmY_Hi') . '.xls"');
+                $response->setContent($partial);
+                return $response;
+        }
+    }
+
     /*
      * FUNCIONES ADICIONALES
      */
+
+    private function getPeriodoParaFiltro($desde, $hasta) {
+        $hoy = new \DateTime();
+        $inicio = date("d-m-Y", strtotime('first day of January', time()));
+        $ini = ($desde) ? $desde : $inicio;
+        $fin = ($hasta) ? $hasta : $hoy->format('d-m-Y');
+        return array('desde' => $ini, 'hasta' => $fin);
+    }
 
     private function getDatosReporteInsumoxSector($em, $filtro, $tiposInsumos, $sectores) {
         // Reporte por Sector, tipo incidencia y tipo de equipos
