@@ -566,6 +566,8 @@ class OrdenTrabajoController extends Controller {
                         $otNueva->setTecnico($tecnicoNuevo);
                         $otNueva->setEstado('ABIERTO');
                         $otNueva->setRequerimiento($ot->getRequerimiento());
+                        $tipoSoporte = $ot->getTipoSoporte();
+                        $otNueva->setTipoSoporte($tipoSoporte);
                         $otNueva->setJira($ot->getJira());
                         $otNueva->setNroOrden(count($ot->getRequerimiento()->getOrdentrabajoAsociadas()) + 1);
                         $otNueva->setDescripcion($entity->getDescripcion());

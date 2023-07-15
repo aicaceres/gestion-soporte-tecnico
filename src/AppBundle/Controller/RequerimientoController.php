@@ -199,7 +199,7 @@ class RequerimientoController extends Controller {
                 if ($tecnico) {
                     $ot = $this->asignarRequerimiento($entity, $tecnico, $em);
                     $entity->setEstado('ASIGNADO');
-                    $msj = 'Se ha creado la OT NÂ° ' . $ot->getNroOT();
+                    $msj = 'Se ha creado la OT Nro ' . $ot->getNroOT();
                     $em->persist($entity);
                     $em->flush();
                     $session = $this->get('session');
@@ -341,7 +341,7 @@ class RequerimientoController extends Controller {
                     $ot = $this->asignarRequerimiento($entity, $tecnico, $em);
                     if ($ot) {
                         $session->set('otid', $ot->getId());
-                        $msj = 'Se ha creado la OT NÂ° ' . $ot->getNroOT();
+                        $msj = 'Se ha creado la OT Nro ' . $ot->getNroOT();
                         $entity->setEstado('ASIGNADO');
                         $em->persist($entity);
                         $em->flush();
@@ -354,7 +354,7 @@ class RequerimientoController extends Controller {
                 $em->getConnection()->commit();
                 if ($data['otid']) {
                     $otnro = $em->getRepository('AppBundle:OrdenTrabajo')->find($data['otid']);
-                    $this->addFlash('success', 'La OT NÂ°' . $otnro->getNroOT() . ' fue guardada correctamente.');
+                    $this->addFlash('success', 'La OT Nro ' . $otnro->getNroOT() . ' fue guardada correctamente.');
                 }
                 else {
                     $this->addFlash('success', 'El requerimiento fue guardado correctamente. ' . $msj);
@@ -686,7 +686,7 @@ class RequerimientoController extends Controller {
                 $session = $this->get('session');
                 $session->set('otid', $ot->getId());
             }
-            $this->addFlash('success', 'Se ha creado la OT NÂ° ' . $ot->getNroOT());
+            $this->addFlash('success', 'Se ha creado la OT Nro ' . $ot->getNroOT());
             return new Response($ot->getNroOT());
         }
         else {
@@ -879,6 +879,7 @@ class RequerimientoController extends Controller {
         $ot->setTecnico($tecnico);
         $ot->setEstado('ABIERTO');
         $ot->setRequerimiento($requerimiento);
+        $ot->setTipoSoporte($requerimiento->getTipoSoporte());
         $ot->setJira($requerimiento->getJira());
         $ot->setNroOrden(count($requerimiento->getOrdentrabajoAsociadas()) + 1);
         $ot->setDescripcion($requerimiento->getDescripcion());
@@ -903,7 +904,7 @@ class RequerimientoController extends Controller {
         $em->persist($ot);
         $em->flush();
         // generar mensajerÃ­a
-        $textoMensaje = 'Se ha asignado la OT NÂ° ' . $ot->getNroOT();
+        $textoMensaje = 'Se ha asignado la OT Nro ' . $ot->getNroOT();
         $asunto = 'Nueva OT';
         $mensaje = new Mensajeria();
         $mensaje->setDestinatario($tecnico);

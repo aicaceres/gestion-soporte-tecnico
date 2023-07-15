@@ -949,7 +949,7 @@ class EquipoController extends Controller {
         $departamento = $em->getRepository('ConfigBundle:Departamento')->find($filtro['idDepartamento']);
         $piso = $em->getRepository('ConfigBundle:Piso')->find($filtro['idPiso']);
         $verificado = ($filtro['verificado'] == 'T') ? 'Todos' : ($filtro['verificado'] == '1') ? 'Si' : 'No';
-        $adicionales = array('CÃ“DIGO DE BARRA', 'PROVEEDOR', 'FECHA DE COMPRA', 'NÂ° ORDEN COMPRA', 'NÂ° FACTURA', 'NÂ° REMITO');
+        $adicionales = array('CODIGO DE BARRA', 'PROVEEDOR', 'FECHA DE COMPRA', 'NRO ORDEN COMPRA', 'NRO FACTURA', 'NRO REMITO');
         $opAdicional = $adicionales[$filtro['opAdicional']];
 
         $arrayFiltro = array($tipos ? $tipos : 'Todos', $marca ? $marca->getNombre() : 'Todas',

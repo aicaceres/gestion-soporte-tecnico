@@ -5,29 +5,29 @@
     <fieldset style="padding-bottom:10px;">
         <div class="col-md-3">
             <span><strong>Fecha/hora:</strong>&nbsp;{{entity.fechaOrden|date('d-m-Y H:i')}}</span>                        
-        </div>
-        <div class="col-md-2">
-            <span><strong>N° OT :</strong>&nbsp;{{ entity.nroOT }}</span>
         </div>    
+        <div class="col-md-4">
+            <span><strong>Tipo de Incidencia:</strong>&nbsp;{{entity.tipoSoporte}}</span>
+        </div> 
         <div class="col-md-3">
             <span><strong>Técnico:</strong>&nbsp;{{entity.tecnico.nombre}}</span>
         </div> 
         <div class="col-md-2">
             <span><strong>N° JIRA:</strong>&nbsp;{{entity.jira}}</span>
-        </div> 
+        </div>         
+    </fieldset>                                    
+    <fieldset style="padding-bottom:10px;">
+        <div class="col-md-{{ entity.estado=='CERRADO' and app.user.access('ordentrabajo') ? '8' : '10'}} ">
+            <span><strong>Descripcion de la Orden de Trabajo:</strong>&nbsp;{% if entity.descripcion %} {{entity.descripcion}} {% else %} -- {% endif %} </span>                        
+        </div>           
         <div class="col-md-2">
             <span><strong>Estado:</strong>&nbsp;{{entity.estado}}</span>
         </div> 
-    </fieldset>                                    
-    <fieldset style="padding-bottom:10px;">
-        <div class="col-md-10">
-            <span><strong>Descripcion de la Orden de Trabajo:</strong>&nbsp;{% if entity.descripcion %} {{entity.descripcion}} {% else %} -- {% endif %} </span>                        
-        </div>                                       
+        {% if entity.estado=='CERRADO' and app.user.access('ordentrabajo') %}
         <div class="col-md-2">
-            {% if entity.estado=='CERRADO' and app.user.access('ordentrabajo') %}
-                <a href="{{path('soporte_ordentrabajo_reabrir', { 'id': entity.id })}}" class="btn btn-danger"> <i class="fa fa-refresh"></i>&nbsp; Reabrir OT</a>
-            {% endif %}
-        </div>                                       
+            <a href="{{path('soporte_ordentrabajo_reabrir', { 'id': entity.id })}}" class="btn btn-danger"> <i class="fa fa-refresh"></i>&nbsp; Reabrir OT</a>
+        </div>     
+        {% endif %}
     </fieldset>
     <div class="col-md-12" style="text-align:center;margin:15px;"> 
         {% if entity.reubicacionEquipo >0 %}

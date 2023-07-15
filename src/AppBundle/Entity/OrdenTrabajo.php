@@ -43,6 +43,13 @@ class OrdenTrabajo {
     protected $jira;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\TipoSoporte")
+     * @ORM\JoinColumn(name="tipo_soporte_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
+     */
+    protected $tipoSoporte;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario",inversedBy="ordenesTrabajo" )
      * @ORM\JoinColumn(name="tecnico_id", referencedColumnName="id")
      * @Gedmo\Versioned()
@@ -371,6 +378,27 @@ class OrdenTrabajo {
      */
     public function getDeletedAt() {
         return $this->deletedAt;
+    }
+
+    /**
+     * Set tipoSoporte
+     *
+     * @param \ConfigBundle\Entity\TipoSoporte $tipoSoporte
+     * @return OrdenTrabajo
+     */
+    public function setTipoSoporte(\ConfigBundle\Entity\TipoSoporte $tipoSoporte = null) {
+        $this->tipoSoporte = $tipoSoporte;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoSoporte
+     *
+     * @return \ConfigBundle\Entity\TipoSoporte
+     */
+    public function getTipoSoporte() {
+        return $this->tipoSoporte ? $this->tipoSoporte : $this->getRequerimiento()->getTipoSoporte();
     }
 
     /**

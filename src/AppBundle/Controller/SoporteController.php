@@ -34,6 +34,7 @@ class SoporteController extends Controller {
      * @Template("AppBundle:Soporte:ordentrabajo-edit.html.twig")
      */
     public function ordentrabajoNewAction() {
+        die;
         UtilsController::haveAccess($this->getUser(), 'ordentrabajo_new');
         $entity = new OrdenTrabajo();
         $entity->setFechaOrden(new \DateTime());
@@ -71,6 +72,7 @@ class SoporteController extends Controller {
      * @Template("AppBundle:Soporte:ordentrabajo-edit.html.twig")
      */
     public function ordentrabajoCreateAction(Request $request) {
+        die;
         UtilsController::haveAccess($this->getUser(), 'ordentrabajo_new');
         $data = $request->get('appbundle_ordentrabajo');
         $ckEstado = $request->get('ckEstadoEquipo');
@@ -135,8 +137,8 @@ class SoporteController extends Controller {
                 $em->persist($entity);
                 $em->flush();
                 // generar mensajerÃ­a
-                $textoMensaje = 'Se ha asignado la OT NÂ° ' . str_pad($entity->getId(), 6, '0', STR_PAD_LEFT);
-                ;
+                $textoMensaje = 'Se ha asignado la OT Nro ' . str_pad($entity->getId(), 6, '0', STR_PAD_LEFT);
+
                 $asunto = 'Nueva OT';
                 $mensaje = new Mensajeria();
                 $mensaje->setDestinatario($entity->getTecnico());

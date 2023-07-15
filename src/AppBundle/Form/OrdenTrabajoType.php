@@ -26,7 +26,20 @@ class OrdenTrabajoType extends AbstractType {
                 return $qb;
             }
         );
+        $tipoSoporteOptions = array(
+            'class' => 'ConfigBundle:TipoSoporte',
+            'label' => 'Tipo de Incidencia:',
+            'placeholder' => 'Seleccionar...',
+            'choice_label' => 'nombre',
+            'query_builder' => function (EntityRepository $repository) {
+                $qb = $repository->createQueryBuilder('ts')
+                        ->where("ts.activo = 1 ")
+                        ->orderBy('ts.nombre');
+                return $qb;
+            }
+        );
         $builder
+                ->add('tipoSoporte', 'entity', $tipoSoporteOptions)
                 ->add('altaPrioridad', null, array('label' => ' Prioridad Alta', 'required' => false))
                 ->add('fechaOrden', 'date', array('widget' => 'single_text', 'label' => 'Fecha:',
                     'format' => 'dd-MM-yyyy', 'required' => true))

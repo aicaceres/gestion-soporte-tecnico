@@ -15,15 +15,20 @@ class SoporteRepository extends EntityRepository {
     public function findOTByCriteria($data, $userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select('o')
-                ->from('AppBundle\Entity\OrdenTrabajo', 'o')
-                ->innerJoin('o.requerimiento', 'r')
-                ->innerJoin('r.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->where("1=1");
-
+            ->from('AppBundle\Entity\OrdenTrabajo', 'o')
+            ->innerJoin('o.requerimiento', 'r')
+            ->innerJoin('r.solicitante', 's')
+            ->innerJoin('s.edificio', 'e')
+            ->where("1=1");
+        if ($data['idTipoIncidencia']) {
+            $query->leftJoin('o.tipoSoporte', 'oi')
+                ->leftJoin('r.tipoSoporte', 'ri')
+                ->andWhere('oi.id=' . $data['idTipoIncidencia'] . ' OR (oi.id IS NULL AND ri.id= ' . $data['idTipoIncidencia'] . ') ')
+            ;
+        }
         if ($data['idUbicacion']) {
             $query->innerJoin('e.ubicacion', 'u')
-                    ->andWhere('u.id=' . $data['idUbicacion']);
+                ->andWhere('u.id=' . $data['idUbicacion']);
             if ($data['idEdificio']) {
                 $query->andWhere('e.id=' . $data['idEdificio']);
                 if ($data['idDepartamento']) {
@@ -34,11 +39,7 @@ class SoporteRepository extends EntityRepository {
 
         if ($data['idTecnico']) {
             $query->innerJoin('o.tecnico', 't')
-                    ->andWhere('t.id=' . $data['idTecnico']);
-        }
-        if ($data['idTipoIncidencia']) {
-            $query->innerJoin('r.tipoSoporte', 'i')
-                    ->andWhere('i.id=' . $data['idTipoIncidencia']);
+                ->andWhere('t.id=' . $data['idTecnico']);
         }
         if ($data['estado']) {
             $query->andWhere("o.estado= '" . $data['estado'] . "'");
@@ -54,11 +55,13 @@ class SoporteRepository extends EntityRepository {
                 $query->andWhere($cadena);
             }
         }
+
         if ($userId) {
             // restringuir segun permiso
             $query->innerJoin('e.usuarios', 'us')
-                    ->andWhere('us.id=' . $userId);
+                ->andWhere('us.id=' . $userId);
         }
+
         return $query->getQuery()->getResult();
     }
 
@@ -69,20 +72,20 @@ class SoporteRepository extends EntityRepository {
     public function findByCriteria($data, $userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select('r')
-                ->from('AppBundle\Entity\Requerimiento', 'r')
-                ->innerJoin('r.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->where("1=1");
+            ->from('AppBundle\Entity\Requerimiento', 'r')
+            ->innerJoin('r.solicitante', 's')
+            ->innerJoin('s.edificio', 'e')
+            ->where("1=1");
         if ($data['idTipo']) {
             $query->innerJoin('r.tipoSoporte', 'ts')
-                    ->andWhere("ts.id= " . $data['idTipo']);
+                ->andWhere("ts.id= " . $data['idTipo']);
         }
         if ($data['estado']) {
             $query->andWhere("r.estado= '" . $data['estado'] . "'");
         }
         if ($data['idUbicacion']) {
             $query->innerJoin('e.ubicacion', 'u')
-                    ->andWhere('u.id=' . $data['idUbicacion']);
+                ->andWhere('u.id=' . $data['idUbicacion']);
             if ($data['idEdificio']) {
                 $query->andWhere('e.id=' . $data['idEdificio']);
                 if ($data['idDepartamento']) {
@@ -104,7 +107,7 @@ class SoporteRepository extends EntityRepository {
         if ($userId) {
             // restringuir segun permiso
             $query->innerJoin('e.usuarios', 'us')
-                    ->andWhere('us.id=' . $userId);
+                ->andWhere('us.id=' . $userId);
         }
         return $query->getQuery()->getResult();
     }
@@ -112,23 +115,23 @@ class SoporteRepository extends EntityRepository {
     public function getReqyOts($id) {
         $query = $this->_em->createQueryBuilder();
         $query->select('r')
-                ->from('AppBundle\Entity\Requerimiento', 'r')
-                ->innerJoin('r.ordentrabajoAsociadas', 'o')
-                ->innerJoin('o.detalles', 'od')
-                ->innerJoin('od.equipo', 'e')
-                ->where("e.id=" . $id)
-                ->orderBy('r.fechaRequerimiento');
+            ->from('AppBundle\Entity\Requerimiento', 'r')
+            ->innerJoin('r.ordentrabajoAsociadas', 'o')
+            ->innerJoin('o.detalles', 'od')
+            ->innerJoin('od.equipo', 'e')
+            ->where("e.id=" . $id)
+            ->orderBy('r.fechaRequerimiento');
         return $query->getQuery()->getResult();
     }
 
     public function findTareasReemplazoEquipoPdf($id) {
         $query = $this->_em->createQueryBuilder();
         $query->select('t')
-                ->from('AppBundle:Tarea', 't')
-                ->innerJoin('t.tipoTarea', 'tt')
-                ->innerJoin('t.ordenTrabajo', 'o')
-                ->where('o.id=' . $id)
-                ->andWhere("tt.abreviatura='CE'");
+            ->from('AppBundle:Tarea', 't')
+            ->innerJoin('t.tipoTarea', 'tt')
+            ->innerJoin('t.ordenTrabajo', 'o')
+            ->where('o.id=' . $id)
+            ->andWhere("tt.abreviatura='CE'");
         return $query->getQuery()->getResult();
     }
 
@@ -136,47 +139,47 @@ class SoporteRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         if ($tipo == 'xTS') {
             $query->select("t.id tipoSoporte,DATE_FORMAT(r.fechaRequerimiento, '%Y%m') aniomes, DATE_FORMAT(r.fechaRequerimiento, '%m') mes, DATE_FORMAT(r.fechaRequerimiento, '%Y') anio, "
-                            . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
-                            . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
-                            . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
-                    ->from('AppBundle:Requerimiento', 'r')
-                    ->leftJoin('r.tipoSoporte', 't')
-                    ->where("r.estado!='CANCELADO'")
-                    ->groupBy('t.id,aniomes')
-                    //->having('(finalizado>0 or asignado>0 or sinasignar>0)')
-                    ->orderBy('t.id,aniomes', 'ASC');
+                    . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
+                    . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
+                    . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
+                ->from('AppBundle:Requerimiento', 'r')
+                ->leftJoin('r.tipoSoporte', 't')
+                ->where("r.estado!='CANCELADO'")
+                ->groupBy('t.id,aniomes')
+                //->having('(finalizado>0 or asignado>0 or sinasignar>0)')
+                ->orderBy('t.id,aniomes', 'ASC');
         }
         else {
             $query->select("DATE_FORMAT(r.fechaRequerimiento, '%Y%m') aniomes, DATE_FORMAT(r.fechaRequerimiento, '%m') mes, DATE_FORMAT(r.fechaRequerimiento, '%Y') anio, "
-                            . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
-                            . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
-                            . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
-                    ->from('AppBundle:Requerimiento', 'r')
-                    ->leftJoin('r.tipoSoporte', 't')
-                    ->where("r.estado!='CANCELADO'")
-                    ->groupBy('aniomes')
-                    ->orderBy('aniomes', 'ASC');
+                    . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
+                    . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
+                    . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
+                ->from('AppBundle:Requerimiento', 'r')
+                ->leftJoin('r.tipoSoporte', 't')
+                ->where("r.estado!='CANCELADO'")
+                ->groupBy('aniomes')
+                ->orderBy('aniomes', 'ASC');
         }
         $query->innerJoin('r.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->innerJoin('e.usuarios', 'us')
-                ->andWhere('us.id=' . $userId);
+            ->innerJoin('s.edificio', 'e')
+            ->innerJoin('e.usuarios', 'us')
+            ->andWhere('us.id=' . $userId);
 
         if ($filtro['selTipos']) {
             $query->andWhere(' t.id IN (:tipos)')
-                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
             $query->innerJoin('e.ubicacion', 'u')
-                    ->andWhere('u.id IN (:ubicaciones)')
-                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->andWhere('u.id IN (:ubicaciones)')
+                ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
             if ($filtro['selEdificios']) {
                 $query->andWhere('e.id IN (:edificios)')
-                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                    ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 ;
                 if ($filtro['selDepartamento']) {
                     $query->andWhere(' s.id IN (:deptos)')
-                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                        ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 }
             }
         }
@@ -191,30 +194,30 @@ class SoporteRepository extends EntityRepository {
     public function getResumenAnualTiposSoporte($filtro, $userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select(" distinct (CASE WHEN t.id is NULL THEN 0 ELSE t.id END) id"
-                        . ",(CASE WHEN t.id is NULL THEN 'SIN TIPO' ELSE t.nombre END) nombre ")
-                ->from('AppBundle:Requerimiento', 'r')
-                ->innerJoin('r.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->leftJoin('r.tipoSoporte', 't')
-                ->where("r.estado!='CANCELADO'")
-                ->innerJoin('e.usuarios', 'us')
-                ->andWhere('us.id=' . $userId)
-                ->orderBy('t.id');
+                . ",(CASE WHEN t.id is NULL THEN 'SIN TIPO' ELSE t.nombre END) nombre ")
+            ->from('AppBundle:Requerimiento', 'r')
+            ->innerJoin('r.solicitante', 's')
+            ->innerJoin('s.edificio', 'e')
+            ->leftJoin('r.tipoSoporte', 't')
+            ->where("r.estado!='CANCELADO'")
+            ->innerJoin('e.usuarios', 'us')
+            ->andWhere('us.id=' . $userId)
+            ->orderBy('t.id');
         if ($filtro['selTipos']) {
             $query->andWhere(' t.id IN (:tipos)')
-                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
             $query->innerJoin('e.ubicacion', 'u')
-                    ->andWhere('u.id IN (:ubicaciones)')
-                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->andWhere('u.id IN (:ubicaciones)')
+                ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
             if ($filtro['selEdificios']) {
                 $query->andWhere('e.id IN (:edificios)')
-                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                    ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 ;
                 if ($filtro['selDepartamento']) {
                     $query->andWhere(' s.id IN (:deptos)')
-                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                        ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 }
             }
         }
@@ -229,33 +232,33 @@ class SoporteRepository extends EntityRepository {
     public function getAnualRequerimientoxIncidencia($filtro, $userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select("t.id id,t.nombre nombre,"
-                        . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
-                        . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
-                        . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
-                ->from('AppBundle:Requerimiento', 'r')
-                ->innerJoin('r.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->innerJoin('e.usuarios', 'us')
-                ->leftJoin('r.tipoSoporte', 't')
-                ->where("r.estado!='CANCELADO'")
-                ->andWhere('us.id=' . $userId)
-                ->groupBy('t.id,t.nombre')
-                ->orderBy('t.id', 'ASC');
+                . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
+                . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
+                . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
+            ->from('AppBundle:Requerimiento', 'r')
+            ->innerJoin('r.solicitante', 's')
+            ->innerJoin('s.edificio', 'e')
+            ->innerJoin('e.usuarios', 'us')
+            ->leftJoin('r.tipoSoporte', 't')
+            ->where("r.estado!='CANCELADO'")
+            ->andWhere('us.id=' . $userId)
+            ->groupBy('t.id,t.nombre')
+            ->orderBy('t.id', 'ASC');
         if ($filtro['selTipos']) {
             $query->andWhere(' t.id IN (:tipos)')
-                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
             $query->innerJoin('e.ubicacion', 'u')
-                    ->andWhere('u.id IN (:ubicaciones)')
-                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->andWhere('u.id IN (:ubicaciones)')
+                ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
             if ($filtro['selEdificios']) {
                 $query->andWhere('e.id IN (:edificios)')
-                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                    ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 ;
                 if ($filtro['selDepartamento']) {
                     $query->andWhere(' s.id IN (:deptos)')
-                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                        ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 }
             }
         }
@@ -270,28 +273,28 @@ class SoporteRepository extends EntityRepository {
     public function getRequerimientosParaReporte($filtro, $userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select("r")
-                ->from('AppBundle:Requerimiento', 'r')
-                ->innerJoin('r.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->innerJoin('e.usuarios', 'us')
-                ->where("r.estado!='CANCELADO'")
-                ->andWhere('us.id=' . $userId);
+            ->from('AppBundle:Requerimiento', 'r')
+            ->innerJoin('r.solicitante', 's')
+            ->innerJoin('s.edificio', 'e')
+            ->innerJoin('e.usuarios', 'us')
+            ->where("r.estado!='CANCELADO'")
+            ->andWhere('us.id=' . $userId);
         if ($filtro['selTipos']) {
             $query->leftJoin('r.tipoSoporte', 't')
-                    ->andWhere(' t.id IN (:tipos)')
-                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->andWhere(' t.id IN (:tipos)')
+                ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
             $query->innerJoin('e.ubicacion', 'u')
-                    ->andWhere('u.id IN (:ubicaciones)')
-                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->andWhere('u.id IN (:ubicaciones)')
+                ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
             if ($filtro['selEdificios']) {
                 $query->andWhere('e.id IN (:edificios)')
-                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                    ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 ;
                 if ($filtro['selDepartamento']) {
                     $query->andWhere(' s.id IN (:deptos)')
-                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                        ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 }
             }
         }
@@ -312,30 +315,30 @@ class SoporteRepository extends EntityRepository {
     public function getResumenPorSolicitante($filtro) {
         $query = $this->_em->createQueryBuilder();
         $query->select(" s.id ,s.nombre, e.id edificio, u.id ubicacion,"
-                        . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
-                        . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
-                        . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
-                ->from('AppBundle:Requerimiento', 'r')
-                ->innerJoin('r.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->innerJoin('e.ubicacion', 'u')
-                ->leftJoin('r.tipoSoporte', 't')
-                ->where("r.estado!='CANCELADO'")
-                ->groupBy('s.id ,s.nombre, e.id, u.id');
+                . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
+                . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
+                . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
+            ->from('AppBundle:Requerimiento', 'r')
+            ->innerJoin('r.solicitante', 's')
+            ->innerJoin('s.edificio', 'e')
+            ->innerJoin('e.ubicacion', 'u')
+            ->leftJoin('r.tipoSoporte', 't')
+            ->where("r.estado!='CANCELADO'")
+            ->groupBy('s.id ,s.nombre, e.id, u.id');
         if ($filtro['selTipos']) {
             $query->andWhere(' t.id IN (:tipos)')
-                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
             $query->andWhere('u.id IN (:ubicaciones)')
-                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
             if ($filtro['selEdificios']) {
                 $query->andWhere('e.id IN (:edificios)')
-                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                    ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 ;
                 if ($filtro['selDepartamento']) {
                     $query->andWhere(' s.id IN (:deptos)')
-                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                        ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 }
             }
         }
@@ -365,32 +368,32 @@ class SoporteRepository extends EntityRepository {
     public function getResumenPorIncidencia($filtro, $userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select(" t.id, t.nombre,t.abreviatura,"
-                        . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
-                        . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
-                        . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
-                ->from('AppBundle:Requerimiento', 'r')
-                ->innerJoin('r.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->innerJoin('e.usuarios', 'us')
-                ->innerJoin('e.ubicacion', 'u')
-                ->leftJoin('r.tipoSoporte', 't')
-                ->where("r.estado!='CANCELADO'")
-                ->andWhere('us.id=' . $userId)
-                ->groupBy('t.id ,t.nombre');
+                . " SUM(CASE WHEN r.estado='FINALIZADO' THEN 1 ELSE 0 END) AS finalizado, "
+                . " SUM(CASE WHEN r.estado='SIN ASIGNAR' THEN 1 ELSE 0 END) AS sinasignar, "
+                . " SUM(CASE WHEN r.estado='ASIGNADO' THEN 1 ELSE 0 END) AS asignado")
+            ->from('AppBundle:Requerimiento', 'r')
+            ->innerJoin('r.solicitante', 's')
+            ->innerJoin('s.edificio', 'e')
+            ->innerJoin('e.usuarios', 'us')
+            ->innerJoin('e.ubicacion', 'u')
+            ->leftJoin('r.tipoSoporte', 't')
+            ->where("r.estado!='CANCELADO'")
+            ->andWhere('us.id=' . $userId)
+            ->groupBy('t.id ,t.nombre');
         if ($filtro['selTipos']) {
             $query->andWhere(' t.id IN (:tipos)')
-                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
             $query->andWhere('u.id IN (:ubicaciones)')
-                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
             if ($filtro['selEdificios']) {
                 $query->andWhere('e.id IN (:edificios)')
-                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                    ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 ;
                 if ($filtro['selDepartamento']) {
                     $query->andWhere(' s.id IN (:deptos)')
-                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                        ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 }
             }
         }
@@ -411,12 +414,12 @@ class SoporteRepository extends EntityRepository {
     public function getOtsParaReporte($periodo) {
         $query = $this->_em->createQueryBuilder();
         $query->select(" t.id, t.username, "
-                        . " SUM(CASE WHEN ot.estado='ABIERTO' THEN 1 ELSE 0 END) AS abierto, "
-                        . " SUM(CASE WHEN ot.estado='CERRADO' THEN 1 ELSE 0 END) AS cerrado")
-                ->from('AppBundle:OrdenTrabajo', 'ot')
-                ->innerJoin('ot.tecnico', 't')
-                ->where("ot.estado!='CANCELADO'")
-                ->groupBy('t.id ,t.username');
+                . " SUM(CASE WHEN ot.estado='ABIERTO' THEN 1 ELSE 0 END) AS abierto, "
+                . " SUM(CASE WHEN ot.estado='CERRADO' THEN 1 ELSE 0 END) AS cerrado")
+            ->from('AppBundle:OrdenTrabajo', 'ot')
+            ->innerJoin('ot.tecnico', 't')
+            ->where("ot.estado!='CANCELADO'")
+            ->groupBy('t.id ,t.username');
         if ($periodo['desde'] || $periodo['hasta']) {
             // buscar por fecha
             if ($periodo['desde']) {
@@ -434,23 +437,23 @@ class SoporteRepository extends EntityRepository {
     public function getOtsxMesAnioTecnico($ini) {
         $query = $this->_em->createQueryBuilder();
         $query->select("DATE_FORMAT(r.fechaOrden, '%Y%m') aniomes, t.username, SUM(1) AS cantidad")
-                ->from('AppBundle:OrdenTrabajo', 'r')
-                ->innerJoin('r.tecnico', 't')
-                ->where("r.estado!='CANCELADO'")
-                ->andWhere("DATE_FORMAT(r.fechaOrden, '%Y%m') >" . $ini)
-                ->groupBy('aniomes,t.username')
-                ->orderBy('aniomes,t.username', 'ASC');
+            ->from('AppBundle:OrdenTrabajo', 'r')
+            ->innerJoin('r.tecnico', 't')
+            ->where("r.estado!='CANCELADO'")
+            ->andWhere("DATE_FORMAT(r.fechaOrden, '%Y%m') >" . $ini)
+            ->groupBy('aniomes,t.username')
+            ->orderBy('aniomes,t.username', 'ASC');
         return $query->getQuery()->getArrayResult();
     }
 
     public function getOtsxMesAnio($ini) {
         $query = $this->_em->createQueryBuilder();
         $query->select("DATE_FORMAT(r.fechaOrden, '%Y%m') aniomes, SUM(1) AS cantidad")
-                ->from('AppBundle:OrdenTrabajo', 'r')
-                ->where("r.estado!='CANCELADO'")
-                ->andWhere("DATE_FORMAT(r.fechaOrden, '%Y%m') >" . $ini)
-                ->groupBy('aniomes')
-                ->orderBy('aniomes', 'ASC');
+            ->from('AppBundle:OrdenTrabajo', 'r')
+            ->where("r.estado!='CANCELADO'")
+            ->andWhere("DATE_FORMAT(r.fechaOrden, '%Y%m') >" . $ini)
+            ->groupBy('aniomes')
+            ->orderBy('aniomes', 'ASC');
         return $query->getQuery()->getArrayResult();
     }
 

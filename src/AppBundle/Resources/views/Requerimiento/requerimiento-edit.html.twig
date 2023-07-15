@@ -69,7 +69,8 @@
                     {{ form_widget(form.altaPrioridad) }}
                 </div>
             </div>
-            {% if requerimiento.ordentrabajoAsociadas|length ==0 %}    
+            {# if requerimiento.ordentrabajoAsociadas|length ==0 #}  
+            {% if requerimiento.estado == 'SIN ASIGNAR' %}       
                 <div class="col-md-3" {% if not app.user.access('requerimiento_asign') %}hidden{% endif %}>
                     {{ form_row(form.tecnico, { 'attr': { 'class' : 'select2' } }) }}   
                 </div>

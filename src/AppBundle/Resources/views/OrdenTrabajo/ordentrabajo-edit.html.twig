@@ -1,66 +1,72 @@
 {% set otdata = otform.vars.data %}
 <div class="row"> 
     {% if otdata.estado=='ABIERTO' %}
-    <div class="col-md-12">
-        <div class="col-md-2">
-            {{ form_row(otform.fechaOrden) }}
-        </div>
-        <div class="col-md-1">
-            {{ form_row(otform.hora) }}
-        </div>
-        <div class="col-md-2">
-            <div class="form-group ">
-                <label for="appbundle_ordentrabajo_nroOrden">N° OT :</label>
-                <input type="text" id="appbundle_ordentrabajo_nroOrden" class="form-control" style="text-align:center"
-                       readonly="readonly" value="{{ otdata.nroOT}}">
+        <div class="col-md-12">
+            <div class="col-md-2">
+                {{ form_row(otform.fechaOrden) }}
             </div>
-        </div>                                
-        <div class="col-md-3">
-            {{ form_row(otform.tecnico, { 'attr': {'class' : 'select2' } }) }}   
-        </div>
-        <div class="col-md-2">
-            {{ form_row(otform.jira) }}                                  
-        </div>
-        <div class="col-md-2">
-            <div class="form-group ">
-                <label for="appbundle_ordentrabajo_estado">Estado:</label>
-                <input type="text" id="appbundle_ordentrabajo_estado" class="form-control"
-                       readonly="readonly" value="{{ otdata.estado}}">
+            <div class="col-md-1">
+                {{ form_row(otform.hora) }}
             </div>
-        </div>
-    </div>   
-    <div class="col-md-12">
-        <div class="col-md-10">
-            {{ form_row(otform.descripcion) }}
-        </div>    
-        <div class="col-md-2">                                
-            <div class="form-group ">  
-                 <label>&nbsp;</label>  
-                {{ form_widget(otform.altaPrioridad) }}
-            </div>                               
-        </div>                             
-    </div>  
+            <div class="col-md-1 hidden">
+                <div class="form-group ">
+                    <label for="appbundle_ordentrabajo_nroOrden">N° OT :</label>
+                    <input type="text" id="appbundle_ordentrabajo_nroOrden" class="form-control" style="text-align:center"
+                           readonly="readonly" value="{{ otdata.nroOT}}">
+                </div>
+            </div>                                
+            <div class="col-md-3">
+                {{ form_row(otform.tipoSoporte, { 'attr': {'class' : 'select2' } }) }}   
+            </div>
+            <div class="col-md-2">
+                {{ form_row(otform.jira) }}                                  
+            </div>
+            <div class="col-md-3">
+                {{ form_row(otform.tecnico, { 'attr': {'class' : 'select2' } }) }}   
+            </div>
+        </div>   
+        <div class="col-md-12">
+            <div class="col-md-9">
+                {{ form_row(otform.descripcion) }}
+            </div> 
+            <div class="col-md-3">
+                <div class="col-md-12">
+                    <div class="form-group ">
+                        <label for="appbundle_ordentrabajo_estado">Estado:</label>
+                        <input type="text" id="appbundle_ordentrabajo_estado" class="form-control"
+                               readonly="readonly" value="{{ otdata.estado}}">
+                    </div>
+                </div>
+                <div class="col-md-12">                                
+                    <div class="form-group ">  
+                        {{ form_widget(otform.altaPrioridad) }}
+                    </div>                               
+                </div>      
+            </div>
+        </div>  
     {% else %}
     <div class="col-md-12">    
         <fieldset style="padding-bottom:10px;">
             <div class="col-md-3">
                 <span><strong>Fecha/hora:</strong>&nbsp;{{otdata.fechaOrden|date('d-m-Y H:i')}}</span>                        
             </div>
-                
+            <div class="col-md-4">
+                <span><strong>Tipo de Incidencia:</strong>&nbsp;{{otdata.tipoSoporte}}</span>
+            </div>     
             <div class="col-md-3">
                 <span><strong>Técnico:</strong>&nbsp;{{otdata.tecnico.nombre}}</span>
             </div> 
             <div class="col-md-2">
                 <span><strong>N° JIRA:</strong>&nbsp;{{otdata.jira}}</span>
             </div> 
-            <div class="col-md-2">
-                <span><strong>Estado:</strong>&nbsp;{{otdata.estado}}</span>
-            </div> 
         </fieldset>                                    
         <fieldset style="padding-bottom:10px;">
             <div class="col-md-10">
                 <span><strong>Descripcion de la Orden de Trabajo:</strong>&nbsp;{% if otdata.descripcion %} {{otdata.descripcion}} {% else %} -- {% endif %} </span>                        
-            </div>                                       
+            </div>   
+            <div class="col-md-2">
+                <span><strong>Estado:</strong>&nbsp;{{otdata.estado}}</span>
+            </div> 
         </fieldset>  
     </div>        
     {% endif %}        
