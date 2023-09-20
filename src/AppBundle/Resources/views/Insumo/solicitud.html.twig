@@ -233,9 +233,6 @@ function updateInsumoxTarea(datos,td){
                         td.parent().find('.insumotxt').html(data.nombre);
                     if(data.stock)
                         td.parent().find('.stockTd').html(data.stock);
-                   /* $.get("{{path('get_solinsumo_pendientes')}}", function(data){            
-                        $('.solPendientes').html( data );                
-                     });*/
                   }
               });
 };

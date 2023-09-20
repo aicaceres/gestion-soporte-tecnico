@@ -91,7 +91,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-4">
-                                        {{ form_row(form.solicitante, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector select2' } }) }}   
+                                        {{ form_row(form.solicitante, { 'attr': {'urlDatosDepartamento' : path('datos_departamento'), 'class' : 'departamento_selector select2', 'required':'required' } }) }}   
                                     </div>                                                                 
                                 </div>  
                             {% endif %}
@@ -215,35 +215,40 @@
                     e.stopPropagation();
                 });
 
-                $('[name="appbundle_insumoentrega"]').on('submit', function (e) {                                       
-                    let ckstck = true
-                    $('[id$="_insumo"]').each(function () {
-                        const stock = $(this).closest('.item').find('.stckTd input').val()
-                        const cantidad = $(this).closest('.item').find('.cntTd input').val()
-                        if ( parseInt(stock) < parseInt(cantidad)) {
-                            ckstck = false
-                            $(this).closest('.item').find('.cntTd input').focus()
-                        }
-                        if (!$(this).val()) {
-                            $(this).closest('tr').remove();
-                        }
-                    });
+                $('[name="appbundle_insumoentrega"]').on('submit', function (e) {     
                     if($('[id$="_insumo"]').length == 0 ){
                         alert('Debe ingresar insumos para la entrega!')
                         return false
                     }
-
-                    if (!ckstck) {
-                        alert('Alguno de los items no posee el stock suficiente para la entrega!')
-                        return false
+                    
+                    const estado = $('#appbundle_insumoentrega_estado').val()
+                    if(estado === 'PENDIENTE'){
+                        let ckstck = true                   
+                        $('[id$="_insumo"]').each(function () {
+                            const stock = $(this).closest('.item').find('.stckTd input').val()
+                            const cantidad = $(this).closest('.item').find('.cntTd input').val()
+                            if ( parseInt(stock) < parseInt(cantidad)) {
+                                ckstck = false
+                                $(this).closest('.item').find('.cntTd input').focus()
+                            }
+                            if (!$(this).val()) {
+                                $(this).closest('tr').remove();
+                            }
+                        });
+                        if (!ckstck) {
+                            alert('Alguno de los items no posee el stock suficiente para la entrega!')
+                            return false
+                        }
                     }
+
                     // confirmar al entregar pedido pendiente
-                    if($('#appbundle_insumoentrega_estado').val() == 'PENDIENTE'){
+                    if( estado == 'PENDIENTE'){
                         if( !confirm('Confirma la entrega del pedido pendiente?.\n \n Se realizarán los descuentos correspondientes al stock.')){
                             return false
                         }
                     }
                 });
+                
                 updateStock()
             });
 

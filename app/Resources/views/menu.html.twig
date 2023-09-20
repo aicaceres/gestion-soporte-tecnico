@@ -119,7 +119,7 @@
                 <li id="entrega">
                     <a href="{{path('insumo_entrega')}}">
                         <i class="fa fa-circle-o"></i>
-                        Entrega de Insumos
+                        Entrega de Insumos <small class="label pull-right bg-red entPendientes hidden" title="Entregas Pendientes">0</small>
                     </a>
                 </li>
                 {% endif %}
@@ -127,7 +127,7 @@
                 <li id="solicitud">
                     <a href="{{path('insumo_solicitud')}}">
                         <i class="fa fa-circle-o"></i>
-                        Solicitudes de Soporte <small class="label pull-right bg-red solPendientes" title="Solicitudes Pendientes">0</small>
+                        Solicitudes de Soporte <small class="label pull-right bg-red solPendientes hidden" title="Solicitudes Pendientes">0</small>
                     </a>
                 </li>
                 {% endif %}

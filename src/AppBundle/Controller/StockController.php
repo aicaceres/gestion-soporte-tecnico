@@ -55,12 +55,12 @@ class StockController extends Controller {
         }
 
         return $this->render('AppBundle:Stock:inventario.html.twig', array(
-                    'entities' => $entities,
-                    'depositos' => $depositos,
-                    'tipos' => $tipos,
-                    'marcas' => $marcas,
-                    'modelos' => $modelos,
-                    'filtro' => $filtro
+                'entities' => $entities,
+                'depositos' => $depositos,
+                'tipos' => $tipos,
+                'marcas' => $marcas,
+                'modelos' => $modelos,
+                'filtro' => $filtro
         ));
     }
 
@@ -105,8 +105,8 @@ class StockController extends Controller {
         $response = new Response();
 
         $this->render('AppBundle:Stock:inventario.pdf.twig',
-                array('items' => json_decode($items), 'filtro' => $textoFiltro, 'logo' => $logo1, 'depositos' => $depositos,
-                    'search' => $request->get('searchterm')), $response);
+            array('items' => json_decode($items), 'filtro' => $textoFiltro, 'logo' => $logo1, 'depositos' => $depositos,
+                'search' => $request->get('searchterm')), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -142,7 +142,7 @@ class StockController extends Controller {
         }
         $entities = $em->getRepository('AppBundle:StockAjuste')->findAjusteByCriteria($depId, $periodo['desde'], $periodo['hasta']);
         return $this->render('AppBundle:Stock:ajuste.html.twig', array(
-                    'entities' => $entities, 'depositos' => $depositos, 'depId' => $depId, 'desde' => $periodo['desde'], 'hasta' => $periodo['hasta']
+                'entities' => $entities, 'depositos' => $depositos, 'depId' => $depId, 'desde' => $periodo['desde'], 'hasta' => $periodo['hasta']
         ));
     }
 
@@ -161,8 +161,8 @@ class StockController extends Controller {
         $entity->setDeposito($deposito);
         $form = $this->createCreateForm($entity);
         return $this->render('AppBundle:Stock:ajusteNew.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -237,8 +237,8 @@ class StockController extends Controller {
             }
         }
         return $this->render('AppBundle:Stock:ajusteNew.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -255,7 +255,7 @@ class StockController extends Controller {
             throw $this->createNotFoundException('No se encuentra el registro del ajuste.');
         }
         return $this->render('AppBundle:Stock:ajusteShow.html.twig', array(
-                    'entity' => $entity,));
+                'entity' => $entity,));
     }
 
     /**
@@ -272,7 +272,7 @@ class StockController extends Controller {
             throw $this->createNotFoundException('No se encuentra el registro del ajuste.');
         }
         $html = $this->renderView('AppBundle:Stock:modalAjusteShow.html.twig',
-                array('entity' => $entity));
+            array('entity' => $entity));
         return new Response($html);
     }
 
@@ -308,11 +308,11 @@ class StockController extends Controller {
 
         self::setearDatosHistorico($entities, $em, $this);
         return $this->render('AppBundle:Stock:historico.html.twig', array(
-                    'entities' => $entities,
-                    'tipos' => $tipos,
-                    'marcas' => $marcas,
-                    'modelos' => $modelos,
-                    'filtro' => $filtro
+                'entities' => $entities,
+                'tipos' => $tipos,
+                'marcas' => $marcas,
+                'modelos' => $modelos,
+                'filtro' => $filtro
         ));
     }
 
@@ -348,7 +348,7 @@ class StockController extends Controller {
         $response = new Response();
 
         $this->render('AppBundle:Stock:historico.pdf.twig',
-                array('items' => $items, 'filtro' => $textoFiltro, 'logo' => $logo1), $response);
+            array('items' => $items, 'filtro' => $textoFiltro, 'logo' => $logo1), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -374,10 +374,13 @@ class StockController extends Controller {
         $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
         $entities = $em->getRepository('AppBundle:StockMovimiento')->findMovimientosByCriteria($periodo['desde'], $periodo['hasta']);
 
+        $url = $request->get('id') ? $this->generateUrl('insumo_movimiento_print', array('id' => $request->get('id'))) : '';
+
         return $this->render('AppBundle:StockMovimiento:index.html.twig', array(
-                    'entities' => $entities,
-                    'desde' => $periodo['desde'],
-                    'hasta' => $periodo['hasta']
+                'entities' => $entities,
+                'desde' => $periodo['desde'],
+                'hasta' => $periodo['hasta'],
+                'url' => $url,
         ));
     }
 
@@ -392,8 +395,8 @@ class StockController extends Controller {
         $entity->setFecha(new \DateTime);
         $form = $this->movimientoCreateForm($entity);
         return $this->render('AppBundle:StockMovimiento:new.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -480,7 +483,7 @@ class StockController extends Controller {
                 }
                 $em->flush();
                 $em->getConnection()->commit();
-                return $this->redirect($this->generateUrl('insumo_movimiento'));
+                return $this->redirectToRoute('insumo_movimiento', array('id' => $entity->getId()));
             }
             catch (\Exception $ex) {
                 $this->get('session')->getFlashBag()->add('error', $ex->getMessage());
@@ -488,8 +491,8 @@ class StockController extends Controller {
             }
         }
         return $this->render('AppBundle:StockMovimiento:new.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -506,7 +509,7 @@ class StockController extends Controller {
             throw $this->createNotFoundException('No se encuentra el registro del movimiento.');
         }
         return $this->render('AppBundle:StockMovimiento:show.html.twig', array(
-                    'entity' => $entity,));
+                'entity' => $entity,));
     }
 
     /**
@@ -523,8 +526,37 @@ class StockController extends Controller {
             throw $this->createNotFoundException('No se encuentra el registro del movimiento.');
         }
         $html = $this->renderView('AppBundle:StockMovimiento:modalshow.html.twig',
-                array('entity' => $entity));
+            array('entity' => $entity));
         return new Response($html);
+    }
+
+    /**
+     * @Route("/movimiento/{id}/printMovimiento.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="insumo_movimiento_print")
+     * @Method("GET")
+     */
+    public function printMovimientoAction($id) {
+        $em = $this->getDoctrine()->getManager();
+        $em->getFilters()->disable('softdeleteable');
+        $entity = $em->getRepository('AppBundle:StockMovimiento')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('No se encuentra el registro del movimiento.');
+        }
+        $logo1 = __DIR__ . '/../../../web/bundles/app/img/homeTSG.png';
+        $fecha = UtilsController::longDateSpanish($entity->getFecha());
+        $nroMovimiento = str_pad($entity->getId(), 6, '0', STR_PAD_LEFT);
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+
+        $this->render('AppBundle:StockMovimiento:remito.pdf.twig',
+            array('entity' => $entity, 'fecha' => $fecha, 'logo' => $logo1), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=movimiento_interdeposito_' . $nroMovimiento . '.pdf'));
     }
 
     public static function setearDatosHistorico($entities, $em, Controller $controller) {

@@ -12,11 +12,11 @@ class InsumoRepository extends EntityRepository {
     public function findByCriteria($data, $me = false) {
         $query = $this->_em->createQueryBuilder();
         $query->select('i')
-                ->from('AppBundle\Entity\Insumo', 'i')
-                ->innerJoin('i.tipo', 't')
-                ->innerJoin('i.marca', 'ma')
-                ->innerJoin('i.modelo', 'mo')
-                ->where("t.clase = 'I'");
+            ->from('AppBundle\Entity\Insumo', 'i')
+            ->innerJoin('i.tipo', 't')
+            ->innerJoin('i.marca', 'ma')
+            ->innerJoin('i.modelo', 'mo')
+            ->where("t.clase = 'I'");
         if ($me) {
             $query->andWhere("t.subclase = 'INSUMO' ");
         }
@@ -35,12 +35,12 @@ class InsumoRepository extends EntityRepository {
     public function combosByCriteria($data, $select, $order, $tabla = '', $me = false) {
         $query = $this->_em->createQueryBuilder();
         $query->select($select)
-                ->from('AppBundle\Entity\Insumo', 'i')
-                ->innerJoin('i.tipo', 't')
-                ->innerJoin('i.marca', 'ma')
-                ->innerJoin('i.modelo', 'mo')
-                ->where("t.clase = 'I'")
-                ->orderBy($order);
+            ->from('AppBundle\Entity\Insumo', 'i')
+            ->innerJoin('i.tipo', 't')
+            ->innerJoin('i.marca', 'ma')
+            ->innerJoin('i.modelo', 'mo')
+            ->where("t.clase = 'I'")
+            ->orderBy($order);
         if ($me) {
             $query->andWhere("t.subclase = 'INSUMO' ");
         }
@@ -65,26 +65,26 @@ class InsumoRepository extends EntityRepository {
     public function findInsumoArray($list) {
         $query = $this->_em->createQueryBuilder();
         $query->select('i.id,i.nombre')
-                ->from('AppBundle\Entity\Insumo', 'i')
-                ->where("i.id=" . $id);
+            ->from('AppBundle\Entity\Insumo', 'i')
+            ->where("i.id=" . $id);
         return $query->getQuery()->getArrayResult();
     }
 
     public function filterByTerm($key) {
         $query = $this->_em->createQueryBuilder();
         $query->select("i.id,concat( COALESCE(i.barcode,0) ,' | ',t.nombre,' | ',m.nombre,' | ',mo.nombre ) text")
-                ->from('AppBundle\Entity\Insumo', 'i')
-                ->innerJoin('i.tipo', 't')
-                ->leftJoin('i.marca', 'm')
-                ->leftJoin('i.modelo', 'mo')
-                ->orderBy('i.barcode,t.nombre,m.nombre,mo.nombre');
+            ->from('AppBundle\Entity\Insumo', 'i')
+            ->innerJoin('i.tipo', 't')
+            ->leftJoin('i.marca', 'm')
+            ->leftJoin('i.modelo', 'mo')
+            ->orderBy('i.barcode,t.nombre,m.nombre,mo.nombre');
         if ($key[0] != '') {
             foreach ($key as $i) {
                 $query->orWhere('i.barcode LIKE :key')
-                        ->orWhere('t.nombre LIKE :key')
-                        ->orWhere('m.nombre LIKE :key')
-                        ->orWhere('mo.nombre LIKE :key')
-                        ->setParameter('key', '%' . $i . '%');
+                    ->orWhere('t.nombre LIKE :key')
+                    ->orWhere('m.nombre LIKE :key')
+                    ->orWhere('mo.nombre LIKE :key')
+                    ->setParameter('key', '%' . $i . '%');
             }
         }
         return $query->getQuery()->getArrayResult();
@@ -93,10 +93,10 @@ class InsumoRepository extends EntityRepository {
     public function findSolicitudes($periodo, $estado = null) {
         $query = $this->_em->createQueryBuilder();
         $query->select('i')
-                ->from('AppBundle\Entity\InsumoxTarea', 'i')
-                ->innerJoin('i.insumo', 'in')
-                ->innerJoin('in.tipo', 't')
-                ->where("t.subclase='HARDWARE'");
+            ->from('AppBundle\Entity\InsumoxTarea', 'i')
+            ->innerJoin('i.insumo', 'in')
+            ->innerJoin('in.tipo', 't')
+            ->where("t.subclase='HARDWARE'");
         switch ($estado) {
             case 1: {
                     $query->andWhere('i.fechaAutorizado is null');
@@ -115,7 +115,7 @@ class InsumoRepository extends EntityRepository {
         }
         if ($periodo) {
             $query->andWhere("i.created>='" . UtilsController::toAnsiDate($periodo['desde']) . " 00:00'")
-                    ->andWhere("i.created<='" . UtilsController::toAnsiDate($periodo['hasta']) . " 23:59'");
+                ->andWhere("i.created<='" . UtilsController::toAnsiDate($periodo['hasta']) . " 23:59'");
         }
         return $query->getQuery()->getResult();
     }
@@ -123,24 +123,35 @@ class InsumoRepository extends EntityRepository {
     public function findSolicitudesPendientes() {
         $query = $this->_em->createQueryBuilder();
         $query->select('count(i.id)')
-                ->from('AppBundle\Entity\InsumoxTarea', 'i')
-                ->innerJoin('i.insumo', 'in')
-                ->innerJoin('in.tipo', 't')
-                ->where("i.fechaAutorizado is null")
-                ->andWhere("t.subclase='HARDWARE'");
+            ->from('AppBundle\Entity\InsumoxTarea', 'i')
+            ->innerJoin('i.insumo', 'in')
+            ->innerJoin('in.tipo', 't')
+            ->where("i.fechaAutorizado is null")
+            ->andWhere("t.subclase='HARDWARE'");
+        return $query->getQuery()->getSingleScalarResult();
+    }
+
+    public function findEntregasPendientes() {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('count(i.id)')
+            ->from('AppBundle\Entity\InsumoxTarea', 'i')
+            ->innerJoin('i.insumo', 'in')
+            ->innerJoin('in.tipo', 't')
+            ->where("i.fechaAutorizado is null")
+            ->andWhere("t.subclase='INSUMO'");
         return $query->getQuery()->getSingleScalarResult();
     }
 
     public function findInsumoParaRecepcionCompra($det) {
         $query = $this->_em->createQueryBuilder();
         $query->select('i')
-                ->from('AppBundle\Entity\Insumo', 'i')
-                ->innerJoin('i.tipo', 't')
-                ->innerJoin('i.marca', 'm')
-                ->innerJoin('i.modelo', 'mo')
-                ->where('t.id=' . $det->getTipo()->getId())
-                ->andWhere('m.id=' . $det->getItemMarca()->getId())
-                ->andWhere('mo.id=' . $det->getItemModelo()->getId());
+            ->from('AppBundle\Entity\Insumo', 'i')
+            ->innerJoin('i.tipo', 't')
+            ->innerJoin('i.marca', 'm')
+            ->innerJoin('i.modelo', 'mo')
+            ->where('t.id=' . $det->getTipo()->getId())
+            ->andWhere('m.id=' . $det->getItemMarca()->getId())
+            ->andWhere('mo.id=' . $det->getItemModelo()->getId());
         return $query->getQuery()->getOneOrNullResult();
     }
 
@@ -151,7 +162,7 @@ class InsumoRepository extends EntityRepository {
     public function count() {
         $query = $this->_em->createQueryBuilder();
         $query->select("count(e.id)")
-                ->from('AppBundle\Entity\Insumo', 'e');
+            ->from('AppBundle\Entity\Insumo', 'e');
         return $query->getQuery()->getSingleScalarResult();
     }
 
@@ -159,25 +170,25 @@ class InsumoRepository extends EntityRepository {
         // Create Main Query
         $query = $this->_em->createQueryBuilder();
         $query->select("e")
-                ->from('AppBundle\Entity\Insumo', 'e');
+            ->from('AppBundle\Entity\Insumo', 'e');
 
         // Create Count Query
         $countQuery = $this->_em->createQueryBuilder();
         $countQuery->select("count(e.id)")
-                ->from('AppBundle\Entity\Insumo', 'e');
+            ->from('AppBundle\Entity\Insumo', 'e');
 
         // Create inner joins
         $query
-                ->innerJoin('e.tipo', 'tipo')
-                ->innerJoin('e.marca', 'marca')
-                ->innerJoin('e.modelo', 'modelo')
-                ->andWhere("tipo.subclase='" . $subclase . "'");
+            ->innerJoin('e.tipo', 'tipo')
+            ->innerJoin('e.marca', 'marca')
+            ->innerJoin('e.modelo', 'modelo')
+            ->andWhere("tipo.subclase='" . $subclase . "'");
 
         $countQuery
-                ->innerJoin('e.tipo', 'tipo')
-                ->innerJoin('e.marca', 'marca')
-                ->innerJoin('e.modelo', 'modelo')
-                ->andWhere("tipo.subclase='" . $subclase . "'");
+            ->innerJoin('e.tipo', 'tipo')
+            ->innerJoin('e.marca', 'marca')
+            ->innerJoin('e.modelo', 'modelo')
+            ->andWhere("tipo.subclase='" . $subclase . "'");
 
         // Other conditions than the ones sent by the Ajax call ?
 //        if ($otherConditions === null) {
@@ -220,14 +231,14 @@ class InsumoRepository extends EntityRepository {
                             if ($searchItem) {
                                 // solo los que tienen stock
                                 $query->innerJoin('e.stock', 'stk')
-                                        ->andWhere('stk.cantidad>0');
+                                    ->andWhere('stk.cantidad>0');
                                 $countQuery->innerJoin('e.stock', 'stk')
-                                        ->andWhere('stk.cantidad>0');
+                                    ->andWhere('stk.cantidad>0');
                                 if ($deposito) {
                                     $query->innerJoin('stk.deposito', 'dp')
-                                            ->andWhere('dp.id = ' . $deposito);
+                                        ->andWhere('dp.id = ' . $deposito);
                                     $countQuery->innerJoin('stk.deposito', 'dp')
-                                            ->andWhere('dp.id = ' . $deposito);
+                                        ->andWhere('dp.id = ' . $deposito);
                                 }
                             }
                             break;
@@ -288,16 +299,16 @@ class InsumoRepository extends EntityRepository {
     public function findEntregaByCriteria($data, $userId) {
         $query = $this->_em->createQueryBuilder();
         $query->select('r')
-                ->from('AppBundle\Entity\InsumoEntrega', 'r')
-                ->innerJoin('r.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->where("1=1");
+            ->from('AppBundle\Entity\InsumoEntrega', 'r')
+            ->innerJoin('r.solicitante', 's')
+            ->innerJoin('s.edificio', 'e')
+            ->where("1=1");
         if ($data['estado']) {
             $query->andWhere("r.estado= '" . $data['estado'] . "'");
         }
         if ($data['idUbicacion']) {
             $query->innerJoin('e.ubicacion', 'u')
-                    ->andWhere('u.id=' . $data['idUbicacion']);
+                ->andWhere('u.id=' . $data['idUbicacion']);
             if ($data['idEdificio']) {
                 $query->andWhere('e.id=' . $data['idEdificio']);
                 if ($data['idDepartamento']) {
@@ -319,7 +330,7 @@ class InsumoRepository extends EntityRepository {
         if ($userId) {
             // restringuir segun permiso
             $query->innerJoin('e.usuarios', 'us')
-                    ->andWhere('us.id=' . $userId);
+                ->andWhere('us.id=' . $userId);
         }
         return $query->getQuery()->getResult();
     }
@@ -327,15 +338,15 @@ class InsumoRepository extends EntityRepository {
     public function findByDeposito($id) {
         $query = $this->_em->createQueryBuilder();
         $query->select("i.id,concat( t.nombre,' | ',m.nombre,' | ',mo.nombre) nombre")
-                ->from('AppBundle\Entity\Insumo', 'i')
-                ->innerJoin('i.tipo', 't')
-                ->innerJoin('i.marca', 'm')
-                ->innerJoin('i.modelo', 'mo')
-                ->innerJoin('i.stock', 's')
-                ->innerJoin('s.deposito', 'd')
-                ->where("t.subclase ='INSUMO'")
-                ->andWhere('d.id = ' . $id)
-                ->andWhere('s.cantidad>0');
+            ->from('AppBundle\Entity\Insumo', 'i')
+            ->innerJoin('i.tipo', 't')
+            ->innerJoin('i.marca', 'm')
+            ->innerJoin('i.modelo', 'mo')
+            ->innerJoin('i.stock', 's')
+            ->innerJoin('s.deposito', 'd')
+            ->where("t.subclase ='INSUMO'")
+            ->andWhere('d.id = ' . $id)
+            ->andWhere('s.cantidad>0');
         return $query->getQuery()->getArrayResult();
     }
 
@@ -345,29 +356,29 @@ class InsumoRepository extends EntityRepository {
     public function getMovimientosMesaEntrada($filtro) {
         $query = $this->_em->createQueryBuilder();
         $query->select(" ie.fecha, concat(u.abreviatura,' - ',e.nombre) as sector, t.nombre as insumo, d.cantidad ")
-                ->from('AppBundle\Entity\InsumoEntrega', 'ie')
-                ->innerJoin('ie.detalles', 'd')
-                ->innerJoin('d.insumo', 'i')
-                ->innerJoin('i.tipo', 't')
-                ->innerJoin('ie.solicitante', 's')
-                ->innerJoin('s.edificio', 'e')
-                ->innerJoin('e.ubicacion', 'u')
-                ->where("ie.estado = 'ENTREGADO' ");
+            ->from('AppBundle\Entity\InsumoEntrega', 'ie')
+            ->innerJoin('ie.detalles', 'd')
+            ->innerJoin('d.insumo', 'i')
+            ->innerJoin('i.tipo', 't')
+            ->innerJoin('ie.solicitante', 's')
+            ->innerJoin('s.edificio', 'e')
+            ->innerJoin('e.ubicacion', 'u')
+            ->where("ie.estado = 'ENTREGADO' ");
 
         if ($filtro['selTipos']) {
             $query->andWhere(' t.id IN (:tipos)')
-                    ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->setParameter('tipos', $filtro['selTipos'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
         }
         if ($filtro['selUbicaciones']) {
             $query->andWhere('u.id IN (:ubicaciones)')
-                    ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                ->setParameter('ubicaciones', $filtro['selUbicaciones'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
             if ($filtro['selEdificios']) {
                 $query->andWhere('e.id IN (:edificios)')
-                        ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                    ->setParameter('edificios', $filtro['selEdificios'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
 
                 if ($filtro['selDepartamento']) {
                     $query->andWhere(' s.id IN (:deptos)')
-                            ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+                        ->setParameter('deptos', $filtro['selDepartamento'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                 }
             }
         }

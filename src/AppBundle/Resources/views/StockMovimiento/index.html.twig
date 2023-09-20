@@ -63,6 +63,7 @@
                                     <td class="link-actions">
                                         {% if app.user.access('insumo_movimiento') %}
                                         <a href="{{ path('insumo_movimiento_show', { 'id': entity.id }) }}" data-toggle="tooltip" title="Ver Movimiento"><i class="fa fa-folder-open"></i></a>&nbsp;
+                                        <a href="{{ path('insumo_movimiento_print', { 'id': entity.id }) }}" data-toggle="tooltip" title="Remito" target="_blank"><i class="fa fa-file-text"></i></a>&nbsp;
                                         {% endif %}
                                     </td>
                                 </tr>
@@ -81,6 +82,11 @@
 $(document).ready(function() {
     var oTable = $('#tablelist').dataTable();
         oTable.fnSort( [ [0,'desc'] ] );
+    let url = '{{url}}'; 
+    if(url){
+        window.open(url);
+        location.href = new URL(location.pathname, location.href).href
+    }    
 });
 </script>
 {% endblock %}

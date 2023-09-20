@@ -78,12 +78,14 @@ class InsumoEntregaController extends Controller {
             }
         }
         $entities = $em->getRepository('AppBundle:InsumoEntrega')->findEntregaByCriteria($filtro, $userId);
+        $url = $request->get('id') ? $this->generateUrl('print_insumo_entrega_remito', array('id' => $request->get('id'))) : '';
         return array(
             'entities' => $entities,
             'ubicaciones' => $ubicaciones,
             'edificios' => $edificios,
             'departamentos' => $departamentos,
             'filtro' => $filtro,
+            'url' => $url,
         );
     }
 
@@ -153,7 +155,7 @@ class InsumoEntregaController extends Controller {
 
                 $em->getConnection()->commit();
                 $this->addFlash('success', 'La entrega fue registrada correctamente. ');
-                return $this->redirectToRoute('insumo_entrega');
+                return $this->redirectToRoute('insumo_entrega', array('id' => $entity->getId()));
             }
             catch (Exception $ex) {
                 $this->addFlash('danger', $ex->getMessage());
@@ -210,7 +212,6 @@ class InsumoEntregaController extends Controller {
      * @Template("AppBundle:InsumoEntrega:edit.html.twig")
      */
     public function editAction($id) {
-        UtilsController::haveAccess($this->getUser(), 'insumo_entrega');
         $em = $this->getDoctrine()->getManager();
         if ($this->getUser()->getRol()->getAdmin()) {
             $em->getFilters()->disable('softdeleteable');
@@ -219,6 +220,9 @@ class InsumoEntregaController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra la entrega.');
         }
+        $permiso = $entity->getEstado() == 'PENDIENTE' ? 'insumo_entrega' : 'insumo_entrega_edit';
+        UtilsController::haveAccess($this->getUser(), $permiso);
+
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
@@ -258,9 +262,9 @@ class InsumoEntregaController extends Controller {
      */
     private function createDeleteForm($id) {
         return $this->createFormBuilder()
-                        ->setAction($this->generateUrl('insumo_entrega_delete', array('id' => $id)))
-                        ->setMethod('DELETE')
-                        ->getForm()
+                ->setAction($this->generateUrl('insumo_entrega_delete', array('id' => $id)))
+                ->setMethod('DELETE')
+                ->getForm()
         ;
     }
 
@@ -282,8 +286,9 @@ class InsumoEntregaController extends Controller {
                 if (!$entity) {
                     throw $this->createNotFoundException('No existe esta entrega.');
                 }
-                // rechazar el pedido desde soporte
+                $msg = 'La entrega fue cancelada!';
                 if ($entity->esPedidoInsumoSoporte()) {
+                    // marcar como rechazado el pedido desde soporte
                     foreach ($entity->getDetalles() as $item) {
                         $itemTarea = $item->getInsumoxTarea();
                         $itemTarea->setCantidadAprobada(0);
@@ -291,6 +296,11 @@ class InsumoEntregaController extends Controller {
                         $itemTarea->setAutorizante($this->getUser());
                         $em->persist($itemTarea);
                     }
+                }
+                if ($entity->getEstado() == 'ENTREGADO') {
+                    // reingresar insumos al stock
+                    $this->procesarDevolucion($entity, $em);
+                    $msg = $msg . ' Se reingresaron los insumos al stock.';
                 }
                 // update estado a cancelado
                 $entity->setEstado('CANCELADO');
@@ -300,7 +310,7 @@ class InsumoEntregaController extends Controller {
                 $em->remove($entity);
                 $em->flush();
                 $em->getConnection()->commit();
-                $this->addFlash('success', 'La entrega fue cancelada!');
+                $this->addFlash('success', $msg);
             }
             catch (\Exception $ex) {
                 $em->getConnection()->rollback();
@@ -325,11 +335,14 @@ class InsumoEntregaController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra la entrega.');
         }
-        $insumoxTareas = new ArrayCollection();
-        foreach ($entity->getDetalles() as $item) {
-            // guardo los insumosxtareas para actualizar segun entrega
-            if ($item->getInsumoxTarea())
-                $insumoxTareas->add($item);
+
+        if ($entity->esPedidoInsumoSoporte()) {
+            $insumoxTareas = new ArrayCollection();
+            foreach ($entity->getDetalles() as $item) {
+                // guardo los insumosxtareas para actualizar segun entrega
+                if ($item->getInsumoxTarea())
+                    $insumoxTareas->add($item);
+            }
         }
 
         $data = $request->get('appbundle_insumoentrega');
@@ -342,8 +355,8 @@ class InsumoEntregaController extends Controller {
                 $entity->setFecha(new \DateTime(UtilsController::toAnsiDate($data['fecha']) . ' ' . $data['hora'] . ':00'));
                 $em->persist($entity);
                 $em->flush();
-                // aprobar y registrar salida
                 if ($entity->getEstado() == 'PENDIENTE') {
+                    // aprobar y registrar salida
                     $this->procesarEntrega($entity, $em);
                     $entity->setEstado('ENTREGADO');
 
@@ -352,9 +365,13 @@ class InsumoEntregaController extends Controller {
                         $this->procesarInsumoxTareas($entity, $insumoxTareas, $em);
                     }
                 }
+                else {
+                    // procesar la correccion de los insumos modificados
+                    die;
+                }
 
                 $em->getConnection()->commit();
-                return $this->redirectToRoute('insumo_entrega');
+                return $this->redirectToRoute('insumo_entrega', array('id' => $entity->getId()));
             }
             catch (\Exception $ex) {
                 $em->getConnection()->rollback();
@@ -407,7 +424,7 @@ class InsumoEntregaController extends Controller {
             throw $this->createNotFoundException('No se encuentra el registro de entrega.');
         }
         $html = $this->renderView('AppBundle:InsumoEntrega:modalShow.html.twig',
-                array('entity' => $entity));
+            array('entity' => $entity));
         return new Response($html);
     }
 
@@ -428,12 +445,39 @@ class InsumoEntregaController extends Controller {
         $response = new Response();
 
         $this->render('AppBundle:InsumoEntrega:remito.pdf.twig',
-                array('entrega' => $entrega, 'logo' => $logo1, 'fecha' => $fecha), $response);
+            array('entrega' => $entrega, 'logo' => $logo1, 'fecha' => $fecha), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
         return new Response($content, 200, array('content-type' => 'application/pdf',
             'Content-Disposition' => 'filename=insumo_entrega_remito_' . $entregaNro . '.pdf'));
+    }
+
+    private function procesarDevolucion($entity, $em) {
+        $deposito = $em->getRepository('ConfigBundle:Departamento')->find($entity->getDeposito()->getId());
+        foreach ($entity->getDetalles() as $detalle) {
+            //procesar items
+            $insumo = $detalle->getInsumo();
+            $cantidad = $detalle->getCantidad();
+            $stock = $em->getRepository('AppBundle:Stock')->findInsumoDeposito($insumo->getId(), $deposito->getId());
+            if ($stock) {
+                $stock->setCantidad($stock->getCantidad() + $cantidad);
+                $em->persist($stock);
+
+                // Cargar movimiento
+                $movim = new StockHistorico();
+                $movim->setFecha(new \DateTime());
+                $movim->setTipo('ENTREGAINSUMO');
+                $movim->setSigno('+');
+                $movim->setMovimiento($entity->getId());
+                $movim->setInsumo($insumo);
+                $movim->setStock($insumo->getStockTotal());
+                $movim->setCantidad($cantidad);
+                $movim->setDeposito($deposito);
+                $em->persist($movim);
+                $em->flush();
+            }
+        }
     }
 
 }

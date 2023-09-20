@@ -215,7 +215,7 @@ class InsumoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $insumo = $em->getRepository('AppBundle:Insumo')->find($item);
         return new Response(json_encode(array('id' => $insumo->getId(), 'codigo' => $insumo->getCodigoItem(),
-                    'nombre' => $insumo->getTexto(), 'stock' => $insumo->getStockByDeposito($dep))));
+                'nombre' => $insumo->getTexto(), 'stock' => $insumo->getStockByDeposito($dep))));
     }
 
     /**
@@ -463,9 +463,9 @@ class InsumoController extends Controller {
      */
     private function createDeleteForm($id) {
         return $this->createFormBuilder()
-                        ->setAction($this->generateUrl('insumo_delete', array('id' => $id)))
-                        ->setMethod('DELETE')
-                        ->getForm()
+                ->setAction($this->generateUrl('insumo_delete', array('id' => $id)))
+                ->setMethod('DELETE')
+                ->getForm()
         ;
     }
 
@@ -634,7 +634,7 @@ class InsumoController extends Controller {
             }
             // generar mensajería
             $textoMensaje = 'Solicitud del ' . $entity->getCreated()->format('d/m/Y') .
-                    ' por "' . $entity->getCantidad() . '" de "';
+                ' por "' . $entity->getCantidad() . '" de "';
             if ($insumo)
                 $insumoTxt = $insumo->getTexto();
             else
@@ -689,8 +689,9 @@ class InsumoController extends Controller {
      */
     public function getSolInsumoPendientesAction() {
         $em = $this->getDoctrine()->getManager();
-        $sol = $em->getRepository('AppBundle:Insumo')->findSolicitudesPendientes();
-        return new Response($sol);
+        $solicitudes = $em->getRepository('AppBundle:Insumo')->findSolicitudesPendientes();
+        $entregas = $em->getRepository('AppBundle:Insumo')->findEntregasPendientes();
+        return new JsonResponse(array('sol' => $solicitudes, 'ent' => $entregas));
     }
 
     /**

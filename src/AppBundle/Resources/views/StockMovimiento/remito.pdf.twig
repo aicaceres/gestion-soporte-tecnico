@@ -21,42 +21,36 @@
                 </div>
             </footer>
         </placeholders>
-        <h2 margin='30px 0' text-align="center"> REMITO N° {{ "%06d" | format(entrega.id)}}</h2>              
-        <h2 margin='0' text-align="center"> Entrega de Insumos </h2>              
+        <h2 margin='30px 0' text-align="center"> REMITO N° {{ "%06d" | format(entity.id)}}</h2>              
+        <h2 margin='10px' text-align="center"> Movimiento entre Depósitos  </h2>              
         
-        <h3 margin="8px 0px">{{ entrega.responsable }}</h3>
-        <h3 margin="0">{{ entrega.solicitante.edificio.ubicacion }}</h3>
-        <h3 margin="4px 0">{{ entrega.solicitante.edificio }}</h3>
-        <h3 margin="0">{{ entrega.solicitante }}</h3>
-        {% if entrega.jira %}
-            <p><b>JIRA N°</b> {{ entrega.jira }}</p>
-        {% endif %}
-        <p margin-top='20px' padding-left='100px'>Por la presente notificamos la entrega de los insumos detallados:</p>
-               
-        {% if entrega.detalles|length>0 %}        
-            <h3 >Insumos Entregados:</h3>       
+        <h4 margin="8px 0px"><b>Depósito Origen: </b>{{ entity.depositoOrigen.nombreCompleto }}</h4>
+        <h4 margin="8px 0px"><b>Depósito Destino:</b> {{ entity.depositoDestino.nombreCompleto }}</h4>
+            
+        <p margin-top='30px' padding-left='100px'>Por la presente notificamos la entrega de los insumos detallados:</p>
+              
+        {% if entity.detalles|length>0 %}        
+            <h3 >Detalle:</h3>       
             <table font-size="9px">
                     <tr>
                         <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm">#</td>
                         <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="8 cm">Insumo</td>
                         <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.5 cm">Cantidad</td>
-                        <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">Observaciones</td>
                     </tr>
-                    {% for item in entrega.detalles  %}        
+                    {% for item in entity.detalles  %}        
                         <tr>
                             <td height="20px" vertical-align="middle" text-align="right" padding-right="8px">{{ loop.index }}</td>
                             <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.insumo }}</td>   
                             <td height="20px" vertical-align="middle" text-align="right" padding-right="8px">{{ item.cantidad }}</td> 
-                            <td height="20px" vertical-align="middle" padding="3px 0 3px 5px">{{ item.descripcion }}</td> 
                         </tr>
                     {% endfor %}                
             </table>           
         {% endif %}
 
-        {% if entrega.observacion %}
-            <p margin-top="10px"><strong>Observaciones: </strong> {{ entrega.observacion }}</p>                
-        {% endif %} 
-        <p margin-top="10px" font-size="12px" line-height="30px" text-align="justify" >{{ entrega.textoRemito }}</p>        
+        
+        {% if entity.observaciones %}
+            <p margin-top="10px" font-size="12px" line-height="30px" text-align="justify" ><strong>Observaciones: </strong> {{ entity.observaciones }}</p>                
+        {% endif %}  
 
         <div margin='50px 0 0 0' width='90%' text-align='right'> FIRMA: ....................................................</div>
         <div margin='30px 0 0 0' width='90%' text-align='right'> ACLARACIÓN: ....................................................</div>

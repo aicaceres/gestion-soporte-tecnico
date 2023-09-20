@@ -58,9 +58,13 @@ if(!$band) location.href = "{{path('usuario_logout')}}" ;
 <script type="text/javascript">
 $(document).ready(function() {    
     $.get("{{path('get_solinsumo_pendientes')}}", function(data){   
-        if( data > 0){
-            $('.solPendientes').html( data );                
-            $('.solPendientes').closest('li').removeClass('hidden')   
+        if( data.sol > 0){
+            $('.solPendientes').html( data.sol );                
+            $('.solPendientes').removeClass('hidden')   
+        }
+        if( data.ent > 0){
+            $('.entPendientes').html( data.ent );                
+            $('.entPendientes').removeClass('hidden')   
         }
      });   
     $.getJSON("{{path('get_alerta_vencimientos')}}", function(data){   

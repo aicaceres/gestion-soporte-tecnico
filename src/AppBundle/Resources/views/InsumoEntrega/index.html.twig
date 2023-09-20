@@ -116,7 +116,7 @@
                                     <tr class="{{ entity.deletedAt is empty ? "" : "deleted" }} {{ entity.estado == 'PENDIENTE' ? "altaPrioridad" : ""  }}">
                                         <td><span class="hidden">{{ entity.fecha|date('YmdHi') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>                                
                                         <td>{{ entity.solicitante.nombreCompleto}}</td>
-                                        <td>{{ "%06d" | format(entity.id)}} </td>
+                                        <td>{{ "%06d" | format(entity.id)}}</td>
                                         <td>{{ entity.jira}}</td>
                                         <td>{{ entity.estado}}</td>                                  
                                         <td class="link-actions"> 
@@ -127,6 +127,9 @@
                                             {% if entity.estado=='ENTREGADO' %}
                                             <a href="{{path('print_insumo_entrega_remito', { 'id': entity.id })}}" data-toggle="tooltip" title="Remito" target="_blank" ><i class="fa  fa-file-text"></i></a>&nbsp;
                                            {% endif %}
+                                            {% if app.user.access('insumo_entrega_edit') and entity.estado=='ENTREGADO' %}
+                                            <a href="{{ path('insumo_entrega_edit', { 'id': entity.id }) }}" data-toggle="tooltip" title="Editar"><i class="fa fa-edit"></i></a>&nbsp;
+                                            {% endif %}
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -149,6 +152,11 @@
             });
             var oTable = $('#tablelist').dataTable();
             oTable.fnSort( [ [0,'desc'] ] );
+            let url = '{{url}}'; 
+            if(url){
+                window.open(url);
+                location.href = new URL(location.pathname, location.href).href
+            }
         });
 
     </script>    

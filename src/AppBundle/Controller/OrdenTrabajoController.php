@@ -146,7 +146,7 @@ class OrdenTrabajoController extends Controller {
             throw $this->createNotFoundException('No se encuentra la orden de trabajo.');
         }
         $html = $this->renderView('AppBundle:OrdenTrabajo:show.html.twig',
-                array('entity' => $entity));
+            array('entity' => $entity));
         return new Response($html);
     }
 
@@ -192,9 +192,9 @@ class OrdenTrabajoController extends Controller {
      */
     private function ordentrabajoDeleteForm($id) {
         return $this->createFormBuilder()
-                        ->setAction($this->generateUrl('soporte_ordentrabajo_delete', array('id' => $id)))
-                        ->setMethod('DELETE')
-                        ->getForm();
+                ->setAction($this->generateUrl('soporte_ordentrabajo_delete', array('id' => $id)))
+                ->setMethod('DELETE')
+                ->getForm();
     }
 
     /**
@@ -295,9 +295,9 @@ class OrdenTrabajoController extends Controller {
      */
     private function createDeleteForm($id) {
         return $this->createFormBuilder()
-                        ->setAction($this->generateUrl('soporte_ordentrabajo_delete', array('id' => $id)))
-                        ->setMethod('DELETE')
-                        ->getForm()
+                ->setAction($this->generateUrl('soporte_ordentrabajo_delete', array('id' => $id)))
+                ->setMethod('DELETE')
+                ->getForm()
         ;
     }
 
@@ -356,7 +356,7 @@ class OrdenTrabajoController extends Controller {
         $response = new Response();
 
         $this->render('AppBundle:OrdenTrabajo:ordentrabajo.pdf.twig',
-                array('ot' => $ot, 'logo' => $logo1, 'fecha' => $fecha), $response);
+            array('ot' => $ot, 'logo' => $logo1, 'fecha' => $fecha), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -384,7 +384,7 @@ class OrdenTrabajoController extends Controller {
         $response = new Response();
 
         $this->render('AppBundle:OrdenTrabajo:ordentrabajo_resumen.pdf.twig',
-                array('ot' => $ot, 'logo' => $logo1, 'qr' => $qr, 'fecha' => $fecha), $response);
+            array('ot' => $ot, 'logo' => $logo1, 'qr' => $qr, 'fecha' => $fecha), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -452,15 +452,15 @@ class OrdenTrabajoController extends Controller {
                 // NT= Nota
                 // TS= Terminar Soporte
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea.html.twig',
-                        array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot)
+                    array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot)
                 );
                 break;
             case 'DS':
                 // DS= Derivacion de OT
                 $tecnicos = $em->getRepository('ConfigBundle:Usuario')->findTecnicos();
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea.html.twig',
-                        array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot,
-                            'tecnicos' => $tecnicos)
+                    array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot,
+                        'tecnicos' => $tecnicos)
                 );
                 break;
             case 'RE':
@@ -468,20 +468,20 @@ class OrdenTrabajoController extends Controller {
                 $estados = $em->getRepository('ConfigBundle:Estado')->findAll();
                 $form->get('textoAdicional')->setData('Se deja constancia que al momento de recibir el/los equipo/s aquí especificados se realizaron las pruebas de funcionamiento y se encontraba en buen estado.');
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea.html.twig',
-                        array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot,
-                            'estados' => $estados)
+                    array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot,
+                        'estados' => $estados)
                 );
                 break;
             case 'SI':
                 // SI= Solicitud de Hardware
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea-insumo.html.twig',
-                        array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot, 'subclase' => 'HARDWARE')
+                    array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot, 'subclase' => 'HARDWARE')
                 );
                 break;
             case 'PI':
                 // PI= Pedido de Insumo
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea-insumo.html.twig',
-                        array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot, 'subclase' => 'INSUMO')
+                    array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot, 'subclase' => 'INSUMO')
                 );
                 break;
             case 'CE':
@@ -504,7 +504,7 @@ class OrdenTrabajoController extends Controller {
                 }
                 $form->get('textoAdicional')->setData('Se deja constancia que al momento de recibir el/los equipo/s aquí especificados se realizaron las pruebas de funcionamiento y se encontraba en buen estado.');
                 $html = $this->renderView('AppBundle:OrdenTrabajo:partial-add-tarea-recambio.html.twig',
-                        array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot, 'estados' => $estados)
+                    array('entity' => $tarea, 'form' => $form->createView(), 'ot' => $ot, 'estados' => $estados)
                 );
                 break;
         }
@@ -712,6 +712,7 @@ class OrdenTrabajoController extends Controller {
                     $pedido->setFecha(new \DateTime());
                     $pedido->setEstado('PENDIENTE');
                     $pedido->setResponsable($this->getUser()->getNombre());
+                    $pedido->setObservacion('OT Nro ' . $entity->getOrdenTrabajo()->getNroOT());
                     //$servTecnico = $em->getRepository('ConfigBundle:Departamento')->findOneByServicioTecnico(1);
                     $pedido->setSolicitante($entity->getOrdenTrabajo()->getRequerimiento()->getSolicitante());
 
@@ -984,7 +985,7 @@ class OrdenTrabajoController extends Controller {
         }
 
         $html = $this->renderView('AppBundle:OrdenTrabajo:partial-remove-equipo.html.twig',
-                array('detOT' => $detOT, 'form' => $form->createView())
+            array('detOT' => $detOT, 'form' => $form->createView())
         );
         return new Response($html);
     }
@@ -1110,7 +1111,7 @@ class OrdenTrabajoController extends Controller {
         $response = new Response();
 
         $this->render('AppBundle:OrdenTrabajo:acta-entrega-recepcion.pdf.twig',
-                array('tareas' => $ot->getTareasReubicacionEquipo(), 'logo' => $logo1), $response);
+            array('tareas' => $ot->getTareasReubicacionEquipo(), 'logo' => $logo1), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -1144,7 +1145,7 @@ class OrdenTrabajoController extends Controller {
         $response = new Response();
 
         $this->render('AppBundle:OrdenTrabajo:acta-reemplazo-equipo.pdf.twig',
-                array('tareas' => $tareas, 'logo' => $logo1), $response);
+            array('tareas' => $tareas, 'logo' => $logo1), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -1168,7 +1169,7 @@ class OrdenTrabajoController extends Controller {
         ));
 
         $html = $this->renderView('AppBundle:OrdenTrabajo:prototype-tarea-documento.html.twig',
-                array('doc' => $doc, 'form' => $form->createView()));
+            array('doc' => $doc, 'form' => $form->createView()));
         return new Response($html);
     }
 
@@ -1197,7 +1198,7 @@ class OrdenTrabajoController extends Controller {
                 $em->flush();
                 $em->getConnection()->commit();
                 $html = $this->renderView('AppBundle:OrdenTrabajo:show-item-documento.html.twig',
-                        array('doc' => $doc));
+                    array('doc' => $doc));
                 $result = array('msg' => 'OK', 'html' => $html);
                 return new Response(json_encode($result));
             }
